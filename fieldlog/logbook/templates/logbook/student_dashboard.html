@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Student Dashboard{% endblock %}
+{% block content %}
+<h2>Welcome, {{ user.username }}</h2>
+
+<h3>New Log Entry</h3>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="hidden" name="latitude" id="id_latitude">
+    <input type="hidden" name="longitude" id="id_longitude">
+
+    <button type="submit">Submit Log</button>
+</form>
+
+<h3>Your Previous Logs</h3>
+<ul>
+    {% for log in logs %}
+        <li>
+            <strong>{{ log.date }}:</strong> {{ log.content }}
+            {% if log.approved %} ✅ {% else %} ⏳ {% endif %}
+        </li>
+    {% empty %}
+        <li>No logs submitted yet.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

@@ -1,0 +1,93 @@
+/* Center container and style */
+.signup-select-container {
+  max-width: 450px;
+  margin: 3rem auto;
+  padding: 2rem;
+  background: #1a1a2e; /* Deep dark blue */
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(26, 26, 46, 0.8);
+  color: #e0e0ff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-align: center;
+}
+
+.signup-select-container h2 {
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  font-size: 1.9rem;
+  color: #62dafb; /* Bright cyan */
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.account-type-list {
+  list-style: none;
+  padding: 0;
+}
+
+.account-type-list li {
+  margin: 1rem 0;
+}
+
+.account-type-list a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  background: #0f3460; /* Slightly lighter dark blue */
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  color: #62dafb;
+  font-weight: 600;
+  font-size: 1.25rem;
+  text-decoration: none;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  box-shadow: 0 0 10px transparent;
+}
+
+.account-type-list a i {
+  font-size: 1.5rem;
+}
+
+.account-type-list a:hover,
+.account-type-list a:focus {
+  background: #62dafb;
+  color: #0f1a30;
+  box-shadow: 0 0 12px #62dafb;
+  cursor: pointer;
+  transform: scale(1.05);
+  transition: all 0.25s ease;
+}
+
+/* Ripple effect style */
+.account-type-list a {
+  position: relative;
+  overflow: hidden;
+}
+
+.account-type-list a .ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(98, 218, 251, 0.7);
+  transform: scale(0);
+  animation: ripple-effect 0.6s linear;
+  pointer-events: none;
+  width: 100px;
+  height: 100px;
+  opacity: 0.75;
+}
+
+@keyframes ripple-effect {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Keyboard focus ring */
+.account-type-list a.keyboard-focus {
+  box-shadow: 0 0 10px 3px #62dafb;
+  outline: none;
+  transform: scale(1.07);
+  transition: all 0.3s ease;
+}

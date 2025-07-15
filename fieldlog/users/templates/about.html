@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block extra_css %}
+{% load static %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-pVPR0eXlJhsqfBdZT7SnTlkUhuqvl06Q7VjLDXyOaU87Lx0o+Urb1x0PzB0z2EUs28yj+UOSsvCsOW1cNkU8mw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="{% static 'css/about.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="about-container">
+  <div class="about-header">
+    <h1><i class="fas fa-info-circle"></i> About This Project</h1>
+    <p class="about-subtitle">Empowering institutions with smart digital field training solutions</p>
+  </div>
+
+  <div class="about-section animate-fade-in">
+    <h2><i class="fas fa-graduation-cap"></i> Final Year Project</h2>
+    <p>
+      This platform is our final year project for the Bachelor of Science in Computer Science at Mwenge Catholic University.
+      It was developed to digitalize and simplify field practical training (FPT) documentation, bridging communication between students,
+      supervisors, and coordinators.
+    </p>
+  </div>
+
+  <div class="about-section animate-slide-up">
+    <h2><i class="fas fa-users"></i> Team Members</h2>
+    <ul>
+      <li><strong>Agola W. Tom</strong> — System Developer & Backend Engineer</li>
+      <li><strong>Robert E. Kipendaroho</strong> — UI/UX Designer & Frontend Developer</li>
+      <li><strong>Millenium L. Ngao</strong> — Database & Network Administrator</li>
+    </ul>
+  </div>
+
+  <div class="about-section animate-fade-in-delay">
+    <h2><i class="fas fa-laptop-code"></i> What We Do</h2>
+    <ul class="skills-list">
+      <li><i class="fas fa-tools"></i> Computer Maintenance & Technical Support</li>
+      <li><i class="fas fa-code"></i> Full Stack System Development</li>
+      <li><i class="fas fa-network-wired"></i> Networking, Security & Administration</li>
+      <li><i class="fas fa-shield-alt"></i> Cybersecurity & Ethical Hacking</li>
+      <li><i class="fas fa-database"></i> Database Design & Administration</li>
+    </ul>
+  </div>
+
+  <div class="about-section animate-slide-up-delay">
+    <h2><i class="fas fa-bullseye"></i> Our Vision</h2>
+    <p>
+      We aim to deliver scalable digital tools for institutions while showcasing our passion for solving real-world challenges using technology.
+      This project is a testament to our creativity, discipline, and commitment to excellence.
+    </p>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/about.js' %}"></script>
+{% endblock %}

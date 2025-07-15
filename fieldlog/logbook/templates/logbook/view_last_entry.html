@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}View Last Log Entry{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'logbook/css/logentry.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-logentry">
+  <h1>Last Log Entry Details</h1>
+
+  {% if last_entry %}
+    <p class="summary">
+      Viewing log entry <strong>{{ last_entry.day_number }}</strong> of <strong>25</strong>.
+    </p>
+
+    <div class="logentry-details">
+      <p><strong>Place:</strong> {{ last_entry.place.name }}</p>
+      <p><strong>Institution:</strong> {{ last_entry.institution.name }}</p>
+      <p><strong>Date:</strong> {{ last_entry.date }}</p>
+      <p><strong>Start Time:</strong> {{ last_entry.start_time }}</p>
+      <p><strong>Departure Time:</strong> {{ last_entry.departure_time }}</p>
+      <p><strong>Description:</strong></p>
+      <div style="background:#f1f5f9; padding:15px; border-radius:8px; margin-bottom:15px; white-space: pre-wrap;">
+        {{ last_entry.description }}
+      </div>
+      <p><strong>Trainee Signature:</strong> {{ last_entry.trainee_signature }}</p>
+    </div>
+
+  {% else %}
+    <p class="summary">No log entries found.</p>
+  {% endif %}
+<a href="{% url 'logbook:create_log_entry' %}" class="btn">Add New Entry</a>
+
+</div>
+{% endblock %}

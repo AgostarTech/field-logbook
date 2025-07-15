@@ -1,0 +1,96 @@
+/* ===== Base Reset & Theme ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #203a43, #2c5364);
+  color: #cfd8dc;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== Navbar ===== */
+.navbar {
+  background-color: #0f3460;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  position: sticky;
+  top: 0;
+  z-index: 999;
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.nav-logo {
+  font-weight: 700;
+  font-size: 1.6rem;
+  color: #62dafb;
+  letter-spacing: 1.5px;
+  transition: color 0.3s ease;
+}
+.nav-logo:hover,
+.nav-logo:focus {
+  color: #ade8f4;
+  outline: none;
+}
+
+#nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: #62dafb;
+  font-size: 1.8rem;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+#nav-toggle:hover,
+#nav-toggle:focus {
+  color: #ade8f4;
+  outline: none;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-weight: 600;
+}
+
+.nav-link, .logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  color: #62dafb;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease,
+
+}
+
+.scroll-top-btn:hover {
+  background: #14a37f;
+  box-shadow: 0 0 18px #14a37f;
+}

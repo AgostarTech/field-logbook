@@ -1,0 +1,81 @@
+/* Make the main container wider and centered */
+.container-logentry {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 30px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Form heading */
+.container-logentry h1 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Description summary */
+.summary {
+  font-size: 1rem;
+  margin-bottom: 25px;
+  text-align: center;
+  color: #444;
+}
+
+/* All form groups */
+.mb-3 {
+  margin-bottom: 20px;
+}
+
+/* Label style */
+.form-label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Make inputs full width and stylish */
+input.form-control,
+select.form-select,
+textarea.form-control {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+/* Highlight on focus */
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #1e88e5;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(30, 136, 229, 0.2);
+}
+
+/* Error message styling */
+.text-danger.small {
+  color: #d32f2f;
+  font-size: 0.9rem;
+  margin-top: 5px;
+}
+
+/* Submit button style */
+button.btn-success {
+  background-color: #28a745;
+  color: white;
+  font-weight: bold;
+  padding: 14px;
+  font-size: 1rem;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+  border: none;
+}
+
+button.btn-success:hover {
+  background-color: #218838;
+}

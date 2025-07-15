@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link href="{% static 'css/signup_select.css' %}" rel="stylesheet" />
+<!-- FontAwesome CDN -->
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+/>
+{% endblock %}
+
+{% block content %}
+<div class="signup-select-container">
+  <h2>Choose Account Type</h2>
+  <ul class="account-type-list">
+    <li>
+      <a href="{% url 'student_signup' %}">
+        <i class="fas fa-user-graduate"></i> Student Signup
+      </a>
+    </li>
+    <li>
+      <a href="{% url 'onstation_signup' %}">
+        <i class="fas fa-hard-hat"></i> On-Station Supervisor Signup
+      </a>
+    </li>
+    <li>
+      <a href="{% url 'oncampus_signup' %}">
+        <i class="fas fa-chalkboard-teacher"></i> On-Campus Supervisor Signup
+      </a>
+    </li>
+  </ul>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/signup_select.js' %}"></script>
+{% endblock %}

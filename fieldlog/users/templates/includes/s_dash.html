@@ -1,0 +1,114 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Student Dashboard</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+
+    <!-- Font Awesome CDN -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer"
+    />
+
+    <!-- Your custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/s_dash.css' %}" />
+</head>
+
+<body>
+    <!-- Sidebar Overlay for mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <ul class="menu">
+            <li><a href="{% url 'logbook:profile' %}"><i class="fa-solid fa-user"></i> Profile</a></li>
+
+            <li class="submenu-parent" onclick="toggleSubMenu('logbookSubMenu')">
+                <i class="fa-solid fa-book"></i> Logbook Activity <i class="fa-solid fa-chevron-down arrow"></i>
+                <ul id="logbookSubMenu" class="submenu">
+                    <li><a href="{% url 'logbook:create_log_entry' %}">Create New Entry</a></li>
+                    <li><a href="{% url 'logbook:view_last_entry' %}">View Last Entry</a></li>
+                    <li><a href="{% url 'logbook:update_entry' %}">Update Entry</a></li>
+                </ul>
+            </li>
+
+            <li><a href="{% url 'logbook:progress_report' %}"><i class="fa-solid fa-chart-line"></i> Progress Report</a></li>
+            <li><a href="{% url 'logbook:evaluation_forms' %}"><i class="fa-solid fa-file-pen"></i> Evaluation Forms</a></li>
+            <li><a href="{% url 'logbook:view_files' %}"><i class="fa-solid fa-folder-open"></i> View Uploaded Files</a></li>
+            <li><a href="{% url 'logbook:upload_file' %}"><i class="fa-solid fa-upload"></i> Upload File/Document</a></li>
+            <li><a href="{% url 'logbook:download_files' %}"><i class="fa-solid fa-download"></i> Download Files</a></li>
+        </ul>
+    </nav>
+
+    <!-- Sidebar Toggle Button -->
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+    </button>
+
+    <!-- Header -->
+    <header class="header">
+        <img src="{% static 'img/mwecau_logo.png' %}" alt="MWECAU Logo" class="logo" />
+        <div class="header-text">
+            <h1>MWENGE CATHOLIC UNIVERSITY</h1>
+            <h2>FACULTY OF SCIENCE</h2>
+            <p>DEPARTMENT OF NATURAL AND INFORMATION TECHNOLOGY</p>
+            <h3>BACHELOR OF SCIENCE IN COMPUTER SCIENCE</h3>
+            <h3>FIELD PRACTICAL TRAINING LOGBOOK</h3>
+        </div>
+    </header>
+
+    <!-- External Links Section -->
+    <section class="external-links-section">
+        <h2>Quick Links</h2>
+        <div class="toggle-buttons">
+            <button onclick="window.open('https://www.mwecau.ac.tz', '_blank')" title="Mwenge Catholic University Website" class="link-btn">
+                <i class="fa-solid fa-university"></i> University Site
+            </button>
+            <button onclick="window.open('https://ums.mwecau.ac.tz/', '_blank')" title="Moodle Learning Portal" class="link-btn">
+                <i class="fa-solid fa-graduation-cap"></i> Stdent Management System
+            </button>
+            <button onclick="window.open('https://mail.mwec.ac.tz', '_blank')" title="University Email" class="link-btn">
+                <i class="fa-solid fa-envelope"></i> Email
+            </button>
+        </div>
+    </section>
+
+    <!-- Trainee Information -->
+    <section class="trainee-info">
+        <h2>Student Information</h2>
+        <div class="info-card">
+            <p><i class="fa-solid fa-user"></i> <strong>Name:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+            <p><i class="fa-solid fa-id-card"></i> <strong>Reg Number:</strong> {{ user.studentprofile.registration_number }}</p>
+            <p><i class="fa-solid fa-calendar-alt"></i> <strong>Year of Study:</strong> {{ user.studentprofile.year_of_study }}</p>
+            <p><i class="fa-solid fa-graduation-cap"></i> <strong>Academic Year:</strong> {{ user.studentprofile.academic_year }}</p>
+        </div>
+    </section>
+
+    <!-- Help Section -->
+    <section class="help-section">
+        <button class="help-btn" onclick="showHelpModal()">Need Help?</button>
+    </section>
+
+    <!-- Help Modal -->
+    <div id="helpModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeHelpModal()">&times;</span>
+            <h2>Help & Support</h2>
+            <p>Please contact your supervisor or visit the help desk for assistance.</p>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="{% static 'js/s_dash.js' %}"></script>
+</body>
+
+</html>

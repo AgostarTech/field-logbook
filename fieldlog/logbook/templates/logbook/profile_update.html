@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link href="{% static 'logbook/css/update_profile.css' %}" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+<div class="update-profile-page-container" role="main" aria-label="Update Profile Form">
+  <div class="update-profile-wrapper">
+    <h2 class="update-profile-title">
+      <i class="fas fa-user-edit"></i>
+      Update Profile
+    </h2>
+    <form method="post" enctype="multipart/form-data" class="update-profile-form" novalidate>
+      {% csrf_token %}
+      {{ user_form.as_p }}
+      {{ profile_form.as_p }}
+
+      <button type="submit" class="btn-update">Save Changes</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'logbook/js/update_profile.js' %}"></script>
+{% endblock %}

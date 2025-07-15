@@ -1,0 +1,89 @@
+.about-container {
+  padding: 60px 30px;
+  color: #f0f8ff;
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 20px;
+  max-width: 900px;
+  margin: auto;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 0 40px rgba(30, 144, 255, 0.4);
+  animation: slideFade 1s ease-in-out;
+}
+
+.about-header h1 {
+  font-size: 2.8rem;
+  color: #66fcf1;
+  margin-bottom: 10px;
+  text-align: center;
+  animation: glow 3s ease-in-out infinite alternate;
+}
+
+.about-header .sub-header {
+  font-size: 1.2rem;
+  color: #d0dfee;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.team-list, .expertise-list {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 20px;
+}
+
+.team-list li, .expertise-list li {
+  margin: 10px 0;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.about-expertise h2 {
+  margin-top: 40px;
+  color: #00ffff;
+  font-size: 1.6rem;
+}
+
+.about-footer {
+  margin-top: 40px;
+  font-size: 1.05rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: inset 0 0 10px rgba(0, 255, 255, 0.1);
+}
+
+@keyframes glow {
+  from {
+    text-shadow: 0 0 10px #1de9b6;
+  }
+  to {
+    text-shadow: 0 0 25px #1de9b6, 0 0 40px #1de9b6;
+  }
+}
+
+@keyframes slideFade {
+  0% {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .about-container {
+    padding: 40px 20px;
+  }
+
+  .about-header h1 {
+    font-size: 2rem;
+  }
+
+  .about-expertise h2 {
+    font-size: 1.3rem;
+  }
+}

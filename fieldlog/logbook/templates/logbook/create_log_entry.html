@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create Log Entry{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'logbook/css/logentry.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-logentry">
+  <h1>Create a New Log Entry</h1>
+
+  <p class="summary">
+    Filling log entry <strong><span id="day-number">{{ entry_count|add:"1" }}</span></strong> of <strong>25</strong>.
+  </p>
+
+  <div class="form-wrapper"> <!-- ✅ Optional wrapper for styling -->
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% for field in form %}
+        <div class="mb-3">
+          <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}
+            <div class="text-danger small">{{ field.errors }}</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-success w-100">Submit Entry</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const fieldStartDateStr = "{{ field_start_date }}";
+</script>
+<script src="{% static 'logbook/js/logentry.js' %}"></script>
+{% endblock %}

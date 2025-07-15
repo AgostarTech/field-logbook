@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}Supervisor Dashboard{% endblock %}
+{% block content %}
+
+<h2>Welcome, {{ user.username }}</h2>
+
+<h3>Assign Task</h3>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Assign</button>
+</form>
+
+<h3>Student Logs</h3>
+<table>
+    <tr>
+        <th>Student</th>
+        <th>Date</th>
+        <th>Content</th>
+        <th>Status</th>
+        <th>Action</th>
+    </tr>
+    {% for log in logs %}
+    <tr>
+        <td>{{ log.student.username }}</td>
+        <td>{{ log.date }}</td>
+        <td>{{ log.content }}</td>
+        <td>{{ log.approved|yesno:"Approved,Pending" }}</td>
+        <td>
+            {% if not log.approved %}
+                <a href="{% url 'approve_log' log.id %}">Approve</a>
+            {% else %}
+                ---
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

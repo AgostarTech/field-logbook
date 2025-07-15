@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/student_signup.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="center-screen">
+    <div class="a1">
+        <h2>Student Signup</h2>
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}">Username</label>
+                {{ form.username }}
+                {% for error in form.username.errors %}
+                    <div class="errorlist">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.email.id_for_label }}">Email Address</label>
+                {{ form.email }}
+                {% for error in form.email.errors %}
+                    <div class="errorlist">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.registration_number.id_for_label }}">Registration Number</label>
+                {{ form.registration_number }}
+                {% for error in form.registration_number.errors %}
+                    <div class="errorlist">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.course.id_for_label }}">Course</label>
+                {{ form.course }}
+                {% for error in form.course.errors %}
+                    <div class="errorlist">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.year_of_study.id_for_label }}">Year of Study</label>
+                {{ form.year_of_study }}
+                {% for error in form.year_of_study.errors %}
+                    <div class="errorlist">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.password1.id_for_label }}">Password</label>
+                {{ form.password1 }}
+                {% for error in form.password1.errors %}
+                    <div class="errorlist">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.password2.id_for_label }}">Confirm Password</label>
+                {{ form.password2 }}
+                {% for error in form.password2.errors %}
+                    <div class="errorlist">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="signup-btn">Create Account</button>
+        </form>
+
+        <div class="login-link">
+            Already have an account? <a href="{% url 'login' %}">Login here</a>
+        </div>
+        <p class="footer-note">© 2025 Field Logbook System</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/s_signup.js' %}"></script>
+{% endblock %}

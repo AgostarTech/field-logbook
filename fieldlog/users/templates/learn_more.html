@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link href="{% static 'css/learn_more.css' %}" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="learn-more-container">
+  <h1 class="learn-heading"><i class="fas fa-info-circle"></i> Learn More About This Project</h1>
+
+  <div class="info-section">
+    <p>
+      This project is our Final Year Project for the <strong>Bachelor of Science in Computer Science</strong> at Mwenge Catholic University.
+      It was proudly developed by <strong>Agola W. Tom</strong>, <strong>Robert E. Kipendaroho</strong>, and <strong>Millenium L. Ngao</strong>.
+    </p>
+
+    <p>
+      Our goal was to modernize field training supervision through a smart, secure and scalable logbook system. The system allows students
+      to log daily reports, attach evidence, get feedback from supervisors, and have academic tracking in real time.
+    </p>
+  </div>
+
+  <div class="passion-section">
+    <h2><i class="fas fa-brain"></i> Our Passion & Expertise</h2>
+    <ul>
+      <li><i class="fas fa-tools"></i> Computer Maintenance & Troubleshooting</li>
+      <li><i class="fas fa-database"></i> Database Design & Administration</li>
+      <li><i class="fas fa-network-wired"></i> Networking, Security & Infrastructure</li>
+      <li><i class="fas fa-laptop-code"></i> Full-stack System Development</li>
+      <li><i class="fas fa-shield-alt"></i> Cybersecurity & Ethical Hacking</li>
+    </ul>
+  </div>
+
+  <div class="contact-promo">
+    <p>
+      Want to learn more or collaborate with us? You can reach out via our <a href="{% url 'contact' %}">Contact Page</a> or explore our online profiles.
+    </p>
+    <p class="cta-line">
+      <i class="fas fa-arrow-circle-right"></i> Let’s build the future of tech together!
+    </p>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/learn_more.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Update Log Entry{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'logbook/css/logentry.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-logentry">
+  <h1>Update Log Entry</h1>
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+
+    {% for field in form %}
+      <div class="mb-3">
+        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}
+          <div class="text-danger small">{{ field.errors }}</div>
+        {% endif %}
+      </div>
+    {% endfor %}
+
+    <button type="submit" class="btn btn-primary w-100">Update Entry</button>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'logbook/js/logentry.js' %}"></script>
+{% endblock %}

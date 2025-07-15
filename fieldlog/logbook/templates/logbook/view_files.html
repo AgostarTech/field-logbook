@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'logbook/css/file_gallery.css' %}">
+<link rel="stylesheet" href="{% static 'logbook/css/buttons.css' %}">
+{% endblock %}
+
+{% block content %}
+  <h2>Uploaded Files</h2>
+
+  <div class="file-gallery">
+    {% for file in files %}
+      <div class="file-item">
+        <div class="file-preview">
+          {% if file.is_image %}
+            <img src="{{ file.file.url }}" alt="Uploaded image" class="file-image" />
+          {% else %}
+            <!-- Document icon SVG -->
+            <svg xmlns="http://www.w3.org/2000/svg" height="60" width="60" viewBox="0 0 384 512" fill="#555">
+              <path d="M224 136v-136H24C10.7 0 0 10.7 0 24v464c0 13.3 10.7 24 24 24h336c13.3 0 24-10.7 24-24V160H248c-13.3 0-24-10.7-24-24zM384 121.9V128h-82.1c-7.5 0-14.6-3.7-18.8-9.7L256 91.6 309.4 38.2c6-6 14.1-9.7 22.6-9.7H384v93.4z"/>
+            </svg>
+          {% endif %}
+        </div>
+
+        <div class="file-info">
+          <div class="file-name">{{ file.file.name|slice:"8:" }}</div>
+
+          <div class="file-action-button">
+            {% if file.is_image %}
+              <button onclick="openModal('{{ file.file.url }}', 'image')" class="btn btn-primary btn-sm">View</button>
+            {% else %}
+              <button onclick="openModal('{{ file.file.url }}', 'doc')" class="btn btn-secondary btn-sm">Read</button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <p>No files uploaded yet.</p>
+    {% endfor %}
+  </div>
+
+  <!-- Modal Container -->
+  <div id="fileModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeModal()">&times;</span>
+      <div id="modalContent" class="modal-body"></div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'logbook/js/file_modal.js' %}"></script>
+{% endblock %}
+

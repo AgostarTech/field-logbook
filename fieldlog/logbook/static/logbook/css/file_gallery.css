@@ -1,0 +1,75 @@
+.file-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.file-item {
+  border: 1px solid #ddd;
+  padding: 10px;
+  width: 180px;
+  text-align: center;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+}
+
+.file-preview img.file-image {
+  max-width: 100%;
+  height: 120px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.file-info {
+  margin-top: 10px;
+}
+
+.file-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 5px;
+}
+
+.file-action-button {
+  margin-top: 5px;
+}
+
+/* Modal styling */
+
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed;
+  z-index: 1000;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.7);
+}
+
+.modal-content {
+  position: relative;
+  margin: 5% auto;
+  max-width: 80%;
+  max-height: 80%;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  overflow: auto;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+.modal-close {
+  position: absolute;
+  right: 15px;
+  top: 10px;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.modal-body img, 
+.modal-body iframe {
+  max-width: 100%;
+  max-height: 70vh;
+  border-radius: 4px;
+}
+

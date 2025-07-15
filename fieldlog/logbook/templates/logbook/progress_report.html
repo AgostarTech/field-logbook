@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Progress Report{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/progress_report.css' %}">
+<script src="{% static 'js/progress_report.js' %}" defer></script>
+
+<div class="container my-4">
+  <h2 class="mb-4">Progress Report</h2>
+  <div class="trainee-info mb-4 p-3 border rounded">
+    <p><strong>Trainee Name:</strong> {{ trainee_name }}</p>
+    <p><strong>Organization:</strong> {{ organization_name }}</p>
+    <p><strong>Registration Number:</strong> {{ registration_number }}</p>
+  </div>
+
+  <form method="post" id="progressReportForm">
+    {% csrf_token %}
+
+    {% for week in detailed_weeks %}
+      <div class="week-block border rounded p-3 mb-3">
+        <h5>Week {{ week.week_number }}</h5>
+        <p><strong>From:</strong> {{ week.start_date }}</p>
+        <p><strong>To:</strong> {{ week.end_date }}</p>
+
+        <label for="{{ week.form_field.id_for_label }}">Supervisor Comment:</label><br>
+        {{ week.form_field }}
+
+        <p class="location">
+          <strong>Location:</strong> 
+          {% if week.latitude and week.longitude %}
+            Latitude: {{ week.latitude }}, Longitude: {{ week.longitude }}
+          {% else %}
+            Not provided
+          {% endif %}
+        </p>
+
+        <button type="submit" class="btn btn-primary submit-btn" data-week="{{ week.week_number }}">
+          Submit Week {{ week.week_number }}
+        </button>
+      </div>
+    {% endfor %}
+  </form>
+</div>
+
+{% endblock %}

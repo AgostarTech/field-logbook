@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<section class="hero-section">
+  <div class="hero-content">
+    <h1><i class="fas fa-graduation-cap"></i> Mwenge Catholic University</h1>
+    <h2 class="tagline">Where Innovation Meets Field Experience</h2>
+    <p class="description">
+      Welcome to the <strong>Online Field Logbook System</strong> — your smart companion for managing and tracking field practical training (FPT).
+      This final year project is designed specifically for <strong>Mwenge Catholic University</strong> students, supervisors, and academic staff.
+    </p>
+    <a href="{% url 'login' %}" class="cta-button ripple-container">
+      <i class="fas fa-sign-in-alt"></i> Get Started
+    </a>
+  </div>
+
+  <!-- ✅ Logo and caption on the right -->
+  <div class="hero-logo-box">
+    <img src="{% static 'images/mwecaulogo.png' %}" alt="Mwenge Catholic University Logo" class="mwecau-logo-right" />
+    <p class="logo-caption">Lux Mundi — Light of the World</p>
+  </div>
+</section>
+
+<section class="features-section">
+  <h2>What This System Offers</h2>
+  <div class="features-grid">
+    <div class="feature-box">
+      <i class="fas fa-book-open"></i>
+      <h3>Digital Logbook</h3>
+      <p>Students can record daily progress, upload evidence, and reflect on learning during fieldwork.</p>
+    </div>
+    <div class="feature-box">
+      <i class="fas fa-chalkboard-teacher"></i>
+      <h3>Supervisor Access</h3>
+      <p>Supervisors can monitor, comment, and grade students directly through the dashboard.</p>
+    </div>
+    <div class="feature-box">
+      <i class="fas fa-university"></i>
+      <h3>Institutional Oversight</h3>
+      <p>Lecturers and admins can evaluate progress, generate reports, and ensure FPT quality across all programs.</p>
+    </div>
+  </div>
+</section>
+
+<section class="motto-section">
+  <blockquote>
+    <i class="fas fa-quote-left"></i>
+    <p>"Empowering students with technology to bridge academics and real-world experience."</p>
+    <footer>— Field Logbook System | <strong>Lux Mundi</strong></footer>
+  </blockquote>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/home.js' %}"></script>
+{% endblock %}

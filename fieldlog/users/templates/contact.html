@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/contact.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="contact-container">
+  <h1 class="contact-title"><i class="fas fa-address-book"></i> Contact Us</h1>
+  <p class="contact-subtitle">Get in touch with the minds behind the Field Logbook System</p>
+
+  <div class="contact-grid">
+
+    <div class="contact-card">
+      <h3><i class="fas fa-user"></i> Agola W. Tom</h3>
+      <p><i class="fas fa-phone"></i> +255 694 079 017</p>
+      <p><i class="fas fa-laptop-code"></i> System Design & Security</p>
+    </div>
+
+    <div class="contact-card">
+      <h3><i class="fas fa-user"></i> Robert E. Kipendaroho</h3>
+      <p><i class="fas fa-phone"></i> +255 621 919 252</p>
+      <p><i class="fas fa-server"></i> Backend & Networking</p>
+    </div>
+
+    <div class="contact-card">
+      <h3><i class="fas fa-user"></i> Millenium L. Ngao</h3>
+      <p><i class="fas fa-phone"></i> +255 135 200 03</p>
+      <p><i class="fas fa-database"></i> Database & Infrastructure</p>
+    </div>
+
+  </div>
+
+  <div class="contact-socials">
+    <h2><i class="fas fa-share-alt"></i> Follow Us</h2>
+    <ul>
+      <li><a href="https://youtube.com/@AgostarTech" target="_blank"><i class="fab fa-youtube"></i> YouTube - AgostarTech</a></li>
+      <li><a href="https://github.com/AgostarTech" target="_blank"><i class="fab fa-github"></i> GitHub - AgostarTech</a></li>
+      <li><a href="https://www.linkedin.com/in/agola-tom" target="_blank"><i class="fab fa-linkedin"></i> LinkedIn - Agola Tom</a></li>
+    </ul>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/contact.js' %}"></script>
+{% endblock %}

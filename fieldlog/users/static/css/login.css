@@ -1,0 +1,184 @@
+/* Reset & base styles for html & body */
+/* Remove flex centering from html, body */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #203a43, #2c5364);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #cfd8dc;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* This wrapper centers the login-wrapper on the page */
+/* Add this container in login.html wrapping login-wrapper */
+.login-page-container {
+  min-height: calc(100vh - 160px); /* Adjust based on your nav+footer height */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Wrapper container */
+.login-wrapper {
+  background: rgba(20, 30, 40, 0.95);
+  padding: 50px 50px;
+  border-radius: 15px;
+  box-shadow: 0 0 25px #1de9b6;
+  width: 360px;
+  max-width: 90vw;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  animation: fadeIn 0.8s ease forwards;
+  opacity: 0;
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Title with icon styling */
+.login-title {
+  color: #1de9b6;
+  font-size: 2.5rem;
+  margin-bottom: 30px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  font-weight: 900;
+}
+
+.login-title i {
+  font-size: 2.8rem;
+  color: #14a37f;
+  text-shadow: 0 0 8px #14a37f;
+  animation: pulseGlow 2.5s infinite ease-in-out;
+}
+
+/* Glow pulse animation for icon */
+@keyframes pulseGlow {
+  0%, 100% {
+    text-shadow: 0 0 8px #14a37f, 0 0 20px #1de9b6;
+    color: #14a37f;
+  }
+  50% {
+    text-shadow: 0 0 16px #1de9b6, 0 0 30px #14a37f;
+    color: #62dafb;
+  }
+}
+
+/* Input groups styling */
+.input-group {
+  margin-bottom: 25px;
+  text-align: left;
+}
+
+.input-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #80deea;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 12px 15px;
+  font-size: 1rem;
+  border: 2px solid #455a64;
+  border-radius: 8px;
+  background: #263238;
+  color: #cfd8dc;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  font-family: inherit;
+}
+
+.input-group input::placeholder {
+  color: #607d8b;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #1de9b6;
+  box-shadow: 0 0 10px #1de9b6;
+}
+
+/* Login button styling */
+.btn-login {
+  width: 100%;
+  padding: 14px 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #0f2027;
+  background: #1de9b6;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  text-transform: uppercase;
+  box-shadow: 0 0 20px #1de9b6;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  user-select: none;
+}
+
+.btn-login:hover,
+.btn-login:focus {
+  background: #14a37f;
+  box-shadow: 0 0 30px #14a37f;
+  transform: scale(1.05);
+  outline: none;
+}
+
+.btn-login:active {
+  transform: scale(0.95);
+}
+
+/* Signup text below form */
+.signup-text {
+  margin-top: 20px;
+  font-size: 0.9rem;
+  color: #80deea;
+  user-select: none;
+}
+
+.signup-text a {
+  color: #1de9b6;
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.signup-text a:hover,
+.signup-text a:focus {
+  color: #14a37f;
+  text-decoration: underline;
+  outline: none;
+}
+
+/* Shake animation for error feedback */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-10px); }
+  40%, 80% { transform: translateX(10px); }
+}
+
+.shake {
+  animation: shake 0.5s;
+}
+
+/* Responsive adjustments */
+@media (max-width: 400px) {
+  .login-wrapper {
+    width: 90vw;
+    padding: 40px 30px;
+  }
+}
