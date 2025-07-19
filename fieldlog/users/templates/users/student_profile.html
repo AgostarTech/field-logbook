@@ -1,0 +1,9 @@
+<!-- templates/users/student_profile.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Student Profile</h1>
+<p>Name: {{ student.user.get_full_name }}</p>
+<p>Email: {{ student.user.email }}</p>
+<p>Department: {{ student.department }}</p>
+{% endblock %}

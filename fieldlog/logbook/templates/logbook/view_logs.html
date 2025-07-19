@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}All Logs - Supervisor{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<style>
+  /* Extra styles for logs page */
+  .logs-container {
+    max-width: 1100px;
+    margin: 2rem auto;
+    padding: 2rem 3rem;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #2c3e50;
+  }
+  .logs-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  .logs-header h1 {
+    font-size: 2rem;
+  }
+  .search-input {
+    padding: 0.6rem 1rem;
+    font-size: 1rem;
+    border: 1.5px solid #ccc;
+    border-radius: 8px;
+    width: 250px;
+  }
+  .table-responsive {
+    overflow-x: auto;
+  }
+  .logs-table th, .logs-table td {
+    white-space: nowrap;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="logs-container" role="main" aria-label="All logs overview">
+
+  <div class="logs-header">
+    <h1><i class="fas fa-list"></i> All Logs for Assigned Students</h1>
+    <input type="search" id="logSearch" class="search-input" placeholder="Search logs..." aria-label="Search logs by student name, date or status">
+  </div>
+
+  <div class="table-responsive">
+    <table class="logs-table" role="table" aria-describedby="logsTableDesc">
+      <caption id="logsTableDesc" class="visually-hidden">Complete list of logs submitted by students assigned to you</caption>
+      <thead>
+        <tr>
+          <th scope="col">Student</th>
+          <th scope="col">Date</th>
+          <th scope="col" class="text-center">Status</th>
+          <th scope="col">Created At</th>
+          <th scope="col">Approved By</th>
+          <th scope="col" class="text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="logsTableBody">
+        {% for log in logs %}
+        <tr>
+          <td>{{ log.user.get_full_name }}</td>
+          <td>{{ log.date|date:"M d, Y" }}</td>
+          <td class="text-center">
+            {% if log.approved %}
+              <span class="status status-approved" aria-label="Approved">Approved</span>
+            {% else %}
+              <span class="status status-pending" aria-label="Pending approval">Pending</span>
+            {% endif %}
+          </td>
+          <td>{{ log.created_at|date:"M d, Y H:i" }}</td>
+          <td>
+            {% if log.approved %}
+              {{ log.approved_by.get_full_name }} <br>
+              <small>{{ log.approved_at|date:"M d, Y H:i" }}</small>
+            {% else %}
+              <em>Not approved yet</em>
+            {% endif %}
+          </td>
+          <td class="text-center">
+            <a href="{% url 'logbook:view_log_detail' log.id %}" class="btn btn-small" aria-label="View log details for {{ log.user.get_full_name }}">
+              <i class="fas fa-eye" aria-hidden="true"></i> View
+            </a>
+            {% if not log.approved %}
+            <a href="{% url 'logbook:approve_log' log.id %}" class="btn btn-success btn-small" aria-label="Approve this log for {{ log.user.get_full_name }}">
+              <i class="fas fa-check"></i> Approve
+            </a>
+            <a href="{% url 'logbook:reject_log' log.id %}" class="btn btn-danger btn-small" aria-label="Reject this log for {{ log.user.get_full_name }}">
+              <i class="fas fa-times"></i> Reject
+            </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="text-center">No logs found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Simple search filter for logs table
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('logSearch');
+    const tableBody = document.getElementById('logsTableBody');
+
+    searchInput.addEventListener('input', () => {
+      const filter = searchInput.value.toLowerCase();
+      const rows = tableBody.getElementsByTagName('tr');
+
+      for(let row of rows) {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(filter) ? '' : 'none';
+      }
+    });
+  });
+</script>
+{% endblock %}

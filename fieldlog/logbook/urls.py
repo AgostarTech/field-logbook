@@ -2,18 +2,26 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
 
-app_name = "logbook"  # Namespace for this app's URLs
+
+app_name = "logbook"
 
 urlpatterns = [
+    # Dashboard
+    path('student/', views.student_dashboard, name='student_dashboard'),
+
     # Profile Management
     path('profile/', views.profile_view, name='profile'),
     path('profile/edit/', views.profile_update, name='edit_profile'),
 
     # Logbook Activities
-    path('log-activity/', views.log_activity_view, name='log_activity'),
-    path('log-activity/create/', views.create_entry, name='create_log_entry'),
-    path('log-activity/last/', views.view_last_entry, name='view_last_entry'),
-    path('log-activity/update/', views.update_entry, name='update_entry'),
+    path('logs/', views.view_logs, name='view_logs'),
+    path('logs/new/', views.new_logentry, name='new_logentry'),
+    path('logs/create/', views.new_logentry, name='create_log_entry'),  # Could be merged logically
+    path('logs/last/', views.view_last_entry, name='view_last_entry'),
+    path('logs/update/', views.update_entry, name='update_entry'),
+    path('add/', views.add_entry, name='add_entry'),
+    path('edit/<int:pk>/', views.edit_entry, name='edit_entry'),
+    path('detail/<int:pk>/', views.log_detail, name='log_detail'),
 
     # Progress Reporting
     path('progress-report/', views.progress_report_view, name='progress_report'),
@@ -27,12 +35,16 @@ urlpatterns = [
     path('files/download/', views.download_files, name='download_files'),
     path('files/delete/<int:file_id>/', views.delete_file, name='delete_file'),
 
-    # New Log Entry with automatic day counting
-    path('new/', views.new_logentry, name='new_logentry'),
+    # Task Management
+    path('tasks/assign/', views.assign_task, name='assign_task'),
+    path('complete-task/<int:pk>/', views.mark_task_complete, name='mark_task_complete'),
 
-    # AJAX: Dynamic institution fetch
+    # Additional Functionalities
     path('ajax/get_institutions/', views.get_institutions, name='get_institutions'),
+    path('add-entry/', views.add_entry_view, name='add_entry_view'),
+    path('detail/<int:pk>/', views.log_detail, name='log_detail'),
 
-    # Logout
+
+    # Authentication
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
 ]

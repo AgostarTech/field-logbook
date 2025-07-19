@@ -1,7 +1,7 @@
-
-# Register your models here.
 from django.contrib import admin
-from .models import LogEntry, StudentProfile
+from .models import LogEntry
 
-admin.site.register(LogEntry)
-admin.site.register(StudentProfile)
+class LogEntryAdmin(admin.ModelAdmin):
+    list_display = ['user', 'date', 'description', 'approved']  # Replace 'activity' with 'description' or another existing field
+
+admin.site.register(LogEntry, LogEntryAdmin)

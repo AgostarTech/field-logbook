@@ -3,7 +3,8 @@ from django.utils.timezone import now
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.contrib.auth import login
+from django.contrib.auth import login, get_user_model
+from django.contrib import messages
 
 from .models import (
     LogEntry,
@@ -12,6 +13,7 @@ from .models import (
     Institution,
     ProgressReport,
     StudentProfile,
+    Task,
 )
 from .forms import (
     CustomUserUpdateForm,
@@ -19,137 +21,67 @@ from .forms import (
     LogEntryForm,
     FileUploadForm,
     ProgressReportForm,
-    StudentSignUpForm,  # make sure this is imported
+    StudentSignUpForm,
+    TaskAssignForm,
 )
 
+User = get_user_model()  # Correct way to get the User model dynamically
 
-# ==========================
-# Profile Views
-# ==========================
+
+# ---------- Profile Views ----------
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from .forms import StudentProfileUpdateForm
 
 @login_required
 def profile_view(request):
-    """Display user profile."""
-    context = {
-        'user': request.user,
-        'profile': getattr(request.user, 'student_profile', None),
-    }
-    return render(request, 'logbook/profile.html', context)
+    profile = getattr(request.user, 'student_profile', None)
+    return render(request, 'logbook/profile.html', {'user': request.user, 'profile': profile})
 
 @login_required
 def profile_update(request):
-    """Update user and student profile."""
-    try:
-        profile = request.user.student_profile
-    except StudentProfile.DoesNotExist:
-        profile = StudentProfile(user=request.user)
+    profile = getattr(request.user, 'student_profile', None)
+    if not profile:
+        # Handle the case where profile doesn't exist
+        # You can create or redirect or show an error
+        return redirect('logbook:profile')  # or create profile logic here
 
     if request.method == 'POST':
-        user_form = CustomUserUpdateForm(request.POST, instance=request.user)
         profile_form = StudentProfileUpdateForm(request.POST, request.FILES, instance=profile)
-
-        if user_form.is_valid() and profile_form.is_valid():
-            user_form.save()
+        if profile_form.is_valid():
             profile_form.save()
             return redirect('logbook:profile')
-
     else:
-        user_form = CustomUserUpdateForm(instance=request.user)
         profile_form = StudentProfileUpdateForm(instance=profile)
 
-    return render(request, 'logbook/profile_update.html', {
-        'user_form': user_form,
-        'profile_form': profile_form,
-    })
+    return render(request, 'logbook/profile_update.html', {'profile_form': profile_form})
 
-
-# ==========================
-# Logbook Entry Views
-# ==========================
-
-@login_required
-def log_activity_view(request):
-    """View main log activity page."""
-    return render(request, 'logbook/log_activity.html')
-
-
-@login_required
-def create_entry(request):
-    """Create a new log entry."""
-    if request.method == 'POST':
-        form = LogEntryForm(request.POST)
-        if form.is_valid():
-            entry = form.save(commit=False)
-            entry.user = request.user
-            entry.save()
-            return redirect('logbook:view_last_entry')
-    else:
-        form = LogEntryForm()
-    return render(request, 'logbook/create_log_entry.html', {'form': form})
-
-
-@login_required
-def view_last_entry(request):
-    """View the most recent log entry of the user."""
-    entry = LogEntry.objects.filter(user=request.user).order_by('-date').first()
-    return render(request, 'logbook/view_last_entry.html', {'entry': entry})
-
-
-@login_required
-def update_entry(request):
-    """Update the most recent log entry."""
-    entry = LogEntry.objects.filter(user=request.user).order_by('-date').first()
-    if not entry:
-        return redirect('logbook:create_entry')
-
-    if request.method == 'POST':
-        form = LogEntryForm(request.POST, instance=entry)
-        if form.is_valid():
-            form.save()
-            return redirect('logbook:view_last_entry')
-    else:
-        form = LogEntryForm(instance=entry)
-    return render(request, 'logbook/update_entry.html', {'form': form})
-
-
-# ==========================
-# Helper Function: Working Days Calculator (Exclude weekends)
-# ==========================
+# ---------- Log Entry Views ----------
 
 def working_days_since(start_date, current_date):
-    """Calculate working days (Mon-Fri) between two dates, inclusive."""
     day_count = 0
     current = start_date
     while current <= current_date:
-        if current.weekday() < 5:  # Monday=0 ... Friday=4
+        if current.weekday() < 5:  # Monday to Friday are working days
             day_count += 1
         current += timedelta(days=1)
     return day_count
 
-
-# ==========================
-# New Log Entry with Automatic Day Number Calculation
-# ==========================
-
 @login_required
 def new_logentry(request):
-    """Create a new log entry with automatic day counting excluding weekends."""
-    user = request.user
-    profile = getattr(user, 'student_profile', None)
-
-    # Redirect if no start date set in profile
-    if not profile or not getattr(profile, 'field_start_date', None):
+    profile = getattr(request.user, 'student_profile', None)
+    if not profile or not profile.field_start_date:
+        messages.error(request, "Please update your profile with field start date before adding log entries.")
         return redirect('logbook:profile_update')
-
-    field_start_date = profile.field_start_date
 
     if request.method == 'POST':
         form = LogEntryForm(request.POST)
         if form.is_valid():
             logentry = form.save(commit=False)
-            logentry.user = user
-            logentry.day_number = working_days_since(field_start_date, logentry.date)
+            logentry.user = request.user
+            logentry.day_number = working_days_since(profile.field_start_date, logentry.date)
             logentry.save()
+            messages.success(request, "New log entry created.")
             return redirect('logbook:view_last_entry')
     else:
         form = LogEntryForm(initial={
@@ -160,53 +92,59 @@ def new_logentry(request):
     return render(request, 'logbook/new.html', {
         'form': form,
         'places': Place.objects.all(),
-        'institutions': Institution.objects.none(),  # AJAX will load based on place
-        'entry_count': LogEntry.objects.filter(user=user).count(),
-        'field_start_date': field_start_date.strftime('%Y-%m-%d'),
-        'max_days': 25,  # max expected working days
+        'institutions': Institution.objects.none(),
+        'entry_count': LogEntry.objects.filter(user=request.user).count(),
+        'field_start_date': profile.field_start_date.strftime('%Y-%m-%d'),
+        'max_days': 25,
     })
 
+@login_required
+def view_last_entry(request):
+    entry = LogEntry.objects.filter(user=request.user).order_by('-date').first()
+    return render(request, 'logbook/view_last_entry.html', {'entry': entry})
 
-# ==========================
-# AJAX Views
-# ==========================
+@login_required
+def update_entry(request):
+    entry = LogEntry.objects.filter(user=request.user).order_by('-date').first()
+    if not entry:
+        messages.warning(request, "No log entry found to update.")
+        return redirect('logbook:new_logentry')
+
+    if request.method == 'POST':
+        form = LogEntryForm(request.POST, instance=entry)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Log entry updated successfully.")
+            return redirect('logbook:view_last_entry')
+    else:
+        form = LogEntryForm(instance=entry)
+
+    return render(request, 'logbook/update_entry.html', {'form': form})
+
+@login_required
+def view_logs(request):
+    logs = LogEntry.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'logbook/view_logs.html', {'logs': logs})
 
 @login_required
 def get_institutions(request):
-    """Return institutions filtered by place (AJAX)."""
     place_id = request.GET.get('place_id')
     institutions = Institution.objects.filter(place_id=place_id).values('id', 'name')
     return JsonResponse(list(institutions), safe=False)
 
 
-# ==========================
-# Progress & Evaluation Views
-# ==========================
-
-@login_required
-def evaluation_forms_view(request):
-    """Show evaluation forms page."""
-    return render(request, 'logbook/evaluation_forms.html')
-
+# ---------- Progress Report Views ----------
 
 @login_required
 def progress_report_view(request):
     user = request.user
+    profile = getattr(user, 'student_profile', None)
+    trainee_name = f"{user.first_name} {user.last_name}" if user.first_name and user.last_name else user.username
+    organization_name = profile.organization_name if profile else "N/A"
+    registration_number = profile.registration_number if profile else "N/A"
 
-    # Get trainee profile
-    try:
-        profile = StudentProfile.objects.get(user=user)
-        trainee_name = f"{user.first_name} {user.last_name}"
-        organization_name = getattr(profile, 'organization_name', 'N/A')
-        registration_number = profile.registration_number
-    except StudentProfile.DoesNotExist:
-        trainee_name = "N/A"
-        organization_name = "N/A"
-        registration_number = "N/A"
+    start_date = datetime(2025, 6, 1)  # Adjust as needed
 
-    start_date = datetime(2025, 6, 1)  # FTP start date (adjust as needed)
-
-    # Weeks info
     weeks = [
         (1, 'supervisor_comment_week_1', start_date, start_date + timedelta(days=6)),
         (2, 'supervisor_comment_week_2', start_date + timedelta(days=7), start_date + timedelta(days=13)),
@@ -227,12 +165,9 @@ def progress_report_view(request):
                     ProgressReport.objects.update_or_create(
                         student=user,
                         week_number=week_number,
-                        defaults={
-                            'supervisor_comment': comment,
-                            'latitude': lat,
-                            'longitude': lon,
-                        }
+                        defaults={'supervisor_comment': comment, 'latitude': lat, 'longitude': lon}
                     )
+            messages.success(request, "Progress report saved.")
             return redirect('dashboard')
     else:
         initial_data = {}
@@ -246,7 +181,6 @@ def progress_report_view(request):
                 initial_data[field_name] = ''
         form = ProgressReportForm(initial=initial_data)
 
-    # Build detailed week reports list for template
     detailed_weeks = []
     for week_number, comment_field, start, end in weeks:
         try:
@@ -269,74 +203,62 @@ def progress_report_view(request):
             'form_field': form[comment_field],
         })
 
-    context = {
+    return render(request, 'logbook/progress_report.html', {
         'form': form,
         'detailed_weeks': detailed_weeks,
         'trainee_name': trainee_name,
         'organization_name': organization_name,
         'registration_number': registration_number,
-    }
-
-    return render(request, 'logbook/progress_report.html', context)
+    })
 
 
-# ==========================
-# File Operations Views
-# ==========================
+# ---------- File Views ----------
 
 @login_required
 def view_files(request):
-    """View uploaded files with image detection."""
     files = UploadedFile.objects.filter(user=request.user).order_by('-uploaded_at')
     for f in files:
         f.is_image = f.file.url.lower().endswith(('.jpg', '.jpeg', '.png', '.gif'))
     return render(request, 'logbook/view_files.html', {'files': files})
 
-
 @login_required
 def upload_file(request):
-    """Upload a new file."""
     if request.method == 'POST':
         form = FileUploadForm(request.POST, request.FILES)
         if form.is_valid():
-            uploaded_file = form.save(commit=False)
-            uploaded_file.user = request.user
-            uploaded_file.save()
+            upload = form.save(commit=False)
+            upload.user = request.user
+            upload.save()
+            messages.success(request, "File uploaded successfully.")
             return redirect('logbook:view_files')
+        messages.error(request, "Please fix the errors.")
     else:
         form = FileUploadForm()
     return render(request, 'logbook/upload_file.html', {'form': form})
 
-
 @login_required
 def download_files(request):
-    """View files for download."""
     files = UploadedFile.objects.filter(user=request.user).order_by('-uploaded_at')
     for f in files:
         f.is_image = f.file.url.lower().endswith(('.jpg', '.jpeg', '.png', '.gif'))
     return render(request, 'logbook/download_files.html', {'files': files})
 
-
 @login_required
 def delete_file(request, file_id):
-    """Delete a file owned by the user."""
     file = get_object_or_404(UploadedFile, id=file_id, user=request.user)
     if request.method == 'POST':
         file.delete()
+        messages.success(request, "File deleted successfully.")
     return redirect('logbook:download_files')
 
 
-# ==========================
-# Student Signup View
-# ==========================
+# ---------- Student Signup ----------
 
 def student_signup(request):
     if request.method == 'POST':
         form = StudentSignUpForm(request.POST, request.FILES or None)
         if form.is_valid():
-            user = form.save()  # saves User
-
-            # Create StudentProfile WITHOUT year_of_study
+            user = form.save()
             StudentProfile.objects.create(
                 user=user,
                 academic_year=form.cleaned_data.get('academic_year'),
@@ -346,10 +268,196 @@ def student_signup(request):
                 field_start_date=form.cleaned_data.get('field_start_date'),
                 organization_name=form.cleaned_data.get('organization_name'),
             )
-
             login(request, user)
+            messages.success(request, "Account created and logged in.")
             return redirect('logbook:profile')
+        messages.error(request, "Please correct the errors in the signup form.")
     else:
         form = StudentSignUpForm()
-
     return render(request, 'users/student_signup.html', {'form': form})
+
+
+# ---------- Task Assignment ----------
+
+@login_required
+def assign_task(request):
+    if request.method == 'POST':
+        form = TaskAssignForm(request.POST)
+        if form.is_valid():
+            task_description = form.cleaned_data['task_description']
+            student_ids = form.cleaned_data['student_ids']
+
+            # Create one task for this assignment
+            task = Task.objects.create(
+                assigned_by=request.user,
+                description=task_description,
+            )
+            for student_id in student_ids:
+                student_profile = StudentProfile.objects.filter(id=student_id).first()
+                if student_profile:
+                    task.assigned_to.add(student_profile)
+
+            messages.success(request, "Task assigned successfully.")
+            return redirect('logbook:dashboard')
+        messages.error(request, "Please correct errors in the task form.")
+    else:
+        form = TaskAssignForm()
+
+    assigned_students = StudentProfile.objects.filter(supervisor=request.user)
+    return render(request, 'logbook/assign_task.html', {
+        'form': form,
+        'assigned_students': assigned_students,
+    })
+
+
+# ---------- Dashboard ----------
+
+@login_required
+def dashboard(request):
+    user = request.user
+    role = getattr(user, 'role', None)
+
+    if role == 'student':
+        return render(request, 'users/student_dashboard.html')
+
+    elif role in ['onstation', 'oncampus']:
+        assigned_students = User.objects.filter(role='student', student_profile__supervisor=user).distinct()
+        total_students = User.objects.filter(role='student')
+        logs = LogEntry.objects.filter(user__in=assigned_students)
+
+        student_progress = []
+        for student in assigned_students:
+            total_logs = logs.filter(user=student).count()
+            approved_logs = logs.filter(user=student, approved=True).count()
+            progress_percent = (approved_logs / total_logs * 100) if total_logs else 0
+
+            student_progress.append({
+                'student': student,
+                'total_logs': total_logs,
+                'approved_logs': approved_logs,
+                'progress_percent': round(progress_percent, 2),
+            })
+
+        pending_logs = logs.filter(approved=False)
+        approved_logs = logs.filter(approved=True)
+
+        assigned_tasks = Task.objects.filter(assigned_by=user)
+
+        context = {
+            'assigned_students': assigned_students,
+            'student_progress': student_progress,
+            'total_students': total_students,
+            'total_students_count': total_students.count(),
+            'assigned_students_count': assigned_students.count(),
+            'pending_logs': pending_logs,
+            'approved_logs': approved_logs,
+            'pending_logs_count': pending_logs.count(),
+            'approved_logs_count': approved_logs.count(),
+            'assigned_tasks': assigned_tasks,
+        }
+        return render(request, 'users/supervisor_dashboard.html', context)
+
+    return render(request, 'users/dashboard.html')
+
+
+@login_required
+def create_entry(request):
+    if request.method == 'POST':
+        form = LogEntryForm(request.POST)
+        if form.is_valid():
+            entry = form.save(commit=False)
+            entry.user = request.user
+            entry.save()
+            messages.success(request, "Log entry created successfully.")
+            return redirect('logbook:view_last_entry')
+    else:
+        form = LogEntryForm()
+    return render(request, 'logbook/create_log_entry.html', {'form': form})
+
+
+@login_required
+def evaluation_forms_view(request):
+    # Placeholder view - extend logic as needed
+    return render(request, 'logbook/evaluation_forms.html')
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from .forms import LogEntryForm
+
+@login_required
+def add_entry_view(request):
+    if request.method == 'POST':
+        form = LogEntryForm(request.POST, request.FILES)
+        if form.is_valid():
+            entry = form.save(commit=False)
+            entry.student = request.user
+            entry.save()
+            return redirect('logbook:student_dashboard')
+    else:
+        form = LogEntryForm()
+    return render(request, 'logbook/add_entry.html', {'form': form})
+
+
+from django.shortcuts import render
+
+def student_dashboard(request):
+    # Dummy context for now – update this with your real data later
+    context = {
+        'user': request.user,
+        'notifications': [],
+        'total_logs': 0,
+        'pending_logs': 0,
+        'approved_logs': 0,
+        'rejected_logs': 0,
+        'log_completion_percent': 0,
+        'recent_logs': [],
+        'assigned_tasks': [],
+    }
+    return render(request, 'logbook/student_dashboard.html', context)
+
+from django.shortcuts import render, redirect
+from django.views.decorators.http import require_POST
+
+@require_POST
+def add_entry(request):
+    # Handle form submission from student_dashboard.html
+    # For now, just redirect back
+    return redirect('logbook:student_dashboard')
+
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import LogEntry
+from .forms import LogEntryForm
+
+def edit_entry(request, pk):
+    entry = get_object_or_404(LogbookEntry, pk=pk)
+    
+    if request.method == 'POST':
+        form = LogbookEntryForm(request.POST, request.FILES, instance=entry)
+        if form.is_valid():
+            form.save()
+            return redirect('logbook:student_dashboard')
+    else:
+        form = LogbookEntryForm(instance=entry)
+    
+    return render(request, 'logbook/edit_entry.html', {'form': form})
+
+from django.shortcuts import render, get_object_or_404
+from .models import LogEntry
+
+def log_detail(request, pk):
+    entry = get_object_or_404(LogEntry, pk=pk)
+    return render(request, 'logbook/log_detail.html', {'entry': entry})
+
+
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import Task
+
+@login_required
+def mark_task_complete(request, pk):
+    task = get_object_or_404(Task, pk=pk, assigned_by=request.user)
+    task.completed = True  # assuming you have a boolean field `completed`
+    task.save()
+    messages.success(request, "Task marked as complete.")
+    return redirect('logbook:dashboard')  # or any page you want to redirect to

@@ -1,0 +1,411 @@
+/* Reset and basics */
+* {
+  box-sizing: border-box;
+  transition: all 0.25s ease-in-out;
+}
+
+body {
+  font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  color: #e0e0e0;
+  margin: 0;
+  padding: 30px 40px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Container */
+.dashboard-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2.5rem 3rem;
+  background: linear-gradient(145deg, #1c1f26, #272b33);
+  border-radius: 24px;
+  box-shadow:
+    0 0 30px 5px rgba(36, 203, 255, 0.25),
+    inset 0 0 40px 3px rgba(36, 203, 255, 0.15);
+  user-select: none;
+  backdrop-filter: blur(12px);
+}
+
+/* Title */
+.dashboard-title {
+  font-size: 3.5rem;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  margin-bottom: 1.2rem;
+  color: #24cbff;
+  text-align: center;
+  text-shadow:
+    0 0 8px #24cbff,
+    0 0 20px #24cbff,
+    0 0 40px #24cbff;
+  user-select: text;
+}
+
+/* Divider */
+hr {
+  border: none;
+  border-top: 4px solid #24cbff;
+  width: 160px;
+  margin: 1rem auto 3rem auto;
+  border-radius: 5px;
+  box-shadow:
+    0 0 10px 3px #24cbff;
+}
+
+/* Overview Cards container */
+.overview-cards {
+  display: flex;
+  gap: 28px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 3rem;
+}
+
+/* Individual cards */
+.card {
+  flex: 1 1 260px;
+  background: linear-gradient(135deg, #0c84b7, #0a5a91);
+  border-radius: 18px;
+  padding: 35px 30px;
+  box-shadow:
+    0 8px 28px rgba(10, 90, 145, 0.7),
+    inset 0 0 20px rgba(255, 255, 255, 0.1);
+  color: #e0f7ff;
+  font-weight: 800;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: default;
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+  transition: transform 0.4s cubic-bezier(0.4,0,0.2,1), box-shadow 0.4s ease;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: -60%;
+  left: -60%;
+  width: 180%;
+  height: 180%;
+  background: rgba(255, 255, 255, 0.12);
+  transform: rotate(35deg);
+  pointer-events: none;
+  transition: all 0.6s ease;
+  filter: blur(30px);
+  z-index: 0;
+}
+
+.card:hover::before {
+  top: -40%;
+  left: -40%;
+  width: 220%;
+  height: 220%;
+  filter: blur(35px);
+}
+
+.card:hover {
+  transform: translateY(-15px) scale(1.05);
+  box-shadow:
+    0 16px 45px rgba(10, 90, 145, 0.9),
+    inset 0 0 40px rgba(255, 255, 255, 0.2);
+  z-index: 10;
+}
+
+/* Different colors for each card */
+.card.blue {
+  background: linear-gradient(135deg, #0c84b7, #0a5a91);
+}
+
+.card.green {
+  background: linear-gradient(135deg, #19bc9c, #14856f);
+}
+
+.card.orange {
+  background: linear-gradient(135deg, #ff9e3c, #d97512);
+}
+
+.card.red {
+  background: linear-gradient(135deg, #dc3545, #9f1e27);
+}
+
+/* Card title and number */
+.card h3 {
+  margin-bottom: 15px;
+  font-size: 1.25rem;
+  text-shadow:
+    0 0 5px rgba(0, 0, 0, 0.4);
+  user-select: none;
+}
+
+.card p {
+  font-size: 3.8rem;
+  line-height: 1;
+  letter-spacing: 0.07em;
+  text-shadow:
+    0 0 12px rgba(0, 0, 0, 0.6);
+  font-variant-numeric: tabular-nums;
+  user-select: text;
+  margin: 0;
+}
+
+/* Info boxes (sections) */
+/* ======= HERE IS THE NEW CLEAN SINGLE COLOR BACKGROUND STYLE ====== */
+.info-box {
+  background-color: #223344; /* single solid color, change as needed */
+  border-radius: 18px;
+  padding: 2rem 2.5rem;
+  margin-bottom: 3.5rem;
+  box-shadow:
+    0 6px 25px rgba(36, 203, 255, 0.25),
+    inset 0 0 20px rgba(255, 255, 255, 0.08);
+  user-select: text;
+  transition: box-shadow 0.3s ease;
+}
+
+.info-box:hover {
+  box-shadow:
+    0 10px 35px rgba(36, 203, 255, 0.45),
+    inset 0 0 25px rgba(255, 255, 255, 0.12);
+}
+
+/* Section headers */
+.info-box h3 {
+  color: #24cbff;
+  font-weight: 900;
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  letter-spacing: 0.07em;
+  text-shadow:
+    0 0 8px #24cbff,
+    0 0 16px #24cbff;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+/* Small buttons */
+.btn-small {
+  background: #24cbff;
+  border: none;
+  padding: 10px 20px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border-radius: 14px;
+  color: #002f3d;
+  cursor: pointer;
+  box-shadow:
+    0 0 10px #24cbff;
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.25s ease;
+  user-select: none;
+  margin: 0 5px;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-small:hover,
+.btn-small:focus {
+  background: #0099cc;
+  box-shadow:
+    0 0 18px #0099cc;
+  transform: translateY(-3px);
+  outline: none;
+  color: #fff;
+}
+
+/* Buttons in red */
+.btn-small.red {
+  background: #e94b4b;
+  color: #330000;
+  box-shadow: 0 0 10px #e94b4b;
+}
+
+.btn-small.red:hover,
+.btn-small.red:focus {
+  background: #c12727;
+  box-shadow: 0 0 18px #c12727;
+  color: #fff;
+}
+
+/* Tables */
+.full-width-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #ddd;
+  background: transparent;
+  border-radius: 16px;
+  overflow: hidden;
+  user-select: text;
+  box-shadow:
+    0 0 15px rgba(36, 203, 255, 0.15);
+}
+
+/* Table headers */
+.full-width-table thead {
+  background: linear-gradient(90deg, #24cbff, #00aaff);
+  color: #001f2d;
+  font-weight: 800;
+  font-size: 1rem;
+  letter-spacing: 0.05em;
+  user-select: none;
+  text-transform: uppercase;
+  box-shadow:
+    inset 0 3px 10px rgba(255, 255, 255, 0.35);
+}
+
+/* Table header cells */
+.full-width-table th {
+  padding: 15px 20px;
+  border: none;
+  text-align: left;
+  vertical-align: middle;
+}
+
+/* Table body rows */
+.full-width-table tbody tr {
+  background: linear-gradient(145deg, #1a1f26, #232931);
+  box-shadow:
+    0 3px 8px rgba(36, 203, 255, 0.12);
+  border-radius: 12px;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  cursor: default;
+}
+
+/* Hover effect on rows */
+.full-width-table tbody tr:hover {
+  background: linear-gradient(145deg, #2688d8, #25a3ff);
+  box-shadow:
+    0 6px 22px rgba(36, 203, 255, 0.6);
+  color: #fff;
+  transform: scale(1.015);
+  cursor: pointer;
+}
+
+/* Table data cells */
+.full-width-table tbody td {
+  padding: 12px 20px;
+  vertical-align: middle;
+  color: #ddd;
+  user-select: text;
+}
+
+/* Status badges */
+.status {
+  padding: 6px 14px;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  display: inline-block;
+  min-width: 65px;
+  text-align: center;
+  box-shadow: 0 0 6px rgba(36, 203, 255, 0.3);
+  user-select: none;
+  cursor: default;
+  transition: background-color 0.3s ease;
+}
+
+.status.approved {
+  background: #00d27a;
+  color: #0b2f1a;
+  box-shadow: 0 0 14px #00d27a;
+}
+
+.status.pending {
+  background: #ffbe00;
+  color: #4a3e00;
+  box-shadow: 0 0 14px #ffbe00;
+}
+
+.status.rejected {
+  background: #ff4b4b;
+  color: #330000;
+  box-shadow: 0 0 14px #ff4b4b;
+}
+
+.status:hover {
+  filter: brightness(110%);
+  cursor: default;
+}
+
+/* Resource links container */
+.resource-links {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+  justify-content: flex-start;
+}
+
+/* Main buttons */
+.btn {
+  background: #24cbff;
+  border: none;
+  padding: 12px 28px;
+  font-weight: 900;
+  font-size: 1.1rem;
+  border-radius: 18px;
+  color: #002f3d;
+  cursor: pointer;
+  box-shadow:
+    0 0 15px #24cbff;
+  transition:
+    background-color 0.4s ease,
+    box-shadow 0.4s ease,
+    transform 0.3s ease;
+  user-select: none;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn:hover,
+.btn:focus {
+  background: #0099cc;
+  box-shadow:
+    0 0 28px #0099cc;
+  transform: translateY(-4px);
+  outline: none;
+  color: #fff;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .overview-cards {
+    flex-direction: column;
+    gap: 24px;
+  }
+  .dashboard-container {
+    padding: 2rem 1.5rem;
+  }
+  .info-box {
+    padding: 1.5rem 1.8rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .overview-cards {
+    flex-direction: column;
+    gap: 20px;
+  }
+  .btn,
+  .btn-small {
+    width: 100%;
+    text-align: center;
+  }
+  table.full-width-table thead {
+    font-size: 0.85rem;
+  }
+  .full-width-table {
+    font-size: 0.85rem;
+  }
+}

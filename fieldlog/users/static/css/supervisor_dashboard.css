@@ -1,0 +1,345 @@
+/* Reset and base */
+html, body {
+    height: 100%;
+    margin: 0; padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #2e3a59;  /* Solid Dark Blue background */
+    color: #f5f5f5;        /* Whitesmoke text */
+    min-height: 100vh;
+    /* Optional subtle gradient for depth */
+    background-image: linear-gradient(135deg, #2e3a59 0%, #233052 100%);
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+/* Container */
+.container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+}
+
+/* Title */
+.dashboard-title {
+    text-align: center;
+    font-size: 2.6rem;
+    margin-bottom: 2rem;
+    font-weight: 700;
+    color: #f5f5f5;
+    letter-spacing: 1px;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+/* Search Bar */
+.search-bar {
+    width: 100%;
+    padding: 14px 20px;
+    font-size: 1.15rem;
+    border-radius: 30px;
+    border: 2.5px solid #4a61a9; /* Blue Accent border */
+    background-color: #f5f5f5;   /* Whitesmoke background */
+    color: #2e3a59;              /* Dark Blue text */
+    margin-bottom: 2rem;
+    box-shadow: 0 3px 8px rgba(74, 97, 169, 0.3);
+    transition: border-color 0.3s ease, box-shadow 0.4s ease;
+}
+
+.search-bar::placeholder {
+    color: #7a8ca6;  /* Medium gray-blue */
+    font-style: italic;
+}
+
+.search-bar:focus {
+    outline: none;
+    border-color: #233052; /* Darker Blue on focus */
+    box-shadow: 0 0 12px 3px rgba(58, 81, 149, 0.7);
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: flex;
+    justify-content: space-around;
+    gap: 1.25rem;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+}
+
+/* Cards */
+.card {
+    flex: 1 1 25%;
+    background: #4a61a9;      /* Blue Accent */
+    border-radius: 18px;
+    padding: 2rem 2.5rem;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.35);
+    cursor: pointer;
+    color: #f5f5f5;
+    text-align: center;
+    transition: background-color 0.35s ease, transform 0.25s ease;
+    user-select: none;
+    border: 1px solid rgba(255,255,255,0.15);
+}
+
+.card:hover {
+    background-color: #3b4d7a; /* Darker blue */
+    transform: translateY(-7px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+}
+
+.card h3 {
+    font-weight: 700;
+    font-size: 1.3rem;
+    margin-bottom: 0.7rem;
+    letter-spacing: 0.03em;
+}
+
+.card p {
+    font-size: 2.2rem;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+}
+
+/* Tables */
+.table-container {
+    margin-top: 2rem;
+    overflow-x: auto;
+    background: #f5f5f5;       /* Whitesmoke */
+    border-radius: 14px;
+    padding: 1.5rem 1.75rem;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    color: #2e3a59;            /* Dark Blue text */
+    border: 1px solid #d0d9f2;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    color: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+th, td {
+    padding: 14px 20px;
+    border-bottom: 1.5px solid #d9d9d9;
+    text-align: left;
+}
+
+th {
+    background-color: #4a61a9; /* Blue Accent */
+    color: #f5f5f5;
+    font-weight: 800;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+tbody tr:hover {
+    background-color: #d9e1ff; /* Light blue hover */
+    color: #2e3a59;
+    cursor: default;
+    transition: background-color 0.3s ease;
+}
+
+/* Progress Bar */
+.progress-bar {
+    background: #dcdcdc;       /* Light gray */
+    border-radius: 12px;
+    height: 14px;
+    width: 100%;
+    overflow: hidden;
+    box-shadow: inset 0 3px 7px rgba(0,0,0,0.12);
+}
+
+.progress {
+    height: 100%;
+    background: #4a61a9;       /* Blue Accent */
+    border-radius: 12px 0 0 12px;
+    transition: width 0.6s ease-in-out;
+}
+
+/* Forms */
+input[type="file"] {
+    background: #f5f5f5;
+    color: #2e3a59;
+    border: 2.5px solid #4a61a9;
+    border-radius: 10px;
+    padding: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(74, 97, 169, 0.3);
+    transition: border-color 0.3s ease;
+}
+
+input[type="file"]:hover {
+    border-color: #3b4d7a;
+}
+
+button {
+    background-color: #4a61a9;  /* Blue Accent */
+    color: #f5f5f5;
+    border: none;
+    border-radius: 30px;
+    padding: 12px 28px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background-color 0.35s ease, box-shadow 0.25s ease;
+    box-shadow: 0 3px 10px rgba(74, 97, 169, 0.6);
+    text-transform: uppercase;
+}
+
+button:hover {
+    background-color: #3b4d7a;  /* Darker blue */
+    box-shadow: 0 6px 15px rgba(58, 81, 118, 0.9);
+}
+
+/* Bulk Task Section */
+.bulk-task {
+    margin-top: 3rem;
+    background: #f5f5f5;      /* Whitesmoke */
+    padding: 2rem 2.5rem;
+    border-radius: 20px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    color: #2e3a59;
+    border: 1px solid #d0d9f2;
+}
+
+.bulk-task h3 {
+    margin-bottom: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+.bulk-task textarea {
+    width: 100%;
+    padding: 16px;
+    border-radius: 20px;
+    border: 2.5px solid #4a61a9;
+    resize: vertical;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+    background: #fff;  /* pure white */
+    color: #2e3a59;
+    box-shadow: inset 0 0 10px #b0c4de;
+    font-weight: 600;
+    transition: border-color 0.3s ease;
+}
+
+.bulk-task textarea:focus {
+    outline: none;
+    border-color: #233052;
+    box-shadow: 0 0 15px 4px rgba(58, 81, 118, 0.8);
+}
+
+.bulk-task button {
+    width: 100%;
+    padding: 14px 0;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1500;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(46, 58, 89, 0.85); /* Dark Blue overlay */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.modal.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-content {
+    background: #f5f5f5;        /* Whitesmoke */
+    padding: 2.5rem 3rem;
+    border-radius: 24px;
+    max-width: 480px;
+    width: 90%;
+    color: #2e3a59;            /* Dark Blue text */
+    box-shadow: 0 0 25px #4a61a9;
+    position: relative;
+    transform: translateY(-20px);
+    transition: transform 0.3s ease;
+}
+
+.modal.show .modal-content {
+    transform: translateY(0);
+}
+
+.close {
+    position: absolute;
+    top: 15px; right: 20px;
+    font-size: 32px;
+    cursor: pointer;
+    color: #4a61a9;
+    font-weight: 700;
+    user-select: none;
+    transition: color 0.3s ease;
+}
+
+.close:hover {
+    color: #233052;
+}
+
+.modal textarea {
+    width: 100%;
+    height: 130px;
+    border-radius: 20px;
+    border: 2.5px solid #4a61a9;
+    padding: 14px;
+    font-size: 1.1rem;
+    resize: vertical;
+    background: #fff;
+    color: #2e3a59;
+    box-shadow: inset 0 0 12px #b0c4de;
+    font-weight: 600;
+    transition: border-color 0.3s ease;
+}
+
+.modal textarea:focus {
+    outline: none;
+    border-color: #233052;
+    box-shadow: 0 0 20px 6px rgba(58, 81, 118, 0.8);
+}
+
+.modal button {
+    margin-top: 1.3rem;
+    width: 100%;
+    background-color: #4a61a9;
+    color: #f5f5f5;
+    border-radius: 30px;
+    border: none;
+    padding: 14px 0;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background-color 0.35s ease, box-shadow 0.25s ease;
+    box-shadow: 0 4px 14px rgba(74, 97, 169, 0.7);
+    text-transform: uppercase;
+}
+
+.modal button:hover {
+    background-color: #3b4d7a;
+    box-shadow: 0 7px 18px rgba(58, 81, 118, 0.9);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .stats-grid {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .card {
+        flex: 1 1 100%;
+    }
+}

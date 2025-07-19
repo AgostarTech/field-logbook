@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Message Supervisor: {{ supervisor.get_full_name }}</h2>
+
+  <form method="post">
+    {% csrf_token %}
+    <label for="message">Your message:</label><br>
+    <textarea id="message" name="message" rows="5" cols="40" required></textarea><br><br>
+    <button type="submit">Send Message</button>
+  </form>
+{% endblock %}

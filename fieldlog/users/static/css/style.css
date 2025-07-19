@@ -94,3 +94,99 @@ html, body {
   background: #14a37f;
   box-shadow: 0 0 18px #14a37f;
 }
+
+.dashboard-container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  font-family: 'Poppins', sans-serif;
+  padding: 1rem;
+}
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.icon-lg { font-size: 2.5rem; color: #2c3e50; }
+.icon-xl { font-size: 3rem; }
+
+.summary-cards {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 3rem;
+}
+.card {
+  flex: 1;
+  color: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+.card-blue { background: #3498db; }
+.card-orange { background: #e67e22; }
+.card-green { background: #2ecc71; }
+
+.section-notifications h2,
+.logs-table-section h2,
+.progress-tracking h2 {
+  font-weight: 600;
+  border-bottom: 3px solid #3498db;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+.log-list { list-style: none; padding: 0; }
+.log-item {
+  padding: 1rem;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.log-time { color: #888; font-size: 0.9rem; }
+
+.quick-actions .btn {
+  padding: 1rem 2rem;
+  margin-right: 1rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+}
+.btn-primary { background: #2980b9; color: white; }
+.btn-success { background: #27ae60; color: white; }
+.btn-small { background: #2980b9; color: white; padding: 0.5rem 1rem; border-radius: 5px; }
+
+.logs-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.logs-table th, .logs-table td {
+  padding: 1rem;
+  text-align: center;
+}
+.logs-table th {
+  background: #ecf0f1;
+}
+.status {
+  font-weight: 700;
+}
+.status-approved { color: #27ae60; }
+.status-rejected { color: #c0392b; }
+.status-pending { color: #f39c12; }
+
+.link-attachment { color: #2980b9; text-decoration: none; }
+
+.progress-row {
+  margin-bottom: 1rem;
+}
+.progress-bar-bg {
+  background: #ecf0f1;
+  border-radius: 10px;
+  overflow: hidden;
+  height: 20px;
+  margin-top: 0.3rem;
+}
+.progress-bar-fill {
+  background: #27ae60;
+  height: 100%;
+}

@@ -21,7 +21,7 @@
   <!-- Navbar -->
   <nav class="navbar">
     <div class="nav-left">
-      <a href="{% url 'home' %}" class="nav-logo">📘 Field Logbook</a>
+      <a href="{% url 'users:home' %}" class="nav-logo">Field Logbook</a>
       <button id="nav-toggle"><i class="fas fa-bars"></i></button>
     </div>
     <div class="nav-right" id="nav-menu">
@@ -30,14 +30,14 @@
         {% if user.is_superuser %}
           <a href="/admin/" class="nav-link"><i class="fas fa-cogs"></i> Admin</a>
         {% else %}
-          <a href="{% url 'dashboard' %}" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+          <a href="{% url 'users:dashboard' %}" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
         {% endif %}
-        <form method="post" action="{% url 'logout' %}" class="logout-form">{% csrf_token %}
+        <form method="post" action="{% url 'users:logout' %}" class="logout-form">{% csrf_token %}
           <button type="submit" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
         </form>
       {% else %}
-        <a href="{% url 'login' %}" class="nav-link"><i class="fas fa-sign-in-alt"></i> Login</a>
-        <a href="{% url 'signup_select' %}" class="nav-link"><i class="fas fa-user-plus"></i> Sign Up</a>
+        <a href="{% url 'users:login' %}" class="nav-link"><i class="fas fa-sign-in-alt"></i> Login</a>
+        <a href="{% url 'users:signup_select' %}" class="nav-link"><i class="fas fa-user-plus"></i> Sign Up</a>
         <a href="{% url 'about' %}" class="nav-link">About Us</a>
         <a href="{% url 'contact' %}" class="nav-link">Contact Us</a>
         <a href="{% url 'learn_more' %}" class="nav-link">Learn More</a>

@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Assign Task</h2>
+<form method="post">
+  {% csrf_token %}
+  <label>Select Students:</label><br>
+  {% for student in students %}
+    <input type="checkbox" name="student_ids" value="{{ student.id }}"> {{ student.user.get_full_name }}<br>
+  {% endfor %}
+
+  <label>Task Description:</label><br>
+  <textarea name="task_description" required></textarea><br>
+
+  <label>Due Date:</label><br>
+  <input type="date" name="due_date" required><br><br>
+
+  <button type="submit">Assign Task</button>
+</form>
+
+<hr>
+
+<h2>Previously Assigned Tasks</h2>
+{% if assigned_tasks %}
+  <table border="1" cellpadding="5" cellspacing="0">
+    <thead>
+      <tr>
+        <th>Student</th>
+        <th>Description</th>
+        <th>Due Date</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for task in assigned_tasks %}
+      <tr>
+        <td>{{ task.student.user.get_full_name }}</td>
+        <td>{{ task.task_description }}</td>
+        <td>{{ task.due_date }}</td>
+        <td>{{ task.status|default:"Pending" }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>No tasks assigned yet.</p>
+{% endif %}
+{% endblock %}

@@ -1,4 +1,3 @@
-# utility.py
 from datetime import datetime, timedelta
 
 def get_fpt_week_and_dates(today=None, fpt_start_date=None):
@@ -7,7 +6,7 @@ def get_fpt_week_and_dates(today=None, fpt_start_date=None):
     if fpt_start_date is None:
         fpt_start_date = datetime(2025, 6, 2).date()  # Monday of week 1
     
-    if today.weekday() != 4:  # Friday check
+    if today.weekday() != 4:  # Only allow Fridays (weekday() == 4)
         raise ValueError("Progress report can only be filled on Fridays.")
     
     delta_days = (today - fpt_start_date).days

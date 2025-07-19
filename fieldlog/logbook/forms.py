@@ -1,9 +1,36 @@
 from django import forms
-from django.contrib.auth import get_user_model
+from django.db import transaction
 from django.contrib.auth.forms import UserCreationForm
-from .models import StudentProfile, LogEntry, UploadedFile
 
-CustomUser = get_user_model()
+from users.models import CustomUser
+from .models import StudentProfile, LogEntry, UploadedFile, Task
+
+
+# =========================
+# Student Sign Up Form
+# =========================
+
+class StudentSignUpForm(UserCreationForm):
+    academic_year = forms.CharField(max_length=20, required=True)
+    registration_number = forms.CharField(max_length=30, required=True)
+
+    class Meta(UserCreationForm.Meta):
+        model = CustomUser
+        fields = ('username', 'email', 'password1', 'password2')
+
+    @transaction.atomic
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.is_student = True  # Optional
+        if commit:
+            user.save()
+            StudentProfile.objects.create(
+                user=user,
+                course='Unknown',
+                registration_number=self.cleaned_data.get('registration_number'),
+                year_of_study=self.cleaned_data.get('academic_year'),
+            )
+        return user
 
 
 # =========================
@@ -21,19 +48,31 @@ class CustomUserUpdateForm(forms.ModelForm):
             'last_name': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
+from django import forms
+from .models import StudentProfile
 
 class StudentProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = StudentProfile
-        # Removed 'year_of_study' from fields
-        fields = ['phone_number', 'profile_picture', 'registration_number', 'academic_year']
+        fields = ['registration_number', 'year_of_study']  # Use correct field names here
+        widgets = {
+            'registration_number': forms.TextInput(attrs={'class': 'form-control'}),
+            'year_of_study': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
+
+from django import forms
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+class UserUpdateForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['phone_number', 'profile_picture']
         widgets = {
             'phone_number': forms.TextInput(attrs={'class': 'form-control'}),
             'profile_picture': forms.ClearableFileInput(attrs={'class': 'form-control'}),
-            'registration_number': forms.TextInput(attrs={'class': 'form-control'}),
-            'academic_year': forms.TextInput(attrs={'class': 'form-control'}),
         }
-
 
 # =========================
 # Log Entry Form
@@ -65,7 +104,6 @@ class LogEntryForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Dynamically filter institutions by selected place
         self.fields['institution'].queryset = self.fields['institution'].queryset.none()
 
         if 'place' in self.data:
@@ -92,7 +130,7 @@ class FileUploadForm(forms.ModelForm):
 
 
 # =========================
-# Weekly Progress Report Form (Manual Entry)
+# Weekly Progress Report Form
 # =========================
 
 class ProgressReportForm(forms.Form):
@@ -142,21 +180,28 @@ class ProgressReportForm(forms.Form):
 
 
 # =========================
-# Student SignUp Form
+# Task Assignment Form
 # =========================
 
-class StudentSignUpForm(UserCreationForm):
-    # Removed year_of_study field
-    academic_year = forms.CharField(max_length=20, required=True)
-    registration_number = forms.CharField(max_length=30, required=True)
-    # Add other StudentProfile fields you need
+class TaskAssignForm(forms.Form):
+    task_description = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 3,
+            'placeholder': 'Write task here...'
+        }),
+        label="Task Description",
+        required=True
+    )
+    student_ids = forms.ModelMultipleChoiceField(
+        queryset=StudentProfile.objects.none(),
+        widget=forms.SelectMultiple(attrs={'class': 'form-control'}),
+        label="Select Students",
+        required=True
+    )
 
-    class Meta:
-        model = CustomUser
-        fields = ('username', 'email', 'password1', 'password2',
-                  'academic_year', 'registration_number')
-
-    def save(self, commit=True):
-        user = super().save(commit=commit)
-        # We don't save StudentProfile here; handle in view
-        return user
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if user:
+            self.fields['student_ids'].queryset = StudentProfile.objects.filter(supervisor=user)

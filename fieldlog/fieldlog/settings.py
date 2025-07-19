@@ -136,3 +136,12 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 # Default primary key field type
 # ===========================
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ===========================
+# Redirect unauthenticated users to the correct login URL
+# ===========================
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/dashboard/'
+
+AUTH_USER_MODEL = 'users.CustomUser'
+

@@ -1,40 +1,144 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block title %}Supervisor Dashboard{% endblock %}
+
 {% block content %}
+<div class="dashboard-container" style="max-width:1200px; margin: 2rem auto; font-family: 'Poppins', sans-serif;">
 
-<h2>Welcome, {{ user.username }}</h2>
+  <!-- Welcome Header -->
+  <header style="display:flex; align-items:center; gap:1rem; margin-bottom:2rem;">
+    <i class="fas fa-user-tie" style="font-size:2.5rem; color:#2c3e50;"></i>
+    <h1 style="font-weight:600; font-size:2rem;">Welcome, {{ request.user.first_name }}</h1>
+  </header>
 
-<h3>Assign Task</h3>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Assign</button>
-</form>
+  <!-- Summary Cards -->
+  <section class="summary-cards" style="display:flex; gap:1rem; margin-bottom:3rem;">
+    <div style="flex:1; background:#3498db; color:white; padding:1.5rem; border-radius:8px; text-align:center; box-shadow:0 3px 6px rgba(0,0,0,0.1);">
+      <i class="fas fa-users" style="font-size:3rem;"></i>
+      <h3 style="margin:1rem 0 0;">Total Students</h3>
+      <p style="font-size:2rem; font-weight:700;">{{ total_students }}</p>
+    </div>
+    <div style="flex:1; background:#e67e22; color:white; padding:1.5rem; border-radius:8px; text-align:center; box-shadow:0 3px 6px rgba(0,0,0,0.1);">
+      <i class="fas fa-hourglass-half" style="font-size:3rem;"></i>
+      <h3 style="margin:1rem 0 0;">Pending Logs</h3>
+      <p style="font-size:2rem; font-weight:700;">{{ pending_logs }}</p>
+    </div>
+    <div style="flex:1; background:#2ecc71; color:white; padding:1.5rem; border-radius:8px; text-align:center; box-shadow:0 3px 6px rgba(0,0,0,0.1);">
+      <i class="fas fa-check-circle" style="font-size:3rem;"></i>
+      <h3 style="margin:1rem 0 0;">Approved Logs</h3>
+      <p style="font-size:2rem; font-weight:700;">{{ approved_logs }}</p>
+    </div>
+  </section>
 
-<h3>Student Logs</h3>
-<table>
-    <tr>
-        <th>Student</th>
-        <th>Date</th>
-        <th>Content</th>
-        <th>Status</th>
-        <th>Action</th>
-    </tr>
-    {% for log in logs %}
-    <tr>
-        <td>{{ log.student.username }}</td>
-        <td>{{ log.date }}</td>
-        <td>{{ log.content }}</td>
-        <td>{{ log.approved|yesno:"Approved,Pending" }}</td>
-        <td>
-            {% if not log.approved %}
-                <a href="{% url 'approve_log' log.id %}">Approve</a>
+  <!-- Notifications -->
+  <section style="margin-bottom:3rem;">
+    <h2 style="font-weight:600; border-bottom: 3px solid #3498db; padding-bottom:0.5rem; margin-bottom:1rem;">
+      <i class="fas fa-bell"></i> Recent Log Entries
+    </h2>
+    <ul style="list-style:none; padding-left:0;">
+      {% for log in logs|dictsortreversed:"created_at"|slice:":7" %}
+        <li style="padding:1rem; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <i class="fas fa-book-open" style="color:#3498db; margin-right:0.5rem;"></i>
+            <strong>{{ log.student.user.get_full_name }}</strong> submitted Week <strong>{{ log.week_number }}</strong>
+          </div>
+          <div style="color:#888; font-size:0.9rem;">
+            <i class="far fa-clock"></i> {{ log.created_at|date:"M d, Y H:i" }}
+          </div>
+        </li>
+      {% empty %}
+        <li>No recent log entries found.</li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <!-- Quick Action Buttons -->
+  <section style="margin-bottom:3rem;">
+    <a href="{% url 'view_logs' %}" style="background:#2980b9; color:white; padding:1rem 2rem; border-radius:6px; text-decoration:none; font-weight:600; margin-right:1rem; display:inline-block;">
+      <i class="fas fa-list"></i> View Logs
+    </a>
+    <a href="{% url 'supervisor_profile' %}" style="background:#27ae60; color:white; padding:1rem 2rem; border-radius:6px; text-decoration:none; font-weight:600; display:inline-block;">
+      <i class="fas fa-user-cog"></i> Profile Settings
+    </a>
+  </section>
+
+  <!-- Student Logs Table -->
+  <section>
+    <h2 style="font-weight:600; border-bottom: 3px solid #2ecc71; padding-bottom:0.5rem; margin-bottom:1rem;">
+      <i class="fas fa-clipboard-list"></i> Student Logs Overview
+    </h2>
+    <table style="width:100%; border-collapse:collapse;">
+      <thead>
+        <tr style="background:#ecf0f1;">
+          <th style="padding:1rem; text-align:left;">Student</th>
+          <th style="padding:1rem; text-align:center;">Week</th>
+          <th style="padding:1rem; text-align:center;">Status</th>
+          <th style="padding:1rem; text-align:center;">Date Submitted</th>
+          <th style="padding:1rem; text-align:center;">Attachment</th>
+          <th style="padding:1rem; text-align:center;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+        <tr style="border-bottom:1px solid #ddd;">
+          <td style="padding:1rem;">{{ log.student.user.get_full_name }}</td>
+          <td style="padding:1rem; text-align:center;">Week {{ log.week_number }}</td>
+          <td style="padding:1rem; text-align:center;">
+            {% if log.is_approved %}
+              <span style="color:#27ae60; font-weight:700;">Approved</span>
+            {% elif log.supervisor_feedback %}
+              <span style="color:#c0392b; font-weight:700;">Rejected</span>
             {% else %}
-                ---
+              <span style="color:#f39c12; font-weight:700;">Pending</span>
             {% endif %}
-        </td>
-    </tr>
-    {% endfor %}
-</table>
+          </td>
+          <td style="padding:1rem; text-align:center;">{{ log.created_at|date:"M d, Y" }}</td>
+          <td style="padding:1rem; text-align:center;">
+            {% if log.attachment %}
+              <a href="{{ log.attachment.url }}" target="_blank" style="color:#2980b9; text-decoration:none;">
+                <i class="fas fa-paperclip"></i> View
+              </a>
+            {% else %}
+              <span style="color:#7f8c8d;">None</span>
+            {% endif %}
+          </td>
+          <td style="padding:1rem; text-align:center;">
+            <a href="{% url 'give_feedback' log.id %}" style="background:#2980b9; color:white; padding:0.5rem 1rem; border-radius:5px; text-decoration:none;">
+              <i class="fas fa-comment-dots"></i> Feedback
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" style="text-align:center; padding:1rem;">No logs available</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
 
+  <!-- Progress Tracking -->
+  <section style="margin-top:3rem;">
+    <h2 style="font-weight:600; border-bottom: 3px solid #2980b9; padding-bottom:0.5rem; margin-bottom:1rem;">
+      <i class="fas fa-chart-line"></i> Student Progress Tracking
+    </h2>
+
+    {% for student in students %}
+      {% with total=student.logentry_set.count approved=student.logentry_set.filter(is_approved=True).count %}
+      <div style="margin-bottom:1rem;">
+        <strong>{{ student.user.get_full_name }}</strong> — {{ approved }} of {{ total }} weeks approved
+        <div style="background:#ecf0f1; border-radius:10px; overflow:hidden; height:20px; margin-top:0.3rem;">
+          {% if total > 0 %}
+          <div style="width:{{ (approved|floatformat:2|floatdivisibleby:total|floatformat:2)|floatformat:'0' }}%; background:#27ae60; height:100%;"></div>
+          {% else %}
+          <div style="width:0%;"></div>
+          {% endif %}
+        </div>
+      </div>
+      {% endwith %}
+    {% empty %}
+      <p>No students assigned.</p>
+    {% endfor %}
+  </section>
+
+</div>
 {% endblock %}

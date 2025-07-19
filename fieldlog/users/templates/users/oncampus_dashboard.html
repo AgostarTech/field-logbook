@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- External CSS & JS -->
+<link rel="stylesheet" href="{% static 'css/oncampus.css' %}">
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="dashboard-container">
+  <h1 class="dashboard-title">🎓 On-Campus Supervisor Dashboard</h1>
+  <hr>
+
+  <!-- Overview Cards -->
+  <div class="overview-cards">
+    <div class="card blue"><h3>Total Department Students</h3><p>{{ department_students_count }}</p></div>
+    <div class="card green"><h3>Total On-Station Supervisors</h3><p>{{ total_supervisors }}</p></div>
+    <div class="card orange"><h3>Submitted Logs</h3><p>{{ submitted_logs }}</p></div>
+    <div class="card red"><h3>Pending Approvals</h3><p>{{ pending_logs }}</p></div>
+  </div>
+
+  <!-- Student Filter/Search -->
+  <section class="info-box">
+    <h3><i class="fas fa-users"></i> Students in {{ request.user.department.name }}</h3>
+    <form method="get" class="filter-form">
+      <input type="text" name="q" id="studentSearch" placeholder="🔍 Search by name, reg no, email or phone"
+             value="{{ request.GET.q|default:'' }}" onkeyup="filterStudents()">
+      <select name="progress_filter" onchange="this.form.submit()">
+        <option value="">Filter by Progress</option>
+        <option value="0-25" {% if request.GET.progress_filter == '0-25' %}selected{% endif %}>0-25%</option>
+        <option value="26-50" {% if request.GET.progress_filter == '26-50' %}selected{% endif %}>26-50%</option>
+        <option value="51-75" {% if request.GET.progress_filter == '51-75' %}selected{% endif %}>51-75%</option>
+        <option value="76-100" {% if request.GET.progress_filter == '76-100' %}selected{% endif %}>76-100%</option>
+      </select>
+      <button type="submit" class="btn-small">Apply</button>
+    </form>
+
+    <table id="studentTable" class="full-width-table">
+      <thead>
+        <tr>
+          <th>Student Name</th><th>Reg Number</th><th>Email</th><th>Phone</th>
+          <th>Progress</th><th>Logs Submitted</th><th>Pending Logs</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for student in department_students %}
+        <tr {% if student.progress < 25 %}class="low-progress"{% endif %}>
+          <td><a href="{% url 'student_profile' student.id %}">{{ student.first_name }} {{ student.last_name }}</a></td>
+          <td>{{ student.registration_number }}</td>
+          <td>{{ student.email }}</td>
+          <td>{{ student.phone }}</td>
+          <td>{{ student.progress }}%</td>
+          <td>{{ student.logs_submitted }}</td>
+          <td>{{ student.pending_logs }}</td>
+          <td>
+            <a href="{% url 'view_logs' student.id %}" class="btn-small">View Logs</a>
+            <a href="{% url 'download_logs_pdf' student.id %}" class="btn-small">Download PDF</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8">No students found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Logbook Progress -->
+  <section class="info-box">
+    <h3><i class="fas fa-file-alt"></i> Logbook Progress Overview</h3>
+    <table class="full-width-table">
+      <thead>
+        <tr>
+          <th>Student</th><th>Total Logs</th><th>Approved</th>
+          <th>Pending</th><th>Overdue</th><th>Last Submission</th><th>Bulk Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for data in progress_data %}
+        <tr>
+          <td>{{ data.user__first_name }} {{ data.user__last_name }}</td>
+          <td>{{ data.total }}</td>
+          <td class="status approved">{{ data.approved }}</td>
+          <td class="status pending">{{ data.pending }}</td>
+          <td>{{ data.overdue|default:"0" }}</td>
+          <td>{{ data.last_submission_date|default:"N/A" }}</td>
+          <td>
+            {% if data.user__id %}
+            <form action="{% url 'bulk_approve_logs' data.user__id %}" method="post" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn-small green">Approve All</button>
+            </form>
+            <form action="{% url 'bulk_reject_logs' data.user__id %}" method="post" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn-small red">Reject All</button>
+            </form>
+            {% else %}
+              N/A
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7">No log data available.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Supervisors -->
+  <section class="info-box">
+    <h3><i class="fas fa-user-tie"></i> On-Station Supervisors (Your Department)</h3>
+    <table class="full-width-table">
+      <thead>
+        <tr>
+          <th>Name</th><th>Email</th><th>Phone</th><th>Assigned Students</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sup in onstation_supervisors %}
+        <tr>
+          <td>{{ sup.first_name }} {{ sup.last_name }}</td>
+          <td>{{ sup.email }}</td>
+          <td>{{ sup.phone }}</td>
+          <td>{{ sup.assigned_students_count }}</td>
+          <td>
+            <a href="{% url 'supervisor_students' sup.id %}" class="btn-small">View Students</a>
+            <a href="{% url 'message_supervisor' sup.id %}" class="btn-small">Message</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">No on-station supervisors assigned.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+  </section>
+
+  <!-- Task & Resource Section -->
+  <section class="info-box">
+    <h3><i class="fas fa-tasks"></i> Department Task & Resources</h3>
+    <div class="resource-links">
+      <a href="{% url 'upload_department_resource' %}" class="btn">Upload Resources</a>
+      <a href="{% url 'assign_task_to_students' %}" class="btn">Assign Tasks</a>
+      <a href="{% url 'track_progress' %}" class="btn">Track Progress</a>
+    </div>
+
+    <table class="full-width-table">
+      <thead>
+        <tr>
+          <th>Title</th><th>Type</th><th>Status</th><th>Deadline</th>
+          <th>Priority</th><th>Assigned To</th><th>Access Count</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for task in tasks_and_resources %}
+        <tr>
+          <td>{{ task.title }}</td>
+          <td>{{ task.type }}</td>
+          <td>{{ task.status }}</td>
+          <td>{{ task.deadline|default:"N/A" }}</td>
+          <td>{{ task.priority|default:"-" }}</td>
+          <td>{{ task.assigned_to_names|default:"All" }}</td>
+          <td>{{ task.access_count }}</td>
+          <td>
+            <a href="{% url 'edit_task' task.id %}" class="btn-small">Edit</a>
+            <a href="{% url 'delete_task' task.id %}" class="btn-small red">Delete</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8">No tasks or resources found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+</div>
+
+<!-- External JS -->
+<script src="{% static 'js/oncampus.js' %}"></script>
+{% endblock %}
