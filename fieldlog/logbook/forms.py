@@ -1,9 +1,13 @@
 from django import forms
 from django.db import transaction
 from django.contrib.auth.forms import UserCreationForm
+from django.core.exceptions import ValidationError
+from django.contrib.auth import get_user_model
 
 from users.models import CustomUser
 from .models import StudentProfile, LogEntry, UploadedFile, Task
+
+User = get_user_model()
 
 
 # =========================
@@ -18,17 +22,22 @@ class StudentSignUpForm(UserCreationForm):
         model = CustomUser
         fields = ('username', 'email', 'password1', 'password2')
 
+    def clean_registration_number(self):
+        reg_no = self.cleaned_data.get('registration_number')
+        if StudentProfile.objects.filter(registration_number=reg_no).exists():
+            raise ValidationError("This registration number is already used by another student.")
+        return reg_no
+
     @transaction.atomic
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.is_student = True  # Optional
+        user.is_student = True
         if commit:
             user.save()
             StudentProfile.objects.create(
                 user=user,
-                course='Unknown',
+                academic_year=self.cleaned_data.get('academic_year'),
                 registration_number=self.cleaned_data.get('registration_number'),
-                year_of_study=self.cleaned_data.get('academic_year'),
             )
         return user
 
@@ -48,22 +57,16 @@ class CustomUserUpdateForm(forms.ModelForm):
             'last_name': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
-from django import forms
-from .models import StudentProfile
 
 class StudentProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = StudentProfile
-        fields = ['registration_number', 'year_of_study']  # Use correct field names here
+        fields = ['registration_number', 'year_of_study']  # adjust if needed
         widgets = {
             'registration_number': forms.TextInput(attrs={'class': 'form-control'}),
             'year_of_study': forms.NumberInput(attrs={'class': 'form-control'}),
         }
 
-from django import forms
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
 
 class UserUpdateForm(forms.ModelForm):
     class Meta:
@@ -73,6 +76,7 @@ class UserUpdateForm(forms.ModelForm):
             'phone_number': forms.TextInput(attrs={'class': 'form-control'}),
             'profile_picture': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
+
 
 # =========================
 # Log Entry Form
@@ -205,3 +209,32 @@ class TaskAssignForm(forms.Form):
         super().__init__(*args, **kwargs)
         if user:
             self.fields['student_ids'].queryset = StudentProfile.objects.filter(supervisor=user)
+
+from django import forms
+from .models import StudentProfile
+
+class StudentProfileForm(forms.ModelForm):
+    class Meta:
+        model = StudentProfile
+        fields = [
+            'profile_picture',
+            'phone_number',
+            'registration_number',
+            'course',
+            'year_of_study',
+            'academic_year',
+            'field_start_date',
+            'organization_name',
+            'supervisor',
+        ]
+        widgets = {
+            'profile_picture': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone Number'}),
+            'registration_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Registration Number'}),
+            'course': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Course'}),
+            'year_of_study': forms.NumberInput(attrs={'class': 'form-control', 'min': 1, 'max': 10}),
+            'academic_year': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Academic Year (e.g., 2024/2025)'}),
+            'field_start_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'organization_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Organization Name'}),
+            'supervisor': forms.Select(attrs={'class': 'form-select'}),
+        }

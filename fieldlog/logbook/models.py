@@ -3,7 +3,7 @@ from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from datetime import date
-from users.models import CustomUser  # Ensure CustomUser is defined in users/models.py
+
 
 # ========================
 # Place & Institution
@@ -29,18 +29,15 @@ class Institution(models.Model):
 # ========================
 
 class SupervisorProfile(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='logbook_supervisorprofile'
+    )
     phone = models.CharField(max_length=20, blank=True, null=True)
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='logbook_supervisorprofile')
 
     def __str__(self):
         return self.user.username
-
-from django.db import models
-from django.conf import settings
-from datetime import date
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 
 
 # ========================
@@ -74,17 +71,17 @@ class StudentProfile(models.Model):
         return self.user.username
 
 
-# Signal to create StudentProfile when a new user with role 'student' is created
+# Signal to create StudentProfile automatically for new student users
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_student_profile(sender, instance, created, **kwargs):
     if created and getattr(instance, 'role', None) == 'student':
-        # Provide default values for required fields to avoid NOT NULL errors
         StudentProfile.objects.create(
             user=instance,
-            year_of_study=1,                         # Default year of study
-            registration_number=f"TEMP{instance.pk}",  # Temporary unique reg number
-            course="Unknown",                        # Temporary course name
+            year_of_study=1,  # default value
+            registration_number=f"TEMP{instance.pk}",  # temporary unique reg no
+            course="Unknown",  # placeholder
         )
+
 
 # ========================
 # Logbook Entry
@@ -107,8 +104,6 @@ class LogEntry(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.date}"
-
-        
 
 
 # ========================
@@ -154,10 +149,26 @@ class ProgressReport(models.Model):
 
 class Task(models.Model):
     description = models.TextField()
-    assigned_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='tasks_assigned')
+    assigned_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='tasks_assigneds')
     assigned_to = models.ManyToManyField(StudentProfile, related_name='tasks_received')
     assigned_at = models.DateTimeField(auto_now_add=True)
     completed = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Task by {self.assigned_by.username} at {self.assigned_at.strftime('%Y-%m-%d %H:%M')}"
+
+
+# ========================
+# Assigned Task Model
+# ========================
+
+class AssignedTask(models.Model):
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    assigned_date = models.DateField(auto_now_add=True)
+    due_date = models.DateField()
+    supervisor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='assigned_tasks', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.title

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">ON-STTION SPERVISOR DASHBOARD </h1>
+        <p class="dashboard-subtitle">
+            Manage your assigned students, monitor logbook activities, assign tasks, and upload resources.
+        </p>
+    </div>
+
+    <div class="dashboard-cards-grid">
+
+        <div class="dashboard-card">
+            <a href="{% url 'users:supervisor_students' request.user.id %}">
+                <i class="fas fa-users card-icon"></i>
+                <h3>Assigned Students</h3>
+                <p>View and manage all students under your supervision.</p>
+            </a>
+        </div>
+
+        <div class="dashboard-card">
+            <a href="{% url 'users:logbook_activity' %}">
+                <i class="fas fa-book card-icon"></i>
+                <h3>Log Activities</h3>
+                <p>Monitor daily entries submitted by students.</p>
+            </a>
+        </div>
+
+        <div class="dashboard-card">
+            <a href="{% url 'users:pending_logs' %}">
+                <i class="fas fa-hourglass-half card-icon"></i>
+                <h3>Pending Logs</h3>
+                <p>Review logs awaiting approval.</p>
+            </a>
+        </div>
+
+        <div class="dashboard-card">
+            <a href="{% url 'users:approved_logs' %}">
+                <i class="fas fa-check-circle card-icon"></i>
+                <h3>Approved Logs</h3>
+                <p>Browse logs you’ve already reviewed.</p>
+            </a>
+        </div>
+
+        <div class="dashboard-card">
+            <a href="{% url 'users:approve_logs' %}">
+                <i class="fas fa-comment-dots card-icon"></i>
+                <h3>Comment & Approve</h3>
+                <p>Give feedback while approving or rejecting logs.</p>
+            </a>
+        </div>
+
+        <div class="dashboard-card">
+            <a href="{% url 'users:assign_task' %}">
+                <i class="fas fa-tasks card-icon"></i>
+                <h3>Assign Tasks</h3>
+                <p>Provide specific tasks to individual or all students.</p>
+            </a>
+        </div>
+
+        <div class="dashboard-card">
+            <a href="{% url 'users:upload_department_resource' %}">
+                <i class="fas fa-upload card-icon"></i>
+                <h3>Upload Resources</h3>
+                <p>Share learning documents or departmental materials.</p>
+            </a>
+        </div>
+
+        <div class="dashboard-card">
+            <a href="{% url 'users:view_log_statistics' %}">
+                <i class="fas fa-chart-bar card-icon"></i>
+                <h3>Logbook Stats</h3>
+                <p>Analyze logbook submissions and approvals.</p>
+            </a>
+        </div>
+
+        <div class="dashboard-card">
+            <a href="{% url 'users:edit_profile' %}">
+                <i class="fas fa-user-edit card-icon"></i>
+                <h3>Edit Profile</h3>
+                <p>Update your supervisor information.</p>
+            </a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/script.js' %}"></script>
+{% endblock %}

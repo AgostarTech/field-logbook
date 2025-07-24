@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container" style="margin: 30px;">
+    <h2>Approved Logs</h2>
+    <p>View logs that you have already reviewed and approved.</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Log Content</th>
+                <th>Date Approved</th>
+                <th>Approved By</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in approved_logs %}
+            <tr>
+                <td>{{ log.student.user.get_full_name }}</td>
+                <td>{{ log.content|truncatechars:50 }}</td>
+                <td>{{ log.approved_date|date:"Y-m-d H:i" }}</td>
+                <td>{{ log.approved_by.get_full_name }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4">No approved logs found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

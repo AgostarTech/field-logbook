@@ -190,3 +190,127 @@ html, body {
   background: #27ae60;
   height: 100%;
 }
+
+.dashboard-container {
+    padding: 30px;
+    background: var(--bg-light, #f8f9fa);
+    color: #333;
+}
+
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.dashboard-title {
+    font-size: 2.5rem;
+    color: var(--primary-color, #0059ff);
+    font-weight: bold;
+}
+
+.dashboard-subtitle {
+    font-size: 1.1rem;
+    color: #666;
+}
+
+.dashboard-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+}
+
+.dashboard-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+    padding: 25px;
+    transition: transform 0.3s, box-shadow 0.3s;
+    text-align: center;
+    border-left: 5px solid var(--primary-color, #0059ff);
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+.card-icon {
+    font-size: 2.2rem;
+    color: var(--primary-color, #0059ff);
+    margin-bottom: 10px;
+}
+
+
+.container {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.section-title {
+    color: #003566;
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    color: #6c757d;
+    margin-bottom: 20px;
+}
+
+.styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.styled-table th,
+.styled-table td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+}
+
+.styled-table th {
+    background-color: #003566;
+    color: white;
+}
+
+.pending-row {
+    background-color: #fff3cd;
+}
+
+.approved-row {
+    background-color: #d4edda;
+}
+
+.rejected-row {
+    background-color: #f8d7da;
+}
+
+.btn {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.muted {
+    color: gray;
+    font-style: italic;
+}

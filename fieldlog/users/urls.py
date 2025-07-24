@@ -8,7 +8,6 @@ app_name = 'users'
 urlpatterns = [
     # Home and Authentication
     path('', views.home, name='home'),
-
     path('login/', views.login_view, name='login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
 
@@ -24,10 +23,12 @@ urlpatterns = [
     path('dashboard/onstation/', views.onstation_dashboard, name='onstation_dashboard'),
     path('dashboard/oncampus/', views.oncampus_dashboard, name='oncampus_dashboard'),
 
-    # Profile
+    # Profile Editing
     path('profile/edit/', views.edit_profile, name='edit_profile'),
+    path('profile/edit/student/', views.edit_student_profile, name='edit_student_profile'),
+
+    # Student Profile View
     path('student/<int:pk>/', views.student_profile, name='student_profile'),
-    path('profile/edit/', views.edit_profile, name='profile_edit'),  # You have duplicate here, consider removing one
 
     # Task Assignment
     path('assign-task/', views.assign_task, name='assign_task'),
@@ -56,8 +57,15 @@ urlpatterns = [
 
     # Messaging
     path('supervisor/<int:supervisor_id>/message/', views.message_supervisor, name='message_supervisor'),
+    path('logbook-activity/', views.logbook_activity, name='logbook_activity'),
 
-    # Password change views (using Django built-in)
+    # Pending and Approved Logs
+    path('pending-logs/', views.pending_logs, name='pending_logs'),
+    path('approved-logs/', views.approved_logs, name='approved_logs'),
+    path('approve-logs/', views.approve_logs, name='approve_logs'),
+
+    # Password Change Views
     path('password/change/', auth_views.PasswordChangeView.as_view(template_name='users/password_change.html'), name='change_password'),
     path('password/change/done/', auth_views.PasswordChangeDoneView.as_view(template_name='users/password_change_done.html'), name='password_change_done'),
+    path('log_statistics/', views.view_log_statistics, name='view_log_statistics'),
 ]

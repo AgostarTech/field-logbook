@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container" style="margin: 30px;">
+    <h2>Logbook Statistics</h2>
+    <p>Total Logs Submitted: {{ total_logs }}</p>
+    <p>Pending Logs: {{ pending_logs }}</p>
+    <p>Approved Logs: {{ approved_logs }}</p>
+
+    <h3>Students Supervised</h3>
+    <ul>
+    {% for student in students %}
+        <li>{{ student.user.get_full_name }}</li>
+    {% empty %}
+        <li>No students found.</li>
+    {% endfor %}
+    </ul>
+</div>
+{% endblock %}

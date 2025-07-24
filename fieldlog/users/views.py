@@ -1,12 +1,14 @@
 from datetime import date, timedelta
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, get_user_model
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseForbidden
-from django.template.loader import get_template
 from django.views.decorators.http import require_POST
+from django.template.loader import get_template
 from xhtml2pdf import pisa
+from logbook.models import LogEntry
+
 
 from .forms import (
     StudentSignUpForm,
@@ -24,10 +26,12 @@ from .models import (
     OnCampusSupervisor,
 )
 from logbook.models import LogEntry
+from logbook.forms import StudentProfileForm
 
 User = get_user_model()
 
-# ----- Basic Views -----
+
+# ===== Basic Views =====
 
 def home(request):
     return render(request, 'users/home.html')
@@ -42,7 +46,7 @@ def login_view(request):
             login(request, user)
             if user.is_superuser:
                 return redirect('/admin/')
-            return redirect('dashboard')
+            return redirect('users:dashboard')
         messages.error(request, 'Invalid username or password.')
     return render(request, 'users/login.html')
 
@@ -51,29 +55,19 @@ def signup_select(request):
     return render(request, 'users/signup_select.html')
 
 
-# ----- Signup Views -----
-
-from django.shortcuts import render, redirect
-from django.contrib.auth import login
-from django.contrib import messages
-from .forms import StudentSignUpForm
+# ===== Signup Views =====
 
 def student_signup(request):
     if request.method == 'POST':
         form = StudentSignUpForm(request.POST)
-        print("POST data:", request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
             return redirect('users:dashboard')
-        else:
-            print("Form errors:", form.errors)
-            messages.error(request, "Please fix the errors below.")
+        messages.error(request, "Please fix the errors below.")
     else:
         form = StudentSignUpForm()
     return render(request, 'users/student_signup.html', {'form': form})
-
-
 
 
 def onstation_signup(request):
@@ -82,9 +76,8 @@ def onstation_signup(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect('dashboard')
-        else:
-            messages.error(request, "Please fix the errors below.")
+            return redirect('users:dashboard')
+        messages.error(request, "Please fix the errors below.")
     return render(request, 'users/supervisor_signup.html', {'form': form, 'title': 'On-Station Supervisor Signup'})
 
 
@@ -94,13 +87,12 @@ def oncampus_signup(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect('dashboard')
-        else:
-            messages.error(request, "Please fix the errors below.")
+            return redirect('users:dashboard')
+        messages.error(request, "Please fix the errors below.")
     return render(request, 'users/supervisor_signup.html', {'form': form, 'title': 'On-Campus Supervisor Signup'})
 
 
-# ----- Dashboard Dispatcher -----
+# ===== Dashboard Dispatcher =====
 
 @login_required
 def dashboard(request):
@@ -115,85 +107,43 @@ def dashboard(request):
     return render(request, 'users/dashboard.html')
 
 
-# ----- Role Specific Dashboards -----
+# ===== Role-Specific Dashboards =====
 
 @login_required
 def student_dashboard(request):
+    # Add any student specific info here if needed
     return render(request, 'users/student_dashboard.html')
 
-
-@login_required
-def onstation_dashboard(request):
-    user = request.user
-    assigned_students = User.objects.filter(role='student', studentprofile__supervisor_onstation__user=user)
-    logs = LogEntry.objects.filter(student__user__in=assigned_students)
-
-    student_progress = []
-    for student in assigned_students:
-        total_logs = logs.filter(student__user=student).count()
-        approved_logs_count = logs.filter(student__user=student, status='approved').count()
-        progress_percent = (approved_logs_count / total_logs * 100) if total_logs else 0
-        student_progress.append({
-            'student': student,
-            'total_logs': total_logs,
-            'approved_logs': approved_logs_count,
-            'progress_percent': round(progress_percent, 2),
-        })
-
-    context = {
-        'assigned_students': assigned_students,
-        'student_progress': student_progress,
-        'pending_logs': logs.filter(status='pending'),
-        'approved_logs': logs.filter(status='approved'),
-        'assigned_tasks': AssignedTask.objects.filter(supervisor=user),
-    }
-    return render(request, 'users/supervisor_dashboard.html', context)
-
+from logbook.models import LogEntry  # make sure imported
 
 @login_required
 def oncampus_dashboard(request):
     user = request.user
-    if user.role != 'oncampus':
-        messages.error(request, "You do not have permission to view this page.")
-        return redirect('dashboard')
 
-    # Students under the same department
-    students = User.objects.filter(role='student', department=user.department)
-    student_profiles = StudentProfile.objects.filter(user__in=students)
+    # Get students supervised by this on-campus supervisor
+    students = StudentProfile.objects.filter(supervisor_oncampus__user=user)
 
-    # On-station supervisors in the same department
-    supervisors = User.objects.filter(role='onstation', department=user.department)
+    # Get user IDs of those students
+    student_user_ids = students.values_list('user_id', flat=True)
 
-    # Get logs from those student profiles
-    logs = LogEntry.objects.filter(student__in=student_profiles)
-
-    # Build progress data
-    progress_data = []
-    for profile in student_profiles:
-        student_logs = logs.filter(student=profile)
-        last_log = student_logs.order_by('-date').first()
-        progress_data.append({
-            'student': profile.user,
-            'registration_number': profile.registration_number,
-            'total_logs': student_logs.count(),
-            'approved_logs': student_logs.filter(status='approved').count(),
-            'pending_logs': student_logs.filter(status='pending').count(),
-            'rejected_logs': student_logs.filter(status='rejected').count(),
-            'last_submission_date': last_log.date if last_log else None,
-        })
+    # Get all logs for those students (no filtering by status)
+    logs = LogEntry.objects.filter(user_id__in=student_user_ids).order_by('-date')
 
     context = {
-        'department_students': students,
-        'onstation_supervisors': supervisors,
-        'progress_data': progress_data,
-        'submitted_logs': logs.count(),
-        'approved_logs': logs.filter(status='approved').count(),
-        'pending_logs': logs.filter(status='pending').count(),
-        'rejected_logs': logs.filter(status='rejected').count(),
+        'students': students,
+        'logs': logs,
     }
-
     return render(request, 'users/oncampus_dashboard.html', context)
 
+from django.shortcuts import get_object_or_404
+
+@login_required
+def onstation_dashboard(request):
+    user = request.user
+    return render(request, 'users/onstation_dashboard.html')
+
+
+# ===== Profile Edit =====
 
 @login_required
 def edit_profile(request):
@@ -201,9 +151,39 @@ def edit_profile(request):
     if request.method == 'POST' and form.is_valid():
         form.save()
         messages.success(request, "Profile updated successfully.")
-        return redirect('dashboard')
+        return redirect('users:dashboard')
     return render(request, 'users/edit_profile.html', {'form': form})
 
+
+@login_required
+def edit_student_profile(request):
+    user = request.user
+    try:
+        student_profile = user.studentprofile
+    except StudentProfile.DoesNotExist:
+        student_profile = StudentProfile(user=user)
+
+    if request.method == 'POST':
+        user_form = ProfileForm(request.POST, request.FILES, instance=user)
+        student_form = StudentProfileForm(request.POST, request.FILES, instance=student_profile)
+
+        if user_form.is_valid() and student_form.is_valid():
+            user_form.save()
+            student_form.save()
+            messages.success(request, "Profile updated successfully.")
+            return redirect('users:dashboard')
+        messages.error(request, "Please fix the errors below.")
+    else:
+        user_form = ProfileForm(instance=user)
+        student_form = StudentProfileForm(instance=student_profile)
+
+    return render(request, 'users/edit_student_profile.html', {
+        'user_form': user_form,
+        'student_form': student_form,
+    })
+
+
+# ===== Task Assignment =====
 
 @login_required
 def assign_task(request):
@@ -225,7 +205,7 @@ def assign_task(request):
             messages.success(request, "Task assigned successfully.")
         except Exception as e:
             messages.error(request, f"Error assigning task: {e}")
-    return redirect('dashboard')
+    return redirect('users:dashboard')
 
 
 @login_required
@@ -248,28 +228,43 @@ def bulk_assign_task(request):
             except Exception:
                 continue
         messages.success(request, "Task assigned to all students successfully.")
-    return redirect('dashboard')
+    return redirect('users:dashboard')
 
+
+# ===== Supervisor Document Upload =====
 
 @login_required
 def supervisor_upload_document(request):
     if request.method == 'POST':
-        title = request.POST.get('title')
-        file = request.FILES.get('file')
-        if not title or not file:
-            messages.error(request, "Title and file are required.")
-            return redirect('dashboard')
-        SupervisorUpload.objects.create(title=title, file=file, uploaded_by=request.user)
-        messages.success(request, "Document uploaded successfully.")
-    return redirect('dashboard')
+        form = SupervisorUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            upload_instance = form.save(commit=False)
+            upload_instance.uploaded_by = request.user
+            upload_instance.save()
+            messages.success(request, "Document uploaded successfully.")
+            return redirect('users:dashboard')
+        messages.error(request, "Please fix the errors below.")
+    else:
+        form = SupervisorUploadForm()
+    return render(request, 'users/upload_department_resource.html', {'form': form})
 
 
-# ----- View Student and Supervisor Info -----
+# ===== View Student Profile & Logs =====
 
 @login_required
 def student_profile(request, pk):
     student_user = get_object_or_404(CustomUser, pk=pk, role='student')
-    return render(request, 'users/student_profile.html', {'student': student_user})
+
+    try:
+        profile = student_user.studentprofile
+    except StudentProfile.DoesNotExist:
+        profile = None
+
+    context = {
+        'student': student_user,
+        'profile': profile,
+    }
+    return render(request, 'users/student_profile.html', context)
 
 
 @login_required
@@ -300,8 +295,6 @@ def supervisor_students(request, supervisor_id):
     return render(request, 'users/supervisor_students.html', context)
 
 
-# ----- Logs Views -----
-
 @login_required
 def view_logs(request, student_id):
     student = get_object_or_404(CustomUser, pk=student_id, role='student')
@@ -316,7 +309,7 @@ def download_logs_pdf(request, student_id):
         profile = student.studentprofile
     except StudentProfile.DoesNotExist:
         messages.error(request, "Student profile not found.")
-        return redirect('dashboard')
+        return redirect('users:dashboard')
 
     logs = LogEntry.objects.filter(student__user=student).order_by('date')
 
@@ -342,7 +335,7 @@ def download_logs_pdf(request, student_id):
 def bulk_approve_logs(request, student_id):
     LogEntry.objects.filter(student__user__id=student_id, status='pending').update(status='approved')
     messages.success(request, "All logs approved successfully.")
-    return redirect('oncampus_dashboard')
+    return redirect('users:oncampus_dashboard')
 
 
 @login_required
@@ -350,7 +343,7 @@ def bulk_approve_logs(request, student_id):
 def bulk_reject_logs(request, student_id):
     LogEntry.objects.filter(student__user__id=student_id, status='pending').update(status='rejected')
     messages.success(request, "All logs rejected successfully.")
-    return redirect('oncampus_dashboard')
+    return redirect('users:oncampus_dashboard')
 
 
 @login_required
@@ -359,7 +352,7 @@ def message_supervisor(request, supervisor_id):
     return render(request, 'users/message_supervisor.html', {'supervisor': supervisor})
 
 
-# ----- Assign Task to Multiple Students (for on-campus supervisors) -----
+# ===== Assign Task to Multiple Students (for on-campus supervisors) =====
 
 @login_required
 def assign_task_to_students(request):
@@ -373,13 +366,13 @@ def assign_task_to_students(request):
 
         if not student_ids or not task_description or not due_date_str:
             messages.error(request, "Please fill all required fields.")
-            return redirect('assign_task_to_students')
+            return redirect('users:assign_task_to_students')
 
         try:
             due_date = date.fromisoformat(due_date_str)
         except ValueError:
             messages.error(request, "Invalid date format.")
-            return redirect('assign_task_to_students')
+            return redirect('users:assign_task_to_students')
 
         for sid in student_ids:
             try:
@@ -394,10 +387,10 @@ def assign_task_to_students(request):
                 continue
 
         messages.success(request, "Task(s) assigned successfully.")
-        return redirect('assign_task_to_students')
+        return redirect('users:assign_task_to_students')
 
     # GET request
-    students = StudentProfile.objects.filter(oncampus_supervisor=request.user)
+    students = StudentProfile.objects.filter(supervisor_oncampus__user=request.user)
     assigned_tasks = AssignedTask.objects.filter(student__in=students).order_by('-due_date')
 
     return render(request, 'users/assign_task_to_students.html', {
@@ -406,7 +399,7 @@ def assign_task_to_students(request):
     })
 
 
-# ----- Track Progress -----
+# ===== Track Progress =====
 
 @login_required
 def track_progress(request):
@@ -427,7 +420,7 @@ def track_progress(request):
     return render(request, 'users/track_progress.html', {'progress_data': progress_data})
 
 
-# ----- Upload Department Resource -----
+# ===== Upload Department Resource =====
 
 @login_required
 def upload_department_resource(request):
@@ -438,18 +431,117 @@ def upload_department_resource(request):
             upload_instance.uploaded_by = request.user
             upload_instance.save()
             messages.success(request, "Resource uploaded successfully.")
-            return redirect('dashboard')
-        else:
-            messages.error(request, "Please correct the errors below.")
+            return redirect('users:dashboard')
+        messages.error(request, "Please correct the errors below.")
     else:
         form = SupervisorUploadForm()
 
     return render(request, 'users/upload_department_resource.html', {'form': form})
 
+from datetime import date
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.http import HttpResponseForbidden
+
+from .models import StudentProfile, AssignedTask
+
+@login_required
+def supervisor_assign_task(request):
+    if request.user.role != 'oncampus':
+        return HttpResponseForbidden("You do not have permission to assign tasks.")
+
+    if request.method == 'POST':
+        student_ids = request.POST.getlist('student_ids')
+        task_description = request.POST.get('task_description')
+        due_date_str = request.POST.get('due_date')
+
+        if not student_ids or not task_description or not due_date_str:
+            messages.error(request, "Please fill all required fields.")
+            return redirect('users:supervisor_assign_task')
+
+        try:
+            due_date = date.fromisoformat(due_date_str)
+        except ValueError:
+            messages.error(request, "Invalid date format.")
+            return redirect('users:supervisor_assign_task')
+
+        for sid in student_ids:
+            try:
+                student_profile = StudentProfile.objects.get(id=sid)
+                AssignedTask.objects.create(
+                    student=student_profile,
+                    task_description=task_description,
+                    due_date=due_date,
+                    supervisor=request.user
+                )
+            except StudentProfile.DoesNotExist:
+                continue
+
+        messages.success(request, "Task(s) assigned successfully.")
+        return redirect('users:supervisor_assign_task')
+
+    students = StudentProfile.objects.filter(supervisor_oncampus__user=request.user)
+    assigned_tasks = AssignedTask.objects.filter(student__in=students).order_by('-due_date')
+
+    return render(request, 'users/assign_task_to_students.html', {
+        'students': students,
+        'assigned_tasks': assigned_tasks,
+    })
+
+@login_required
+def logbook_activity(request):
+    # your logic here
+    return render(request, 'users/logbook_activity.html')
+
+
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
 @login_required
-def supervisor_assign_task(request):
-    # You can later add your logic here
-    return render(request, 'users/supervisor_assign_task.html')
+def logbook_activity(request):
+    # Logic to show logbook activities
+    return render(request, 'users/logbook_activity.html')
+
+@login_required
+def pending_logs(request):
+    # Logic to show pending logs for supervisor approval
+    return render(request, 'logbook/pending_logs.html')
+
+@login_required
+def approved_logs(request):
+    # Logic to show approved logs
+    return render(request, 'logbook/approve_logs.html')
+
+@login_required
+def approve_logs(request):
+    # Page to approve logs with comments or bulk approve
+    return render(request, 'logbook/approve_logs.html')
+
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from logbook.models import LogEntry
+from .models import StudentProfile
+
+@login_required
+def view_log_statistics(request):
+    # Example stats:
+    students = StudentProfile.objects.filter(supervisor_onstation__user=request.user)
+    total_logs = 0
+    pending_logs = 0
+    approved_logs = 0
+
+    for student in students:
+        logs = LogEntry.objects.filter(student=student)
+        total_logs += logs.count()
+        pending_logs += logs.filter(status='pending').count()
+        approved_logs += logs.filter(status='approved').count()
+
+    context = {
+        'total_logs': total_logs,
+        'pending_logs': pending_logs,
+        'approved_logs': approved_logs,
+        'students': students,
+    }
+    return render(request, 'users/log_statistics.html', context)

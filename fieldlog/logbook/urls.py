@@ -8,6 +8,7 @@ app_name = "logbook"
 urlpatterns = [
     # Dashboard
     path('student/', views.student_dashboard, name='student_dashboard'),
+    
 
     # Profile Management
     path('profile/', views.profile_view, name='profile'),

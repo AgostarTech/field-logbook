@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<script src="{% static 'js/log_actions.js' %}" defer></script>
+
+<div class="container" style="margin-top: 30px;">
+    <h2 class="section-title">Student Log Activities</h2>
+    <p class="subtitle">Manage logbook entries for students under your supervision</p>
+    <hr>
+
+    {% if logs %}
+    <div class="log-table">
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Student</th>
+                    <th>Day</th>
+                    <th>Activity Description</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                    <th>Comment</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr class="{% if log.status == 'Pending' %}pending-row{% elif log.status == 'Approved' %}approved-row{% else %}rejected-row{% endif %}">
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ log.user.get_full_name }}</td>
+                    <td>Day {{ log.day_number }}</td>
+                    <td>{{ log.description|truncatechars:100 }}</td>
+                    <td>{{ log.date|date:"M d, Y" }}</td>
+                    <td><strong>{{ log.status }}</strong></td>
+                    <td>
+                        {% if log.status == "Pending" %}
+                            <form method="post" action="{% url 'users:approve_log' log.id %}" style="display:inline-block;">
+                                {% csrf_token %}
+                                <button class="btn btn-success" title="Approve this log">✔ Approve</button>
+                            </form>
+                            <form method="post" action="{% url 'users:reject_log' log.id %}" style="display:inline-block;">
+                                {% csrf_token %}
+                                <button class="btn btn-danger" title="Reject this log">✖ Reject</button>
+                            </form>
+                        {% else %}
+                            <span class="muted">No actions</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <form method="post" action="{% url 'users:comment_log' log.id %}">
+                            {% csrf_token %}
+                            <input type="text" name="comment" value="{{ log.comment }}" placeholder="Write comment..." style="width: 100%;">
+                            <button type="submit" class="btn btn-primary" style="margin-top: 5px;">Save</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <div class="alert alert-warning">No log activities available from your students yet.</div>
+    {% endif %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container" style="margin: 30px;">
+    <h2>Pending Logs</h2>
+    <p>Review and approve or reject logs that are waiting for your action.</p>
+
+    <!-- Example Table -->
+    <table>
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Log Content</th>
+                <th>Date Submitted</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Loop over pending logs here -->
+            {% for log in pending_logs %}
+            <tr>
+                <td>{{ log.student.user.get_full_name }}</td>
+                <td>{{ log.content|truncatechars:50 }}</td>
+                <td>{{ log.date|date:"Y-m-d H:i" }}</td>
+                <td>
+                    <form method="post" action="{% url 'users:approve_log' log.id %}">
+                        {% csrf_token %}
+                        <button type="submit">Approve</button>
+                    </form>
+                    <form method="post" action="{% url 'users:reject_log' log.id %}">
+                        {% csrf_token %}
+                        <button type="submit">Reject</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4">No pending logs found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
