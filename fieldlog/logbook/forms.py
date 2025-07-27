@@ -81,6 +81,9 @@ class UserUpdateForm(forms.ModelForm):
 # =========================
 # Log Entry Form
 # =========================
+from django import forms
+from .models import LogEntry
+from django.utils.timezone import now
 
 class LogEntryForm(forms.ModelForm):
     class Meta:
@@ -91,17 +94,24 @@ class LogEntryForm(forms.ModelForm):
             'description', 'trainee_signature'
         ]
         widgets = {
-            'place': forms.Select(attrs={'class': 'form-select'}),
-            'institution': forms.Select(attrs={'class': 'form-select'}),
-            'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-            'start_time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
-            'departure_time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'place': forms.Select(attrs={'class': 'form-select mb-3'}),
+            'institution': forms.Select(attrs={'class': 'form-select mb-3'}),
+            'date': forms.DateInput(attrs={
+                'type': 'date', 'class': 'form-control mb-3',
+                'value': now().date()
+            }),
+            'start_time': forms.TimeInput(attrs={
+                'type': 'time', 'class': 'form-control mb-3'
+            }),
+            'departure_time': forms.TimeInput(attrs={
+                'type': 'time', 'class': 'form-control mb-3'
+            }),
             'description': forms.Textarea(attrs={
-                'class': 'form-control', 'rows': 5,
+                'class': 'form-control notebook-style mb-3', 'rows': 6,
                 'placeholder': 'Describe your daily tasks/assignments',
             }),
             'trainee_signature': forms.TextInput(attrs={
-                'class': 'form-control',
+                'class': 'form-control mb-3',
                 'placeholder': 'Type your full name as signature',
             }),
         }
@@ -118,7 +128,6 @@ class LogEntryForm(forms.ModelForm):
                 pass
         elif self.instance.pk and self.instance.place:
             self.fields['institution'].queryset = self.fields['institution'].queryset.filter(place=self.instance.place)
-
 
 # =========================
 # File Upload Form

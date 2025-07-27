@@ -1,28 +1,87 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container" style="margin: 30px;">
+<style>
+  body {
+    background-color: #080f03ff;
+  }
+
+  .container {
+    margin: 30px auto;
+    max-width: 1000px;
+    font-family: Arial, sans-serif;
+    background-color: #0d1a0b;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 12px rgba(0, 255, 0, 0.1);
+    color: #e0f8e9;
+  }
+
+  h2 {
+    color: #26ff94;
+    margin-bottom: 10px;
+  }
+
+  p {
+    color: #b2d8c5;
+    margin-bottom: 20px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #142f1c;
+    box-shadow: 0 2px 8px rgba(0, 255, 0, 0.05);
+    color: #eaffea;
+  }
+
+  thead tr {
+    background-color: #063116;
+    color: #ffffff;
+    text-align: left;
+  }
+
+  th, td {
+    padding: 12px 15px;
+    border: 1px solid #1c3d28;
+    vertical-align: middle;
+  }
+
+  tbody tr:hover {
+    background-color: #1e3d2a;
+  }
+</style>
+
+<div class="container">
     <h2>Approved Logs</h2>
-    <p>View logs that you have already reviewed and approved.</p>
+    <p>These logs have been reviewed and approved.</p>
 
     <table>
         <thead>
             <tr>
-                <th>Student</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Registration Number</th>
+                <th>Course</th>
                 <th>Log Content</th>
-                <th>Date Approved</th>
-                <th>Approved By</th>
+                <th>Log Time</th>
+                <th>Status</th>
             </tr>
         </thead>
         <tbody>
-            {% for log in approved_logs %}
+            {% for log in approve_log %}
             <tr>
-                <td>{{ log.student.user.get_full_name }}</td>
+                <td>{{ log.student.user.first_name }}</td>
+                <td>{{ log.student.user.last_name }}</td>
+                <td>{{ log.student.registration_number }}</td>
+                <td>{{ log.student.course }}</td>
                 <td>{{ log.content|truncatechars:50 }}</td>
-                <td>{{ log.approved_date|date:"Y-m-d H:i" }}</td>
-                <td>{{ log.approved_by.get_full_name }}</td>
+                <td>{{ log.date|date:"Y-m-d H:i" }}</td>
+                <td>Approved</td>
             </tr>
             {% empty %}
-            <tr><td colspan="4">No approved logs found.</td></tr>
+            <tr>
+                <td colspan="7" style="text-align:center; padding: 20px; color: #ccc;">No approved logs found.</td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>

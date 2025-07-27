@@ -2,98 +2,294 @@
 
 {% load static %}
 
-
 {% block content %}
 <div class="dashboard-container">
-    <div class="dashboard-header">
-        <h1 class="dashboard-title">ON-STTION SPERVISOR DASHBOARD </h1>
-        <p class="dashboard-subtitle">
-            Manage your assigned students, monitor logbook activities, assign tasks, and upload resources.
-        </p>
-    </div>
 
-    <div class="dashboard-cards-grid">
+  <!-- Mobile hamburger toggle + menu -->
+  <div class="mobile-nav">
+    <button id="menu-toggle" aria-label="Toggle menu" aria-expanded="false">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </button>
 
-        <div class="dashboard-card">
-            <a href="{% url 'users:supervisor_students' request.user.id %}">
-                <i class="fas fa-users card-icon"></i>
-                <h3>Assigned Students</h3>
-                <p>View and manage all students under your supervision.</p>
-            </a>
-        </div>
+    <nav id="mobile-menu" class="mobile-menu" aria-hidden="true">
+      <ul>
+        <li><a href="{% url 'users:supervisor_students' request.user.id %}">Assigned Students</a></li>
+        <li><a href="{% url 'users:logbook_activity' %}">Log Activities</a></li>
+        <li><a href="{% url 'users:pending_logs' %}">Pending Logs</a></li>
+        <li><a href="{% url 'users:approved_logs' %}">Approved Logs</a></li>
+        <li><a href="{% url 'users:assign_task_to_students' %}">Assign Tasks</a></li>
+        <li><a href="{% url 'users:upload_department_resource' %}">Upload Resources</a></li>
+        <li><a href="{% url 'users:view_log_statistics' %}">Logbook Stats</a></li>
+        <li><a href="{% url 'users:onstation_profile' %}">View Your Profile</a></li>
+        <li><a href="{% url 'users:edit_onstation_profile' %}">Edit Profile</a></li>
+      </ul>
+    </nav>
+  </div>
 
-        <div class="dashboard-card">
-            <a href="{% url 'users:logbook_activity' %}">
-                <i class="fas fa-book card-icon"></i>
-                <h3>Log Activities</h3>
-                <p>Monitor daily entries submitted by students.</p>
-            </a>
-        </div>
+  <div class="dashboard-header">
+      <h1 class="dashboard-title">ON-STATION SUPERVISOR DASHBOARD</h1>
+      <p class="dashboard-subtitle">
+          Manage your assigned students, monitor logbook activities, assign tasks, and upload resources.
+      </p>
+  </div>
 
-        <div class="dashboard-card">
-            <a href="{% url 'users:pending_logs' %}">
-                <i class="fas fa-hourglass-half card-icon"></i>
-                <h3>Pending Logs</h3>
-                <p>Review logs awaiting approval.</p>
-            </a>
-        </div>
+  <div class="dashboard-cards-grid">
+      <div class="dashboard-card">
+          <a href="{% url 'users:supervisor_students' request.user.id %}">
+              <i class="fas fa-users card-icon"></i>
+              <h3>Assigned Students</h3>
+              <p>View and manage all students under your supervision.</p>
+          </a>
+      </div>
 
-        <div class="dashboard-card">
-            <a href="{% url 'users:approved_logs' %}">
-                <i class="fas fa-check-circle card-icon"></i>
-                <h3>Approved Logs</h3>
-                <p>Browse logs you’ve already reviewed.</p>
-            </a>
-        </div>
+      <div class="dashboard-card">
+          <a href="{% url 'users:logbook_activity' %}">
+              <i class="fas fa-book card-icon"></i>
+              <h3>Log Activities</h3>
+              <p>Monitor daily entries submitted by students.</p>
+          </a>
+      </div>
 
-        <div class="dashboard-card">
-            <a href="{% url 'users:approve_logs' %}">
-                <i class="fas fa-comment-dots card-icon"></i>
-                <h3>Comment & Approve</h3>
-                <p>Give feedback while approving or rejecting logs.</p>
-            </a>
-        </div>
+      <div class="dashboard-card">
+          <a href="{% url 'users:pending_logs' %}">
+              <i class="fas fa-hourglass-half card-icon"></i>
+              <h3>Pending Logs</h3>
+              <p>Review logs awaiting approval.</p>
+          </a>
+      </div>
 
-        <div class="dashboard-card">
-            <a href="{% url 'users:assign_task' %}">
-                <i class="fas fa-tasks card-icon"></i>
-                <h3>Assign Tasks</h3>
-                <p>Provide specific tasks to individual or all students.</p>
-            </a>
-        </div>
+      <div class="dashboard-card">
+          <a href="{% url 'users:approved_logs' %}">
+              <i class="fas fa-check-circle card-icon"></i>
+              <h3>Approved Logs</h3>
+              <p>Browse logs you’ve already reviewed.</p>
+          </a>
+      </div>
 
-        <div class="dashboard-card">
-            <a href="{% url 'users:upload_department_resource' %}">
-                <i class="fas fa-upload card-icon"></i>
-                <h3>Upload Resources</h3>
-                <p>Share learning documents or departmental materials.</p>
-            </a>
-        </div>
+      <div class="dashboard-card">
+          <a href="{% url 'users:assign_task_to_students' %}">
+              <i class="fas fa-tasks card-icon"></i>
+              <h3>Assign Tasks</h3>
+              <p>Provide specific tasks to individual or all students.</p>
+          </a>
+      </div>
 
-        <div class="dashboard-card">
-            <a href="{% url 'users:view_log_statistics' %}">
-                <i class="fas fa-chart-bar card-icon"></i>
-                <h3>Logbook Stats</h3>
-                <p>Analyze logbook submissions and approvals.</p>
-            </a>
-        </div>
+      <div class="dashboard-card">
+          <a href="{% url 'users:upload_department_resource' %}">
+              <i class="fas fa-upload card-icon"></i>
+              <h3>Upload Resources</h3>
+              <p>Share learning documents or departmental materials.</p>
+          </a>
+      </div>
 
-        <div class="dashboard-card">
-            <a href="{% url 'users:edit_profile' %}">
-                <i class="fas fa-user-edit card-icon"></i>
-                <h3>Edit Profile</h3>
-                <p>Update your supervisor information.</p>
-            </a>
-        </div>
+      <div class="dashboard-card">
+          <a href="{% url 'users:view_log_statistics' %}">
+              <i class="fas fa-chart-bar card-icon"></i>
+              <h3>Logbook Stats</h3>
+              <p>Analyze logbook submissions and approvals.</p>
+          </a>
+      </div>
 
-    </div>
+      <div class="dashboard-card">
+          <a href="{% url 'users:onstation_profile' %}">
+              <i class="fas fa-user card-icon"></i>
+              <h3>View Your Profile</h3>
+              <p>See your information.</p>
+          </a>
+      </div>
+
+      <div class="dashboard-card">
+          <a href="{% url 'users:edit_onstation_profile' %}">
+              <i class="fas fa-user-edit card-icon"></i>
+              <h3>Edit Profile</h3>
+              <p>Update your supervisor information.</p>
+          </a>
+      </div>
+  </div>
 </div>
 {% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<style>
+.dashboard-container {
+  max-width: 1200px;
+  margin: 30px auto;
+  padding: 30px 25px;
+  background-color: #121922; /* dark background */
+  border-radius: 14px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.6);
+  color: #e0f7fa; /* light teal text */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.dashboard-header {
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.dashboard-title {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #00bfa5; /* strong teal accent */
+  text-shadow: 0 0 12px #00bfa580;
+  margin-bottom: 10px;
+}
+
+.dashboard-subtitle {
+  font-size: 1.2rem;
+  color: #a7cfcf;
+  font-weight: 400;
+}
+
+.dashboard-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 25px;
+}
+
+.dashboard-card {
+  background: #1e2a33; /* slightly lighter dark */
+  border-radius: 14px;
+  padding: 30px 25px;
+  box-shadow: 0 7px 20px rgba(0, 191, 165, 0.25);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+  color: #b2dfdb;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 32px rgba(0, 191, 165, 0.6);
+  background: #004d40;
+  color: #e0f2f1;
+}
+
+.dashboard-card a {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  height: 100%;
+}
+
+.card-icon {
+  font-size: 3.8rem;
+  color: #00bfa5;
+  margin-bottom: 18px;
+  transition: color 0.3s ease;
+}
+
+.dashboard-card:hover .card-icon {
+  color: #80cbc4;
+}
+
+.dashboard-card h3 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.dashboard-card p {
+  font-size: 1rem;
+  line-height: 1.4;
+  color: #a7cfcf;
+  flex-grow: 1;
+}
+
+/* Hamburger button styles */
+.mobile-nav {
+  display: none; /* hidden on desktop */
+  padding: 10px 0;
+  background: #121922;
+}
+
+#menu-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 30px;
+  height: 24px;
+  padding: 0;
+}
+
+#menu-toggle .bar {
+  width: 100%;
+  height: 3px;
+  background-color: #00bfa5;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+/* Mobile menu */
+.mobile-menu {
+  display: none;
+  background: #1e2a33;
+  border-radius: 8px;
+  margin-top: 10px;
+  padding: 10px 15px;
+}
+
+.mobile-menu ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.mobile-menu ul li + li {
+  margin-top: 10px;
+}
+
+.mobile-menu ul li a {
+  color: #a7cfcf;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.1rem;
+  display: block;
+  transition: color 0.2s ease;
+}
+
+.mobile-menu ul li a:hover {
+  color: #00bfa5;
+}
+
+/* Show hamburger and adjust layout on small screens */
+@media (max-width: 700px) {
+  .mobile-nav {
+    display: block;
+  }
+  
+  /* Optional: add spacing so header isn't too close to menu */
+  .dashboard-header {
+    margin-top: 10px;
+  }
+}
+</style>
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/script.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const menuToggle = document.getElementById('menu-toggle');
+  const mobileMenu = document.getElementById('mobile-menu');
+
+  menuToggle.addEventListener('click', function() {
+    const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
+    menuToggle.setAttribute('aria-expanded', !isExpanded);
+    if (mobileMenu.style.display === 'block') {
+      mobileMenu.style.display = 'none';
+      mobileMenu.setAttribute('aria-hidden', 'true');
+    } else {
+      mobileMenu.style.display = 'block';
+      mobileMenu.setAttribute('aria-hidden', 'false');
+    }
+  });
+});
+</script>
 {% endblock %}

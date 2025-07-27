@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  .profile-container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #1e1e2f;
+    border-radius: 12px;
+    color: #eeeeee;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    box-shadow: 0 0 12px rgba(0, 191, 165, 0.6);
+  }
+  .profile-container h2 {
+    text-align: center;
+    color: #00bfa5;
+    margin-bottom: 24px;
+  }
+  .profile-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .profile-label {
+    font-weight: 600;
+    color: #a0e8d0;
+  }
+  .profile-value {
+    font-weight: 500;
+  }
+  .profile-picture {
+    display: block;
+    margin: 0 auto 24px;
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border: 3px solid #00bfa5;
+  }
+</style>
+
+<div class="profile-container">
+  <h2>On-Station Supervisor Profile</h2>
+
+  {% if user.profile_picture %}
+  <img src="{{ user.profile_picture.url }}" alt="Profile Picture" class="profile-picture">
+  {% endif %}
+
+  <div class="profile-row">
+    <div class="profile-label">Full Name:</div>
+    <div class="profile-value">{{ user.first_name }} {{ user.last_name }}</div>
+  </div>
+
+  <div class="profile-row">
+    <div class="profile-label">Username:</div>
+    <div class="profile-value">{{ user.username }}</div>
+  </div>
+
+  <div class="profile-row">
+    <div class="profile-label">Email:</div>
+    <div class="profile-value">{{ user.email }}</div>
+  </div>
+
+  <div class="profile-row">
+    <div class="profile-label">Phone:</div>
+    <div class="profile-value">{{ user.phone }}</div>
+  </div>
+
+  <div class="profile-row">
+    <div class="profile-label">Gender:</div>
+    <div class="profile-value">{{ user.gender }}</div>
+  </div>
+
+  <div class="profile-row">
+    <div class="profile-label">Company / Institution:</div>
+    <div class="profile-value">{{ supervisor.company_name }}</div>
+  </div>
+
+  <div class="profile-row">
+    <div class="profile-label">Position:</div>
+    <div class="profile-value">{{ supervisor.position }}</div>
+  </div>
+
+  <div class="profile-row">
+    <div class="profile-label">Role:</div>
+    <div class="profile-value">{{ user.role|capfirst }}</div>
+  </div>
+
+  <div class="profile-row">
+    <div class="profile-label">Date Joined:</div>
+    <div class="profile-value">{{ user.date_joined|date:"F j, Y" }}</div>
+  </div>
+</div>
+{% endblock %}

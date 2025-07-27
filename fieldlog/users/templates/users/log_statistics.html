@@ -1,18 +1,91 @@
-{% extends 'base.html' %}
-{% block content %}
-<div class="container" style="margin: 30px;">
-    <h2>Logbook Statistics</h2>
-    <p>Total Logs Submitted: {{ total_logs }}</p>
-    <p>Pending Logs: {{ pending_logs }}</p>
-    <p>Approved Logs: {{ approved_logs }}</p>
+{% extends "base.html" %}
 
-    <h3>Students Supervised</h3>
-    <ul>
-    {% for student in students %}
-        <li>{{ student.user.get_full_name }}</li>
+{% block content %}
+<style>
+  body {
+    background-color: #121212; /* solid dark background */
+    color: #eeeeee; /* light text for contrast */
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+  }
+  h2 {
+    text-align: center;
+    color: #00bfa5; /* teal accent */
+    margin-bottom: 20px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #1e1e1e; /* dark table background */
+    color: #eeeeee;
+  }
+  thead tr {
+    background-color: #004d40; /* teal header */
+    color: white;
+  }
+  th, td {
+    padding: 10px;
+    border: 1px solid #333;
+    text-align: center;
+  }
+  tbody tr {
+    border-bottom: 1px solid #333;
+  }
+  tbody tr:nth-child(even) {
+    background-color: #2a2a2a;
+  }
+  tbody tr:hover {
+    background-color: #00796b;
+    color: white;
+  }
+  td.pending {
+    color: #d9534f; /* red */
+    font-weight: 600;
+  }
+  td.approved {
+    color: #5cb85c; /* green */
+    font-weight: 600;
+  }
+  td {
+    font-weight: 500;
+  }
+</style>
+
+<h2>Student Log Statistics</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>First Name</th>
+      <th>Second Name</th>
+      <th>Course Title</th>
+      <th>Total Logs</th>
+      <th>Pending Logs</th>
+      <th>Approved Logs</th>
+      <th>Logs Remaining</th>
+      <th>Logs Finished</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for stat in students_stats %}
+    <tr>
+      <td>{{ stat.first_name }}</td>
+      <td>{{ stat.last_name }}</td>
+      <td>{{ stat.course_title }}</td>
+      <td>{{ stat.total_logs }}</td>
+      <td class="pending">{{ stat.pending_logs }}</td>
+      <td class="approved">{{ stat.approved_logs }}</td>
+      <td>{{ stat.logs_remaining }}</td>
+      <td>{{ stat.logs_finished }}</td>
+    </tr>
     {% empty %}
-        <li>No students found.</li>
+    <tr>
+      <td colspan="8" style="text-align: center; padding: 15px;">
+        No students found.
+      </td>
+    </tr>
     {% endfor %}
-    </ul>
-</div>
+  </tbody>
+</table>
 {% endblock %}

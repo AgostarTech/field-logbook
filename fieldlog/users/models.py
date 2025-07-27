@@ -3,7 +3,11 @@ from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from django.conf import settings
 
-# Department model
+
+# -------------------------------
+# Department Model
+# Represents academic or organizational departments
+# -------------------------------
 class Department(models.Model):
     name = models.CharField(max_length=100, unique=True)
 
@@ -11,7 +15,22 @@ class Department(models.Model):
         return self.name
 
 
-# Custom User model
+# -------------------------------
+# Course Model
+# Represents courses offered (linked to students)
+# -------------------------------
+class Course(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
+# -------------------------------
+# Custom User Model
+# Extends Django's AbstractUser with additional fields
+# Includes user role, phone, department FK, and profile picture
+# -------------------------------
 class CustomUser(AbstractUser):
     ROLE_CHOICES = [
         ('student', 'Student'),
@@ -34,20 +53,33 @@ class CustomUser(AbstractUser):
         return self.username
 
 
-# Supervisor Profiles
+# -------------------------------
+# SupervisorProfile Model
+# Stores extra details for supervisors, linked to user and department
+# -------------------------------
 class SupervisorProfile(models.Model):
     user = models.OneToOneField(
         CustomUser,
         on_delete=models.CASCADE,
         related_name='supervisor_profile'
     )
-    department = models.CharField(max_length=100)
+    department = models.ForeignKey(
+        Department,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
     phone = models.CharField(max_length=20, blank=True, null=True)
+    position = models.CharField(max_length=100, blank=True, null=True)  # Job title or role
 
     def __str__(self):
         return self.user.username
 
 
+# -------------------------------
+# OnStationSupervisor Model
+# Supervisors located at external companies or stations
+# -------------------------------
 class OnStationSupervisor(models.Model):
     user = models.OneToOneField(
         CustomUser,
@@ -61,20 +93,38 @@ class OnStationSupervisor(models.Model):
         return self.user.get_full_name() or self.user.username
 
 
+# -------------------------------
+# OnCampusSupervisor Model
+# Supervisors within campus departments
+# Uses FK to Department for consistency
+# -------------------------------
+
+from django.db import models
+from .models import CustomUser, Department  # adjust import as needed
+
 class OnCampusSupervisor(models.Model):
     user = models.OneToOneField(
         CustomUser,
         on_delete=models.CASCADE,
         related_name='oncampus_profile'
     )
-    department = models.CharField(max_length=100, blank=True, null=True)
-    is_approved = models.BooleanField(default=False)
+    department = models.ForeignKey(
+        Department,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    is_approved = models.BooleanField(default=False)  # Approval status for supervisor
 
     def __str__(self):
         return self.user.get_full_name() or self.user.username
 
-
-# Student Profile
+# -------------------------------
+# StudentProfile Model
+# Extended student information
+# Links to Course, Department, and supervisors (FK)
+# Includes personal details, reports, and marks
+# -------------------------------
 class StudentProfile(models.Model):
     user = models.OneToOneField(
         CustomUser,
@@ -82,13 +132,27 @@ class StudentProfile(models.Model):
         related_name='student_profile'
     )
     registration_number = models.CharField(max_length=50, unique=True)
-    course = models.CharField(max_length=100)
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
     year_of_study = models.PositiveSmallIntegerField()
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
     institution_name = models.CharField(max_length=100, blank=True, null=True)
-    department = models.CharField(max_length=100, blank=True, null=True)
-    gender = models.CharField(max_length=10, choices=[('Male', 'Male'), ('Female', 'Female')], blank=True)
+    department = models.ForeignKey(
+        Department,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    gender = models.CharField(
+        max_length=10,
+        choices=[('Male', 'Male'), ('Female', 'Female')],
+        blank=True
+    )
     date_of_birth = models.DateField(blank=True, null=True)
     address = models.TextField(blank=True, null=True)
 
@@ -115,20 +179,26 @@ class StudentProfile(models.Model):
         return self.registration_number
 
 
-# Log Entry
+# -------------------------------
+# LogEntry Model
+# Daily logs submitted by students
+# Tracks status and approval metadata
+# -------------------------------
 class LogEntry(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('approved', 'Approved'),
         ('rejected', 'Rejected'),
     ]
+
     student = models.ForeignKey(
         StudentProfile,
         on_delete=models.CASCADE,
         related_name='log_entries'
     )
-    date = models.DateField(default=timezone.now)
+    date = models.DateField(default=timezone.now, db_index=True)
     content = models.TextField()
+
     approved_by = models.ForeignKey(
         CustomUser,
         on_delete=models.SET_NULL,
@@ -137,13 +207,42 @@ class LogEntry(models.Model):
         related_name='approved_logs'
     )
     approved_at = models.DateTimeField(null=True, blank=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='pending', db_index=True)
+    rejection_reason = models.TextField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-date', '-created_at']
 
     def __str__(self):
-        return f"{self.student.user.username} | {self.date}"
+        return f"Log by {self.student.user.username} on {self.date} [{self.status}]"
+
+    @property
+    def is_approved(self):
+        return self.status == 'approved'
+
+    def approve(self, user):
+        self.status = 'approved'
+        self.approved_by = user
+        self.approved_at = timezone.now()
+        self.save(update_fields=['status', 'approved_by', 'approved_at'])
+
+    def reject(self, user, reason=None):
+        self.status = 'rejected'
+        self.approved_by = user
+        self.approved_at = timezone.now()
+        if reason:
+            self.rejection_reason = reason
+        self.save(update_fields=['status', 'approved_by', 'approved_at', 'rejection_reason'])
 
 
-# Assigned Tasks by Supervisor
+# -------------------------------
+# AssignedTask Model
+# Tasks assigned by supervisors to students
+# -------------------------------
 class AssignedTask(models.Model):
     STATUS_CHOICES = [
         ('Pending', 'Pending'),
@@ -170,7 +269,10 @@ class AssignedTask(models.Model):
         return f"{self.task_title} for {self.student.user.username}"
 
 
-# Supervisor Upload Files
+# -------------------------------
+# SupervisorUpload Model
+# Files uploaded by supervisors for resources/materials
+# -------------------------------
 class SupervisorUpload(models.Model):
     uploaded_by = models.ForeignKey(
         CustomUser,
@@ -186,7 +288,10 @@ class SupervisorUpload(models.Model):
         return self.title
 
 
-# Task with ManyToMany to Students
+# -------------------------------
+# Task Model
+# Tasks assigned to multiple students (ManyToMany)
+# -------------------------------
 class Task(models.Model):
     assigned_by = models.ForeignKey(
         CustomUser,
@@ -203,7 +308,11 @@ class Task(models.Model):
         return f"Task {self.id} by {self.assigned_by.username}"
 
 
-# Task and Resource model with department and assigned users
+# -------------------------------
+# TaskResource Model
+# Generic model for Task or Resource
+# Linked to Department and assigned users
+# -------------------------------
 class TaskResource(models.Model):
     TYPE_CHOICES = (
         ('Task', 'Task'),
@@ -231,7 +340,10 @@ class TaskResource(models.Model):
         return self.title
 
 
-# Department resources uploaded by users
+# -------------------------------
+# DepartmentResource Model
+# Files/resources uploaded for a department
+# -------------------------------
 class DepartmentResource(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
@@ -243,7 +355,10 @@ class DepartmentResource(models.Model):
         return self.title
 
 
-# Uploaded Document linked to students
+# -------------------------------
+# UploadedDocument Model
+# Documents uploaded by students
+# -------------------------------
 class UploadedDocument(models.Model):
     student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name='uploaded_documents')
     title = models.CharField(max_length=255, blank=True)

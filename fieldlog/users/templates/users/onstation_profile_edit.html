@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="max-width: 600px; margin: 40px auto; padding: 20px; background: #1e1e2f; border-radius: 12px; color: #eee;">
+  <h2 style="text-align: center; color: #00bfa5;">Edit Supervisor Profile</h2>
+
+  <form method="post" style="margin-top: 20px;">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit" style="
+      background-color: #00bfa5;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      width: 100%;
+      font-weight: bold;
+    ">Save Changes</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,9 +1,13 @@
-from django.urls import path
+from django.urls import path, reverse_lazy
 from django.contrib.auth import views as auth_views
 from . import views
-from .views import export_student_logs_pdf
-
-from .views import assign_task_to_students, track_progress
+from .views import (
+    export_student_logs_pdf,
+    assign_task_to_students,
+    track_progress,
+    onstation_profile_view,
+    edit_onstation_profile,
+)
 
 app_name = 'users'
 
@@ -11,7 +15,7 @@ urlpatterns = [
     # Home and Authentication
     path('', views.home, name='home'),
     path('login/', views.login_view, name='login'),
-    path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
+    path('logout/', auth_views.LogoutView.as_view(next_page='users:login'), name='logout'),
 
     # Signup Options
     path('signup-select/', views.signup_select, name='signup_select'),
@@ -28,6 +32,8 @@ urlpatterns = [
     # Profile Editing
     path('profile/edit/', views.edit_profile, name='edit_profile'),
     path('profile/edit/student/', views.edit_student_profile, name='edit_student_profile'),
+    path('onstation/profile/', onstation_profile_view, name='onstation_profile'),
+    path('onstation/profile/edit/', edit_onstation_profile, name='edit_onstation_profile'),
 
     # Student Profile View
     path('student/<int:pk>/', views.student_profile, name='student_profile'),
@@ -42,7 +48,6 @@ urlpatterns = [
     path('logs/<int:student_id>/', views.view_logs, name='view_logs'),
     path('view-logs/<int:student_id>/', views.view_logs, name='view_logs_alt'),
     path('download-logs/<int:student_id>/', views.download_logs_pdf, name='download_logs_pdf'),
-    
 
     # File Upload by Supervisors
     path('supervisor/upload-document/', views.supervisor_upload_document, name='supervisor_upload_document'),
@@ -65,32 +70,42 @@ urlpatterns = [
     # Pending and Approved Logs
     path('pending-logs/', views.pending_logs, name='pending_logs'),
     path('approved-logs/', views.approved_logs, name='approved_logs'),
-    path('approve-logs/', views.approve_logs, name='approve_logs'),
 
-    # Password Change Views
-    path('password/change/', auth_views.PasswordChangeView.as_view(template_name='users/password_change.html'), name='change_password'),
-    path('password/change/done/', auth_views.PasswordChangeDoneView.as_view(template_name='users/password_change_done.html'), name='password_change_done'),
+    # Approve/Reject Log URLs
+    path('approve-log/<int:log_id>/', views.approve_log, name='approve_log'),
+    path('reject-log/<int:log_id>/', views.reject_log, name='reject_log'),
+
+    # Password Change URLs with proper success_url
+    path('password/change/', auth_views.PasswordChangeView.as_view(
+        template_name='users/password_change.html',
+        success_url=reverse_lazy('users:password_change_done'),
+    ), name='change_password'),
+
+    path('password/change/done/', auth_views.PasswordChangeDoneView.as_view(
+        template_name='users/password_change_done.html',
+    ), name='password_change_done'),
+
+    # Statistics & Reports
     path('log_statistics/', views.view_log_statistics, name='view_log_statistics'),
-
     path('view-resources/', views.view_uploaded_resources, name='view_uploaded_resources'),
-    
     path('students/all/', views.view_all_students, name='view_all_students'),
     path('dashboard/oncampus/student/<int:student_id>/', views.oncampus_dashboard, name='oncampus_dashboard_student'),
 
-    
+    # Supervisor Lists
     path('supervisors/onstation/', views.view_all_onstation_supervisors, name='view_all_onstation_supervisors'),
     path('supervisors/oncampus/', views.view_all_oncampus_supervisors, name='view_all_oncampus_supervisors'),
 
-    # Download student documents and reports
+    # Download Documents & Reports
     path('students/<int:student_id>/download-documents/', views.download_uploaded_documents, name='download_uploaded_documents'),
     path('students/<int:student_id>/download-general-report/', views.download_general_report, name='download_general_report'),
     path('students/<int:student_id>/download-technical-report/', views.download_technical_report, name='download_technical_report'),
 
-    # Assign marks
+    # Assign Marks
     path('students/<int:student_id>/assign-marks/', views.assign_marks, name='assign_marks'),
-    path('logs/<int:student_id>/', views.view_logs, name='view_logs'),
 
-    
+    # PDF Export
     path('export-logs/<int:student_id>/', export_student_logs_pdf, name='export_student_logs_pdf'),
-    path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
+
+    # Upload Profile Picture
+    path('upload-picture/', views.upload_picture, name='upload_picture'),
 ]

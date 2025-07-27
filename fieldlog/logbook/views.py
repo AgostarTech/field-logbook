@@ -438,14 +438,28 @@ def add_entry(request):
 def add_entry_view(request):
     return render(request, 'logbook/add_entry.html')
 
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .models import LogEntry
+
 @login_required
 def all_students_logs(request):
-    if not request.user.is_staff and getattr(request.user, 'role', None) not in ['onstation', 'oncampus']:
-        messages.error(request, "You do not have permission to view all students' logs.")
+    user_role = getattr(request.user, 'role', None)
+    is_supervisor = request.user.is_staff or user_role not in ['oncampus', 'onstation']
+
+    if is_supervisor:
+        logs = LogEntry.objects.select_related('user').order_by('-date', '-created_at')
+    elif user_role in ['oncampus', 'onstation']:
+        logs = LogEntry.objects.filter(user=request.user).order_by('-date', '-created_at')
+    else:
+        messages.error(request, "You do not have permission to view logs.")
         return redirect('logbook:dashboard')
 
-    logs = LogEntry.objects.select_related('user').order_by('-date', '-created_at')
-    return render(request, 'logbook/all_students_logs.html', {'logs': logs})
+    return render(request, 'logbook/all_students_logs.html', {
+        'logs': logs,
+        'is_supervisor': is_supervisor
+    })
 
 from users.models import CustomUser  # Assuming your custom user model
 
@@ -461,3 +475,92 @@ def student_logs(request, student_id):
     student = get_object_or_404(CustomUser, id=student_id, role='student')
     logs = LogEntry.objects.filter(user=student).order_by('-created_at')
     return render(request, 'logbook/student_logs.html', {'student': student, 'logs': logs})
+
+import io
+from django.http import FileResponse
+from django.contrib.auth.decorators import login_required
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.utils import ImageReader
+import qrcode
+from .models import LogEntry
+
+@login_required
+def download_entry_pdf(request):
+    buffer = io.BytesIO()
+    p = canvas.Canvas(buffer, pagesize=A4)
+    width, height = A4
+
+    user = request.user
+
+    # Starting Y position
+    y = height - 80
+
+    # Draw user profile picture if available
+    if hasattr(user, 'profile_picture') and user.profile_picture:
+        try:
+            img_path = user.profile_picture.path  # local file path
+            p.drawImage(ImageReader(img_path), 50, y - 70, width=60, height=60)
+        except Exception:
+            pass
+
+    # Draw user info text next to profile pic
+    text_x = 120
+    p.setFont("Helvetica-Bold", 14)
+    p.drawString(text_x, y, f"{user.first_name} {user.last_name}")
+    p.setFont("Helvetica", 12)
+    y -= 20
+    p.drawString(text_x, y, f"Registration No: {getattr(user, 'registration_number', 'N/A')}")
+    y -= 20
+    p.drawString(text_x, y, f"Username: {user.username}")
+
+    y -= 50
+
+    # Draw title
+    p.setFont("Helvetica-Bold", 16)
+    p.drawCentredString(width / 2, y, "Logbook Entries")
+    y -= 30
+
+    # Fetch user log entries
+    entries = LogEntry.objects.filter(user=user).order_by('created_at')
+
+    p.setFont("Helvetica", 11)
+
+    # Draw each entry - customize as needed
+    for entry in entries:
+        entry_date = entry.created_at.strftime("%Y-%m-%d")
+        place = getattr(entry, 'place', '')
+        description = (entry.description[:100] + '...') if len(entry.description) > 100 else entry.description
+
+        entry_text = f"{entry_date} | {place} | {description}"
+        p.drawString(50, y, entry_text)
+        y -= 20
+
+        if y < 150:
+            p.showPage()
+            y = height - 80
+            p.setFont("Helvetica", 11)
+
+    # Leave space for signature line
+    y -= 50
+    p.line(50, y, 250, y)  # signature line
+    y -= 15
+    p.drawString(50, y, "Signature")
+
+    # Generate QR code (for example, encode user's profile url or id)
+    qr_data = f"https://yourdomain.com/user/{user.pk}/logbook"  # customize your URL
+    qr = qrcode.make(qr_data)
+    qr_buffer = io.BytesIO()
+    qr.save(qr_buffer)
+    qr_buffer.seek(0)
+    qr_img = ImageReader(qr_buffer)
+
+    # Place QR code bottom-right
+    qr_size = 100
+    p.drawImage(qr_img, width - qr_size - 50, 50, width=qr_size, height=qr_size)
+
+    p.showPage()
+    p.save()
+
+    buffer.seek(0)
+    return FileResponse(buffer, as_attachment=True, filename=f"{user.username}_log_entries.pdf")

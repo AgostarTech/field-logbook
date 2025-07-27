@@ -1,38 +1,141 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}View Last Log Entry{% endblock %}
+{% block title %}All Log Entries{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'logbook/css/logentry.css' %}">
+<style>
+  .container-logentry {
+    max-width: 1100px;
+    margin: 30px auto;
+    background-color: #074d63ff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  h1 {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #ffffff;
+    border-bottom: 2px solid #ffffff44;
+    padding-bottom: 10px;
+  }
+
+  .summary {
+    font-size: 16px;
+    margin-bottom: 20px;
+    color: #e5e7eb;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 25px;
+  }
+
+  th, td {
+    border: 1px solid #cbd5e1;
+    padding: 12px 14px;
+    text-align: left;
+  }
+
+  th {
+    background-color: #f1f5f9;
+    color: #1e293b;
+  }
+
+  tr:nth-child(even) {
+    background-color: #f8fafc;
+  }
+
+  .status-approved {
+    color: green;
+    font-weight: bold;
+  }
+
+  .status-pending {
+    color: orange;
+    font-weight: bold;
+  }
+
+  .btn {
+    background-color: #e7e9e8ff;
+    color: green;
+    padding: 10px 18px;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+  }
+
+  .btn:hover {
+    background-color: #1e40af;
+    color: white;
+  }
+</style>
 {% endblock %}
 
 {% block content %}
 <div class="container-logentry">
-  <h1>Last Log Entry Details</h1>
+  <h1>All Log Entries</h1>
 
-  {% if last_entry %}
-    <p class="summary">
-      Viewing log entry <strong>{{ last_entry.day_number }}</strong> of <strong>25</strong>.
-    </p>
+  <p class="summary">Displaying all log entries.</p>
 
-    <div class="logentry-details">
-      <p><strong>Place:</strong> {{ last_entry.place.name }}</p>
-      <p><strong>Institution:</strong> {{ last_entry.institution.name }}</p>
-      <p><strong>Date:</strong> {{ last_entry.date }}</p>
-      <p><strong>Start Time:</strong> {{ last_entry.start_time }}</p>
-      <p><strong>Departure Time:</strong> {{ last_entry.departure_time }}</p>
-      <p><strong>Description:</strong></p>
-      <div style="background:#f1f5f9; padding:15px; border-radius:8px; margin-bottom:15px; white-space: pre-wrap;">
-        {{ last_entry.description }}
-      </div>
-      <p><strong>Trainee Signature:</strong> {{ last_entry.trainee_signature }}</p>
-    </div>
-
+  {% if logs %}
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Student</th>
+          <th>Date</th>
+          <th>Institution</th>
+          <th>Place</th>
+          <th>Description</th>
+          <th>Day</th>
+          <th>Status</th>
+          <th>Approved By</th>
+          <th>Approved Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+        <tr>
+          <td>{{ log.id }}</td>
+          <td>{{ log.user.get_full_name|default:log.user.username }}</td>
+          <td>{{ log.date }}</td>
+          <td>{{ log.institution.name }}</td>
+          <td>{{ log.place.name }}</td>
+          <td>{{ log.description|truncatewords:10 }}</td>
+          <td>{{ log.day_number }}</td>
+          <td>
+            {% if log.approved %}
+              <span class="status-approved">Approved</span>
+            {% else %}
+              <span class="status-pending">Pending</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if log.approved and log.user.student_profile.supervisor %}
+              {{ log.user.student_profile.supervisor.get_full_name|default:log.user.student_profile.supervisor.username }}
+            {% else %}
+              &mdash;
+            {% endif %}
+          </td>
+          <td>
+            {% if log.approved %}
+              {{ log.created_at|date:"Y-m-d" }}
+            {% else %}
+              &mdash;
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   {% else %}
-    <p class="summary">No log entries found.</p>
+    <p class="summary">No logs available at the moment.</p>
   {% endif %}
-<a href="{% url 'logbook:create_log_entry' %}" class="btn">Add New Entry</a>
 
+  <a href="{% url 'logbook:dashboard' %}" class="btn">Back to Dashboard</a>
 </div>
 {% endblock %}

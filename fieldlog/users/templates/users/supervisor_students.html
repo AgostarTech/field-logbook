@@ -3,24 +3,110 @@
 {% block title %}Students under {{ supervisor.username }}{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-  <h2 class="mb-4">Students under <strong>{{ supervisor.get_full_name|default:supervisor.username }}</strong></h2>
+<div class="student-table-container">
+  <h2 class="table-title">
+    Students under <strong>{{ supervisor.get_full_name|default:supervisor.username }}</strong>
+  </h2>
 
   {% if students %}
-    <ul class="list-group">
-      {% for student in students %}
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-          <span>{{ student.user.get_full_name }}</span>
-          {% if student.institution %}
-            <small class="text-muted">{{ student.institution }}</small>
-          {% endif %}
-        </li>
-      {% endfor %}
-    </ul>
+    <div class="custom-table-wrapper">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>First Name</th>
+            <th>Second Name</th>
+            <th>Registration Number</th>
+            <th>Year of Study</th>
+            <th>Gender</th>
+            <th>Email</th>
+            <th>Phone Number</th>
+            <th>Course</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for student in students %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ student.user.first_name }}</td>
+            <td>{{ student.user.last_name }}</td>
+            <td>{{ student.registration_number }}</td>
+            <td>{{ student.year_of_study }}</td>
+            <td>{{ student.gender }}</td>
+            <td>{{ student.user.email }}</td>
+            <td>{{ student.phone_number }}</td>
+            <td>{{ student.course }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   {% else %}
-    <div class="alert alert-info" role="alert">
+    <div class="no-students-alert">
       No students assigned to this supervisor yet.
     </div>
   {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.student-table-container {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 30px;
+  background-color: #121922;
+  border-radius: 14px;
+  color: #e0f7fa;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.table-title {
+  font-size: 2.2rem;
+  color: #00bfa5;
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.custom-table-wrapper {
+  overflow-x: auto;
+}
+
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #1e2a33;
+  color: #ffffff;
+}
+
+.custom-table th,
+.custom-table td {
+  padding: 12px 15px;
+  border: 1px solid #2e3d49;
+  text-align: center;
+}
+
+.custom-table th {
+  background-color: #00bfa5;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.custom-table tr:nth-child(even) {
+  background-color: #263238;
+}
+
+.custom-table tr:hover {
+  background-color: #004d40;
+}
+
+.no-students-alert {
+  background-color: #004d40;
+  color: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 1.1rem;
+}
+</style>
 {% endblock %}

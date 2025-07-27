@@ -80,13 +80,20 @@ def create_student_profile(sender, instance, created, **kwargs):
             registration_number=f"TEMP{instance.pk}",
             course="Unknown"
         )
+        
+##############################
 
+##log entry
 
-# ========================
-# Logbook Entry
-# ========================
+#############################
 
 class LogEntry(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -114,12 +121,26 @@ class LogEntry(models.Model):
     trainee_signature = models.CharField(max_length=100)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
-    approved = models.BooleanField(default=False)
+
+    approved = models.BooleanField(default=False)  # legacy field for compatibility
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default='pending'
+    )
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='approved_log_entries'
+    )
+    approved_date = models.DateTimeField(null=True, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.user.username} - {self.date}"
-
 
 # ========================
 # Uploaded Files

@@ -28,6 +28,7 @@ urlpatterns = [
 
     # Progress Reports
     path('progress-report/', views.progress_report_view, name='progress_report'),
+    path('download-pdf/', views.download_entry_pdf, name='download_entry_pdf'),
 
     # Files
     path('files/', views.view_files, name='view_files'),
@@ -37,6 +38,10 @@ urlpatterns = [
 
     # Signup
     path('signup/student/', views.student_signup, name='student_signup'),
+
+    # Create log entry (note comma below)
+    path('log/create/', views.create_entry, name='create_entry'),
+
 
     # Tasks
     path('tasks/assign/', views.assign_task, name='assign_task'),

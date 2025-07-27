@@ -2,67 +2,232 @@
 {% load static %}
 
 {% block content %}
-<link rel="stylesheet" href="{% static 'css/style.css' %}">
-<script src="{% static 'js/log_actions.js' %}" defer></script>
 
-<div class="container" style="margin-top: 30px;">
+<style>
+  body {
+    background-color: #02000cff !important;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    color: #eee;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 30px auto;
+    background-color: #121212;
+    padding: 20px 25px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    color: #eee;
+  }
+
+  .section-title {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  .subtitle {
+    font-size: 16px;
+    color: #aaa;
+    margin-bottom: 20px;
+  }
+  hr {
+    border: none;
+    border-bottom: 1px solid #444;
+    margin-bottom: 30px;
+  }
+
+  .card {
+    border: 1px solid #333;
+    border-radius: 6px;
+    margin-bottom: 30px;
+    box-shadow: 1px 1px 5px rgba(255,255,255,0.05);
+    background-color: #1e1e1e;
+    color: #eee;
+  }
+  .card-header {
+    background: #0c0909ff;
+    padding: 12px 20px;
+    font-weight: bold;
+    font-size: 18px;
+    color: #fff;
+  }
+  .card-body {
+    padding: 20px;
+  }
+
+  ul {
+    list-style-type: none;
+    padding-left: 0;
+    margin-bottom: 20px;
+  }
+  ul li {
+    margin-bottom: 6px;
+    font-size: 15px;
+  }
+
+  table.styled-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  table.styled-table thead tr {
+    background-color: #088551ff;
+    color: #fff;
+    text-align: left;
+  }
+  table.styled-table th,
+  table.styled-table td {
+    padding: 8px 12px;
+    border: 1px solid #444;
+    font-size: 14px;
+    vertical-align: middle;
+    color: #eee;
+  }
+
+  .pending-row {
+    background-color: #3e3a1e;
+  }
+  .approved-row {
+    background-color: #1e3e1f;
+  }
+  .rejected-row {
+    background-color: #3e1e1e;
+  }
+
+  .btn {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .btn-sm {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+  .btn-success {
+    background-color: #28a745;
+    color: white;
+  }
+  .btn-danger {
+    background-color: #dc3545;
+    color: white;
+  }
+  .btn-primary {
+    background-color: #007bff;
+    color: white;
+  }
+  .btn-outline-success {
+    background-color: #042c1cc0;
+    border: 1px solid #090e0aff;
+    color: #e0e9e2ff;
+    margin-top: 10px;
+    padding: 7px 15px;
+  }
+  .btn-outline-success:hover {
+    background-color: #d0dfd4ff;
+    color: white;
+  }
+
+  .muted {
+    color: #bbb;
+    font-style: italic;
+    font-size: 13px;
+  }
+
+  input[type="text"] {
+    padding: 6px 8px;
+    border: 1px solid #555;
+    border-radius: 4px;
+    background-color: #222;
+    color: #eee;
+  }
+
+  form {
+    margin: 0;
+  }
+</style>
+
+<div class="container">
     <h2 class="section-title">Student Log Activities</h2>
     <p class="subtitle">Manage logbook entries for students under your supervision</p>
     <hr>
 
-    {% if logs %}
-    <div class="log-table">
-        <table class="styled-table">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Student</th>
-                    <th>Day</th>
-                    <th>Activity Description</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                    <th>Comment</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for log in logs %}
-                <tr class="{% if log.status == 'Pending' %}pending-row{% elif log.status == 'Approved' %}approved-row{% else %}rejected-row{% endif %}">
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ log.user.get_full_name }}</td>
-                    <td>Day {{ log.day_number }}</td>
-                    <td>{{ log.description|truncatechars:100 }}</td>
-                    <td>{{ log.date|date:"M d, Y" }}</td>
-                    <td><strong>{{ log.status }}</strong></td>
-                    <td>
-                        {% if log.status == "Pending" %}
-                            <form method="post" action="{% url 'users:approve_log' log.id %}" style="display:inline-block;">
-                                {% csrf_token %}
-                                <button class="btn btn-success" title="Approve this log">✔ Approve</button>
-                            </form>
-                            <form method="post" action="{% url 'users:reject_log' log.id %}" style="display:inline-block;">
-                                {% csrf_token %}
-                                <button class="btn btn-danger" title="Reject this log">✖ Reject</button>
-                            </form>
-                        {% else %}
-                            <span class="muted">No actions</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <form method="post" action="{% url 'users:comment_log' log.id %}">
-                            {% csrf_token %}
-                            <input type="text" name="comment" value="{{ log.comment }}" placeholder="Write comment..." style="width: 100%;">
-                            <button type="submit" class="btn btn-primary" style="margin-top: 5px;">Save</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    {% for student in students %}
+    <div class="card">
+        <div class="card-header">
+            <strong>{{ student.user.first_name }} {{ student.user.last_name }}</strong> - Reg No: {{ student.registration_number }}
+        </div>
+        <div class="card-body">
+            <p><strong>Log Stats:</strong></p>
+            <ul>
+                <li>Total Logs: {{ student.total_logs }}</li>
+                <li>Approved Logs: {{ student.approved_logs }}</li>
+                <li>Pending Logs: {{ student.pending_logs }}</li>
+                <li>Remedied Logs: {{ student.remedied_logs }}</li>
+                <li>Remaining Logs: {{ student.remaining_logs }}</li>
+            </ul>
+
+            <form method="post" action="{% url 'users:bulk_approve_logs' student.user.id %}">
+                {% csrf_token %}
+                <table class="styled-table">
+                    <thead>
+                        <tr>
+                            <th>Select</th>
+                            <th>#</th>
+                            <th>Day</th>
+                            <th>Description</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                            <th>Comment</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in student.log_entries.all %}
+                        <tr class="{% if log.status == 'pending' %}pending-row{% elif log.status == 'approved' %}approved-row{% else %}rejected-row{% endif %}">
+                            <td>
+                                {% if log.status == "pending" %}
+                                    <input type="checkbox" name="log_ids" value="{{ log.id }}">
+                                {% endif %}
+                            </td>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{% if log.day_number %}Day {{ log.day_number }}{% else %}N/A{% endif %}</td>
+                            <td>{{ log.content|truncatechars:100 }}</td>
+                            <td>{{ log.date|date:"M d, Y" }}</td>
+                            <td><strong>{{ log.status|capfirst }}</strong></td>
+                            <td>
+                                {% if log.status == "pending" %}
+                                <form method="post" action="{% url 'users:approve_log' log.id %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button class="btn btn-success btn-sm">✔</button>
+                                </form>
+                                <form method="post" action="{% url 'users:reject_log' log.id %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button class="btn btn-danger btn-sm">✖</button>
+                                </form>
+                                {% else %}
+                                    <span class="muted">N/A</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <form method="post" action="{% url 'users:comment_log' log.id %}">
+                                    {% csrf_token %}
+                                    <input type="text" name="comment" value="{{ log.comment }}" placeholder="Write comment..." style="width: 100%;">
+                                    <button type="submit" class="btn btn-primary btn-sm mt-1">💾</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <button type="submit" class="btn btn-outline-success">Approve Selected</button>
+            </form>
+        </div>
     </div>
-    {% else %}
-        <div class="alert alert-warning">No log activities available from your students yet.</div>
-    {% endif %}
+    {% endfor %}
 </div>
 
 {% endblock %}

@@ -31,6 +31,9 @@ INSTALLED_APPS = [
     'notifications',
     'aihelper',
     'chat',
+    'widget_tweaks',
+
+
 ]
 
 # ===========================

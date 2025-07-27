@@ -8,3 +8,4 @@ def create_student_profile(sender, instance, created, **kwargs):
     if created and instance.role == 'student':
         # This causes error because fields are missing
         StudentProfile.objects.create(user=instance)
+

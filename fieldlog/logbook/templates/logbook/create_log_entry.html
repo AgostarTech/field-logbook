@@ -1,10 +1,54 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load widget_tweaks %}
 
 {% block title %}Create Log Entry{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'logbook/css/logentry.css' %}">
+<style>
+  .notebook-style {
+    background: linear-gradient(white 29px, #eaeaea 30px);
+    background-size: 100% 30px;
+    line-height: 30px;
+    border: 1px solid #ccc;
+    font-family: 'Courier New', Courier, monospace;
+    padding: 10px;
+  }
+
+  .container-logentry {
+    max-width: 800px;
+    margin: 3rem auto;
+    background-color: #f9f9f9;
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  }
+
+  .form-wrapper {
+    margin-top: 1rem;
+  }
+
+  .summary {
+    font-size: 1.1rem;
+    color: #555;
+    margin-bottom: 1rem;
+  }
+
+  .btn-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .btn-group .btn {
+    flex: 1;
+  }
+
+  .form-label {
+    font-weight: 600;
+  }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -15,19 +59,29 @@
     Filling log entry <strong><span id="day-number">{{ entry_count|add:"1" }}</span></strong> of <strong>25</strong>.
   </p>
 
-  <div class="form-wrapper"> <!-- ✅ Optional wrapper for styling -->
+  <div class="form-wrapper">
     <form method="post" novalidate>
       {% csrf_token %}
       {% for field in form %}
         <div class="mb-3">
           <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-          {{ field }}
+
+          {% if field.name == "description" %}
+            {{ field|add_class:"form-control notebook-style" }}
+          {% else %}
+            {{ field|add_class:"form-control" }}
+          {% endif %}
+
           {% if field.errors %}
             <div class="text-danger small">{{ field.errors }}</div>
           {% endif %}
         </div>
       {% endfor %}
-      <button type="submit" class="btn btn-success w-100">Submit Entry</button>
+
+      <div class="btn-group">
+        <button type="submit" class="btn btn-success">Submit Entry</button>
+        <a href="{% url 'logbook:download_entry_pdf' %}" class="btn btn-primary">Download Entry</a>
+      </div>
     </form>
   </div>
 </div>

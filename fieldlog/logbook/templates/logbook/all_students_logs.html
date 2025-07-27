@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/logs.css' %}">
+
+<div class="container mt-4">
+  <h2><i class="fas fa-book"></i> Log Entries</h2>
+
+  {% if user.is_authenticated %}
+    {% if user.is_supervisor %}
+      <p class="text-muted">Showing logs from <strong>all students</strong></p>
+    {% else %}
+      <p class="text-muted">Showing <strong>your logs</strong></p>
+    {% endif %}
+  {% endif %}
+
+  {% if entries %}
+    <table class="table table-striped mt-3">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Description</th>
+          <th>Institution</th>
+          <th>Created by</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in entries %}
+        <tr>
+          <td>{{ entry.created_at|date:"Y-m-d" }}</td>
+          <td>{{ entry.description|truncatechars:50 }}</td>
+          <td>{{ entry.institution.name }}</td>
+          <td>{{ entry.user.get_full_name }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="text-danger mt-4">No log entries available.</p>
+  {% endif %}
+</div>
+
+{% endblock %}

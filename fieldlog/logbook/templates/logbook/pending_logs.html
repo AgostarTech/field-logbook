@@ -1,39 +1,138 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container" style="margin: 30px;">
+<style>
+  body {
+    background-color: #020500dc;
+  }
+
+  .container {
+    margin: 30px auto;
+    max-width: 1000px;
+    font-family: Arial, sans-serif;
+    background-color: #0d1a0b; /* deep dark green */
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 12px rgba(0, 255, 0, 0.1);
+    color: #e0f8e9; /* light text */
+  }
+
+  h2 {
+    color: #26ff94;
+    margin-bottom: 10px;
+  }
+
+  p {
+    color: #b2d8c5;
+    margin-bottom: 20px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #142f1c;
+    box-shadow: 0 2px 8px rgba(0, 255, 0, 0.05);
+    color: #eaffea;
+  }
+
+  thead tr {
+    background-color: #063116;
+    color: #ffffff;
+    text-align: left;
+  }
+
+  th, td {
+    padding: 12px 15px;
+    border: 1px solid #1c3d28;
+    vertical-align: middle;
+  }
+
+  tbody tr:hover {
+    background-color: #1e3d2a;
+  }
+
+  td.actions {
+    white-space: nowrap;
+  }
+
+  form {
+    display: inline-block;
+    margin: 0 4px 0 0;
+  }
+
+  button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .btn-approve {
+    background-color: #28a745;
+    color: white;
+  }
+
+  .btn-approve:hover,
+  .btn-approve:focus {
+    background-color: #218838;
+    outline: none;
+  }
+
+  .btn-reject {
+    background-color: #dc3545;
+    color: white;
+  }
+
+  .btn-reject:hover,
+  .btn-reject:focus {
+    background-color: #c82333;
+    outline: none;
+  }
+</style>
+
+<div class="container">
     <h2>Pending Logs</h2>
     <p>Review and approve or reject logs that are waiting for your action.</p>
 
-    <!-- Example Table -->
     <table>
         <thead>
             <tr>
-                <th>Student</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Registration Number</th>
+                <th>Course</th>
                 <th>Log Content</th>
-                <th>Date Submitted</th>
+                <th>Log Time</th>
+                <th>Status</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
-            <!-- Loop over pending logs here -->
             {% for log in pending_logs %}
             <tr>
-                <td>{{ log.student.user.get_full_name }}</td>
+                <td>{{ log.student.user.first_name }}</td>
+                <td>{{ log.student.user.last_name }}</td>
+                <td>{{ log.student.registration_number }}</td>
+                <td>{{ log.student.course }}</td>
                 <td>{{ log.content|truncatechars:50 }}</td>
                 <td>{{ log.date|date:"Y-m-d H:i" }}</td>
-                <td>
-                    <form method="post" action="{% url 'users:approve_log' log.id %}">
+                <td>Pending</td>
+                <td class="actions">
+                    <form method="post" action="{% url 'users:approve_log' log.id %}" aria-label="Approve log {{ log.id }}">
                         {% csrf_token %}
-                        <button type="submit">Approve</button>
+                        <button type="submit" class="btn-approve">Approve</button>
                     </form>
-                    <form method="post" action="{% url 'users:reject_log' log.id %}">
+                    <form method="post" action="{% url 'users:reject_log' log.id %}" aria-label="Reject log {{ log.id }}">
                         {% csrf_token %}
-                        <button type="submit">Reject</button>
+                        <button type="submit" class="btn-reject">Reject</button>
                     </form>
                 </td>
             </tr>
             {% empty %}
-            <tr><td colspan="4">No pending logs found.</td></tr>
+            <tr>
+                <td colspan="8" style="text-align:center; padding: 20px; color: #ccc;">No pending logs found.</td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>
