@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3>Ask the AI Field Placement Assistant</h3>
+    <textarea id="question" class="form-control mt-3" placeholder="E.g. I'm an IT student..."></textarea>
+    <button onclick="askAI()" class="btn btn-primary mt-2">Ask AI</button>
+    <div id="answer" class="mt-4 alert alert-info" style="display: none;"></div>
+</div>
+
+<script>
+function askAI() {
+    const question = document.getElementById('question').value;
+    fetch('/aihelper/ask/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({question: question})
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById('answer').style.display = 'block';
+        document.getElementById('answer').innerText = data.answer || data.error;
+    });
+}
+</script>
+{% endblock %}

@@ -1,48 +1,163 @@
 {% extends 'base.html' %}
+{% load static %}
+{% block title %}Assign Tasks to Students{% endblock %}
 
 {% block content %}
-<h2>Assign Task</h2>
-<form method="post">
-  {% csrf_token %}
-  <label>Select Students:</label><br>
-  {% for student in students %}
-    <input type="checkbox" name="student_ids" value="{{ student.id }}"> {{ student.user.get_full_name }}<br>
-  {% endfor %}
+<div class="task-assignment-container">
+  <h2>Assign Task</h2>
 
-  <label>Task Description:</label><br>
-  <textarea name="task_description" required></textarea><br>
+  {% if messages %}
+    <ul class="messages">
+      {% for message in messages %}
+        <li class="{{ message.tags }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
 
-  <label>Due Date:</label><br>
-  <input type="date" name="due_date" required><br><br>
+  <form method="post" action="{% url 'users:assign_task_to_students' %}">
+    {% csrf_token %}
+    <div class="form-group">
+      <label><strong>Select Students:</strong></label><br>
+      {% if students %}
+        {% for student in students %}
+          <label>
+            <input type="checkbox" name="student_ids" value="{{ student.id }}">
+            {{ student.user.get_full_name|default:student.user.username }}
+          </label><br>
+        {% endfor %}
+      {% else %}
+        <p>No students available.</p>
+      {% endif %}
+    </div>
 
-  <button type="submit">Assign Task</button>
-</form>
+    <div class="form-group">
+      <label for="task_description"><strong>Task Description:</strong></label><br>
+      <textarea id="task_description" name="task_description" rows="4" required></textarea>
+    </div>
 
-<hr>
+    <div class="form-group">
+      <label for="due_date"><strong>Due Date:</strong></label><br>
+      <input type="date" id="due_date" name="due_date" required>
+    </div>
 
-<h2>Previously Assigned Tasks</h2>
-{% if assigned_tasks %}
-  <table border="1" cellpadding="5" cellspacing="0">
-    <thead>
-      <tr>
-        <th>Student</th>
-        <th>Description</th>
-        <th>Due Date</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody>
-    {% for task in assigned_tasks %}
-      <tr>
-        <td>{{ task.student.user.get_full_name }}</td>
-        <td>{{ task.task_description }}</td>
-        <td>{{ task.due_date }}</td>
-        <td>{{ task.status|default:"Pending" }}</td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
-{% else %}
-  <p>No tasks assigned yet.</p>
-{% endif %}
+    <button type="submit" class="btn btn-primary">Assign Task</button>
+  </form>
+
+  <hr>
+
+  <h2>Previously Assigned Tasks</h2>
+  {% if assigned_tasks %}
+    <table class="assigned-tasks-table">
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Description</th>
+          <th>Due Date</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for task in assigned_tasks %}
+          <tr>
+            <td>{{ task.student.user.get_full_name|default:task.student.user.username }}</td>
+            <td>{{ task.task_description }}</td>
+            <td>{{ task.due_date }}</td>
+            <td>{{ task.status|default:"Pending" }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No tasks assigned yet.</p>
+  {% endif %}
+</div>
+
+<style>
+.task-assignment-container {
+  max-width: 800px;
+  margin: 30px auto;
+  padding: 20px;
+  background-color: #121212;
+  color: #eee;
+  border-radius: 10px;
+  box-shadow: 0 0 12px #00bfa5;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+textarea, input[type="date"] {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+  background-color: #222;
+  color: #eee;
+  font-size: 1rem;
+}
+
+label {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-primary {
+  background-color: #00bfa5;
+  border: none;
+  padding: 10px 20px;
+  color: #121212;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #00796b;
+  color: #fff;
+}
+
+.assigned-tasks-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.assigned-tasks-table th,
+.assigned-tasks-table td {
+  padding: 10px;
+  border: 1px solid #333;
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+.assigned-tasks-table thead {
+  background-color: #004d40;
+  color: #fff;
+}
+
+.messages {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 20px;
+}
+
+.messages li {
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.messages li.error {
+  background-color: #b00020;
+  color: #fff;
+}
+
+.messages li.success {
+  background-color: #00bfa5;
+  color: #121212;
+}
+</style>
 {% endblock %}

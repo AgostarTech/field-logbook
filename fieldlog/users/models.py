@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
+from django.conf import settings
 
 # Department model
 class Department(models.Model):
@@ -10,7 +11,7 @@ class Department(models.Model):
         return self.name
 
 
-# Custom user model
+# Custom User model
 class CustomUser(AbstractUser):
     ROLE_CHOICES = [
         ('student', 'Student'),
@@ -33,7 +34,7 @@ class CustomUser(AbstractUser):
         return self.username
 
 
-# Supervisor Profile (generic)
+# Supervisor Profiles
 class SupervisorProfile(models.Model):
     user = models.OneToOneField(
         CustomUser,
@@ -47,7 +48,6 @@ class SupervisorProfile(models.Model):
         return self.user.username
 
 
-# On-Station Supervisor Profile
 class OnStationSupervisor(models.Model):
     user = models.OneToOneField(
         CustomUser,
@@ -61,7 +61,6 @@ class OnStationSupervisor(models.Model):
         return self.user.get_full_name() or self.user.username
 
 
-# On-Campus Supervisor Profile
 class OnCampusSupervisor(models.Model):
     user = models.OneToOneField(
         CustomUser,
@@ -80,7 +79,7 @@ class StudentProfile(models.Model):
     user = models.OneToOneField(
         CustomUser,
         on_delete=models.CASCADE,
-        related_name='student_profiles'
+        related_name='student_profile'
     )
     registration_number = models.CharField(max_length=50, unique=True)
     course = models.CharField(max_length=100)
@@ -92,6 +91,10 @@ class StudentProfile(models.Model):
     gender = models.CharField(max_length=10, choices=[('Male', 'Male'), ('Female', 'Female')], blank=True)
     date_of_birth = models.DateField(blank=True, null=True)
     address = models.TextField(blank=True, null=True)
+
+    general_report = models.FileField(upload_to='reports/general/', blank=True, null=True)
+    technical_report = models.FileField(upload_to='reports/technical/', blank=True, null=True)
+    marks = models.FloatField(blank=True, null=True)
 
     supervisor_onstation = models.ForeignKey(
         OnStationSupervisor,
@@ -183,7 +186,7 @@ class SupervisorUpload(models.Model):
         return self.title
 
 
-# Optional Task model with ManyToMany to Students (if you want)
+# Task with ManyToMany to Students
 class Task(models.Model):
     assigned_by = models.ForeignKey(
         CustomUser,
@@ -198,3 +201,54 @@ class Task(models.Model):
 
     def __str__(self):
         return f"Task {self.id} by {self.assigned_by.username}"
+
+
+# Task and Resource model with department and assigned users
+class TaskResource(models.Model):
+    TYPE_CHOICES = (
+        ('Task', 'Task'),
+        ('Resource', 'Resource'),
+    )
+    STATUS_CHOICES = (
+        ('Pending', 'Pending'),
+        ('Completed', 'Completed'),
+    )
+
+    title = models.CharField(max_length=200)
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
+    deadline = models.DateField(null=True, blank=True)
+    priority = models.CharField(max_length=20, blank=True, null=True)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE)
+    assigned_to = models.ManyToManyField(CustomUser, blank=True)
+    access_count = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def assigned_to_names(self):
+        return ", ".join([user.get_full_name() for user in self.assigned_to.all()])
+
+    def __str__(self):
+        return self.title
+
+
+# Department resources uploaded by users
+class DepartmentResource(models.Model):
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    file = models.FileField(upload_to='department_resources/')
+    uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+
+# Uploaded Document linked to students
+class UploadedDocument(models.Model):
+    student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name='uploaded_documents')
+    title = models.CharField(max_length=255, blank=True)
+    file = models.FileField(upload_to='uploaded_documents/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title or f"Document {self.pk}"

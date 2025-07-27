@@ -1,11 +1,31 @@
-/* Background */
+/* Base Styles */
 body {
+  background-color: #121212;  /* dark solid background */
+  color: #eeeeee;             /* light text */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
-  font-family: 'Poppins', sans-serif;
-  background: url('../images/4.jpg') no-repeat center center fixed;
-  background-size: cover;
-  background-attachment: fixed;
-  color: #e0f7fa;
+  padding: 0;
+}
+
+/* Links */
+a {
+  color: #00bfa5;
+  text-decoration: none;
+}
+a:hover, a:focus {
+  color: #1de9b6;
+  text-decoration: underline;
+  outline: none;
+}
+
+/* Containers */
+.container, .content-wrapper, main {
+  max-width: 960px;
+  margin: 30px auto;
+  padding: 20px;
+  background-color: #1e1e1e;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0, 128, 128, 0.5); /* subtle teal glow */
 }
 
 /* Navbar */
@@ -13,102 +33,201 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(0, 0, 0, 0.92);
-  backdrop-filter: blur(6px);
-  padding: 1rem 2rem;
-  box-shadow: 0 0 20px #1de9b6;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  border-bottom: 1px solid #14a37f;
+  background-color: #004d40; /* dark teal navbar */
+  padding: 0.8rem 1.5rem;
+  color: #eeeeee;
+  box-shadow: 0 2px 6px rgba(0, 128, 128, 0.7);
 }
-
-/* Logo & Toggle */
 .nav-logo {
-  color: #ffffff;
-  font-weight: bold;
-  font-size: 1.6rem;
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #00bfa5;
   text-decoration: none;
-  text-shadow: 0 0 6px #1de9b6;
 }
-
-.nav-left button {
-  background: none;
-  border: none;
+.nav-link, .nav-welcome {
+  color: #eeeeee;
+  margin-left: 1rem;
+  font-weight: 600;
+}
+.nav-link:hover, .nav-link:focus {
   color: #1de9b6;
-  font-size: 1.4rem;
-  display: none;
-  cursor: pointer;
+  outline: none;
 }
-
-/* Nav Items */
-.nav-right {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-
-.nav-link,
-.nav-welcome {
-  color: #e0f7fa;
-  text-decoration: none;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  text-shadow: 0 0 4px #1de9b6;
-}
-
-.nav-link:hover,
-.nav-logo:hover {
-  color: #1de9b6;
-  text-shadow: 0 0 8px #14a37f;
-}
-
-/* Logout Button */
 .logout-btn {
-  background: #1de9b6;
-  color: #0f2027;
+  background-color: #00bfa5;
+  color: #121212;
   border: none;
-  padding: 0.4rem 1rem;
   border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: 700;
   cursor: pointer;
-  font-weight: bold;
-  box-shadow: 0 0 10px #1de9b6;
-  transition: background 0.3s ease, box-shadow 0.3s ease;
+  transition: background-color 0.3s ease;
+}
+.logout-btn:hover, .logout-btn:focus {
+  background-color: #1de9b6;
+  outline: none;
 }
 
-.logout-btn:hover {
-  background: #14a37f;
-  box-shadow: 0 0 20px #14a37f;
+/* Headings */
+h1, h2, h3, h4 {
+  color: #00bfa5;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  font-size: 1rem;
+}
+th, td {
+  padding: 12px 18px;
+  text-align: center;
+}
+thead {
+  background-color: #004d40;
+}
+thead th {
+  color: #ffffff;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+tbody tr {
+  border-bottom: 1px solid #333333;
+  transition: background-color 0.3s ease;
+}
+tbody tr:nth-child(even) {
+  background-color: #1e1e1e;
+}
+tbody tr:hover {
+  background-color: #00796b;
+  color: #ffffff;
+  cursor: default;
+}
+
+/* Buttons */
+.btn {
+  background-color: #00bfa5;
+  color: #121212;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.btn:hover, .btn:focus {
+  background-color: #1de9b6;
+  outline: none;
 }
 
 /* Messages */
 .messages {
-  margin: 1rem;
-  padding: 1rem;
-  background: rgba(0, 0, 0, 0.7);
-  border-left: 5px solid #1de9b6;
-  border-radius: 10px;
-  font-weight: 500;
-  text-shadow: 0 0 3px #1de9b6;
+  max-width: 960px;
+  margin: 20px auto;
+}
+.message {
+  padding: 12px 20px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+.message.error {
+  background-color: #d32f2f;
+  color: white;
+}
+.message.success {
+  background-color: #388e3c;
+  color: white;
+}
+.message.warning {
+  background-color: #fbc02d;
+  color: black;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .nav-right {
+/* Footer */
+footer.mega-footer {
+  background: #121212;
+  color: #00bfa5;
+  padding: 40px 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  box-shadow: inset 0 1px 0 #00bfa5;
+  user-select: none;
+}
+footer.mega-footer .footer-header {
+  text-align: center;
+  margin-bottom: 30px;
+  font-weight: 600;
+  font-size: 1.2rem;
+  color: #1de9b6;
+}
+footer.mega-footer .footer-container {
+  display: flex;
+  gap: 40px;
+  overflow-x: auto;
+  scroll-padding: 1rem;
+  -webkit-overflow-scrolling: touch;
+}
+footer.mega-footer .footer-section {
+  flex: 0 0 280px;
+  min-width: 280px;
+  background: #004d40;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 0 12px rgba(29, 233, 182, 0.6);
+  transition: box-shadow 0.3s ease;
+  color: #eeeeee;
+}
+footer.mega-footer .footer-section:hover,
+footer.mega-footer .footer-section:focus-within {
+  box-shadow: 0 0 20px rgba(29, 233, 182, 0.9);
+  outline: none;
+}
+footer.mega-footer .footer-section h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #00bfa5;
+}
+footer.mega-footer .footer-section p,
+footer.mega-footer .footer-section ul,
+footer.mega-footer .footer-section li {
+  color: #eeeeee;
+}
+footer.mega-footer .footer-section ul {
+  list-style-type: disc;
+  padding-left: 20px;
+}
+footer.mega-footer .contact-list a {
+  color: #1de9b6;
+  text-decoration: none;
+}
+footer.mega-footer .contact-list a:hover,
+footer.mega-footer .contact-list a:focus {
+  text-decoration: underline;
+  color: #00bfa5;
+  outline: none;
+}
+footer.mega-footer .scroll-hint {
+  margin-top: 30px;
+  text-align: center;
+  font-style: italic;
+  color: #00796b;
+  user-select: none;
+}
+footer.mega-footer .scroll-hint i {
+  margin: 0 6px;
+}
+/* Responsive Footer */
+@media (max-width: 720px) {
+  footer.mega-footer .footer-container {
     flex-direction: column;
-    display: none;
+    gap: 20px;
+  }
+  footer.mega-footer .footer-section {
+    min-width: auto;
     width: 100%;
-    background: rgba(0, 0, 0, 0.95);
-    padding: 1rem;
-    margin-top: 1rem;
-    border-top: 1px solid #14a37f;
-  }
-
-  .nav-left button {
-    display: block;
-  }
-
-  .nav-right.show {
-    display: flex;
   }
 }

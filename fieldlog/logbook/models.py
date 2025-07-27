@@ -4,7 +4,6 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from datetime import date
 
-
 # ========================
 # Place & Institution
 # ========================
@@ -21,7 +20,7 @@ class Institution(models.Model):
     name = models.CharField(max_length=100)
 
     def __str__(self):
-        return f"{self.name} ({self.place.name})"
+        return f"{self.name} - {self.place.name}"
 
 
 # ========================
@@ -32,12 +31,12 @@ class SupervisorProfile(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='logbook_supervisorprofile'
+        related_name='logbook_supervisor_profile'  # Changed related_name to avoid conflicts
     )
     phone = models.CharField(max_length=20, blank=True, null=True)
 
     def __str__(self):
-        return self.user.username
+        return self.user.get_full_name() or self.user.username
 
 
 # ========================
@@ -48,7 +47,7 @@ class StudentProfile(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='student_profile'
+        related_name='logbook_student_profile'  # Changed related_name to avoid conflicts
     )
     profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
@@ -64,22 +63,22 @@ class StudentProfile(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='supervised_students'
+        related_name='supervised_students'  # Assuming this is already unique
     )
 
     def __str__(self):
-        return self.user.username
+        return self.user.get_full_name() or self.user.username
 
 
-# Signal to create StudentProfile automatically for new student users
+# Auto-create profile for new student users
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_student_profile(sender, instance, created, **kwargs):
     if created and getattr(instance, 'role', None) == 'student':
         StudentProfile.objects.create(
             user=instance,
-            year_of_study=1,  # default value
-            registration_number=f"TEMP{instance.pk}",  # temporary unique reg no
-            course="Unknown",  # placeholder
+            year_of_study=1,
+            registration_number=f"TEMP{instance.pk}",
+            course="Unknown"
         )
 
 
@@ -88,9 +87,25 @@ def create_student_profile(sender, instance, created, **kwargs):
 # ========================
 
 class LogEntry(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='log_entries')
-    place = models.ForeignKey(Place, on_delete=models.SET_NULL, null=True, blank=True, related_name='log_entries')
-    institution = models.ForeignKey(Institution, on_delete=models.SET_NULL, null=True, blank=True, related_name='log_entries')
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='log_entries'
+    )
+    place = models.ForeignKey(
+        Place,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='log_entries'
+    )
+    institution = models.ForeignKey(
+        Institution,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='log_entries'
+    )
     date = models.DateField()
     day_number = models.PositiveIntegerField(null=True, blank=True)
     start_time = models.TimeField(null=True, blank=True)
@@ -111,12 +126,16 @@ class LogEntry(models.Model):
 # ========================
 
 class UploadedFile(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='uploaded_files')
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='uploaded_files'
+    )
     file = models.FileField(upload_to='uploads/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.file.name}"
+        return f"{self.user.username} - {self.file.name.split('/')[-1]}"
 
 
 # ========================
@@ -124,8 +143,18 @@ class UploadedFile(models.Model):
 # ========================
 
 class ProgressReport(models.Model):
-    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='progress_reports')
-    supervisor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='supervised_reports')
+    student = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='progress_reports'
+    )
+    supervisor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='supervised_reports'
+    )
     week_number = models.PositiveIntegerField()
     start_date = models.DateField()
     end_date = models.DateField()
@@ -144,22 +173,26 @@ class ProgressReport(models.Model):
 
 
 # ========================
-# Task Model
+# Task Management
 # ========================
 
 class Task(models.Model):
     description = models.TextField()
-    assigned_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='tasks_assigneds')
+    assigned_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='logbook_tasks_assigned'  # Changed related_name to avoid conflict with users.AssignedTask
+    )
     assigned_to = models.ManyToManyField(StudentProfile, related_name='tasks_received')
     assigned_at = models.DateTimeField(auto_now_add=True)
     completed = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"Task by {self.assigned_by.username} at {self.assigned_at.strftime('%Y-%m-%d %H:%M')}"
+        return f"Task by {self.assigned_by.username} on {self.assigned_at.strftime('%Y-%m-%d')}"
 
 
 # ========================
-# Assigned Task Model
+# Assigned Task (Deprecated or Alternative)
 # ========================
 
 class AssignedTask(models.Model):
@@ -167,8 +200,15 @@ class AssignedTask(models.Model):
     description = models.TextField()
     assigned_date = models.DateField(auto_now_add=True)
     due_date = models.DateField()
-    supervisor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    student = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='assigned_tasks', on_delete=models.CASCADE)
+    supervisor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+    student = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name='assigned_tasks',
+        on_delete=models.CASCADE
+    )
 
     def __str__(self):
         return self.title

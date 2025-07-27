@@ -1,6 +1,8 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
+from .views import export_student_logs_pdf
+
 from .views import assign_task_to_students, track_progress
 
 app_name = 'users'
@@ -40,6 +42,7 @@ urlpatterns = [
     path('logs/<int:student_id>/', views.view_logs, name='view_logs'),
     path('view-logs/<int:student_id>/', views.view_logs, name='view_logs_alt'),
     path('download-logs/<int:student_id>/', views.download_logs_pdf, name='download_logs_pdf'),
+    
 
     # File Upload by Supervisors
     path('supervisor/upload-document/', views.supervisor_upload_document, name='supervisor_upload_document'),
@@ -68,4 +71,26 @@ urlpatterns = [
     path('password/change/', auth_views.PasswordChangeView.as_view(template_name='users/password_change.html'), name='change_password'),
     path('password/change/done/', auth_views.PasswordChangeDoneView.as_view(template_name='users/password_change_done.html'), name='password_change_done'),
     path('log_statistics/', views.view_log_statistics, name='view_log_statistics'),
+
+    path('view-resources/', views.view_uploaded_resources, name='view_uploaded_resources'),
+    
+    path('students/all/', views.view_all_students, name='view_all_students'),
+    path('dashboard/oncampus/student/<int:student_id>/', views.oncampus_dashboard, name='oncampus_dashboard_student'),
+
+    
+    path('supervisors/onstation/', views.view_all_onstation_supervisors, name='view_all_onstation_supervisors'),
+    path('supervisors/oncampus/', views.view_all_oncampus_supervisors, name='view_all_oncampus_supervisors'),
+
+    # Download student documents and reports
+    path('students/<int:student_id>/download-documents/', views.download_uploaded_documents, name='download_uploaded_documents'),
+    path('students/<int:student_id>/download-general-report/', views.download_general_report, name='download_general_report'),
+    path('students/<int:student_id>/download-technical-report/', views.download_technical_report, name='download_technical_report'),
+
+    # Assign marks
+    path('students/<int:student_id>/assign-marks/', views.assign_marks, name='assign_marks'),
+    path('logs/<int:student_id>/', views.view_logs, name='view_logs'),
+
+    
+    path('export-logs/<int:student_id>/', export_student_logs_pdf, name='export_student_logs_pdf'),
+    path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
 ]

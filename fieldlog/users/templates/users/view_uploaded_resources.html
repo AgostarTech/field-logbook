@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}All Uploaded Resources{% endblock %}
+
+{% block content %}
+<div style="max-width: 1000px; margin: 50px auto; padding: 30px; background: #121212; border-radius: 12px; box-shadow: 0 0 20px rgba(0, 191, 165, 0.4); color: #e0f7fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+  <h2 style="text-align: center; color: #00bfa5; font-weight: 800; margin-bottom: 30px;">All Uploaded Resources</h2>
+
+  {% if resources %}
+  <table style="width: 100%; border-collapse: collapse; background-color: #1e1e1e;">
+    <thead style="background-color: #004d40;">
+      <tr>
+        <th style="padding: 12px; color: #ffffff;">Title</th>
+        <th style="padding: 12px; color: #ffffff;">Uploaded By</th>
+        <th style="padding: 12px; color: #ffffff;">Role</th>
+        <th style="padding: 12px; color: #ffffff;">Department</th>
+        <th style="padding: 12px; color: #ffffff;">Date Uploaded</th>
+        <th style="padding: 12px; color: #ffffff;">Source</th>
+        <th style="padding: 12px; color: #ffffff;">View/Download</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for resource in resources %}
+      <tr style="border-bottom: 1px solid #333;">
+        <td style="padding: 10px;">{{ resource.title }}</td>
+        <td style="padding: 10px;">
+          {{ resource.uploaded_by.get_full_name|default:resource.uploaded_by.username }}
+        </td>
+        <td style="padding: 10px;">
+          {{ resource.uploaded_by.role|default:"N/A"|title }}
+        </td>
+        <td style="padding: 10px;">
+          {% if resource.uploaded_by.department %}
+            {{ resource.uploaded_by.department.name }}
+          {% else %}
+            N/A
+          {% endif %}
+        </td>
+        <td style="padding: 10px;">{{ resource.uploaded_at|date:"Y-m-d H:i" }}</td>
+        <td style="padding: 10px;">{{ resource.source }}</td>
+        <td style="padding: 10px;">
+          <a href="{{ resource.file.url }}" style="color: #1de9b6; text-decoration: underline;" target="_blank" rel="noopener noreferrer">Open</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p style="text-align: center;">No resources uploaded yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

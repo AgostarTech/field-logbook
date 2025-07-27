@@ -1,178 +1,214 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
-
 {% block content %}
-<!-- External CSS & JS -->
-<link rel="stylesheet" href="{% static 'css/oncampus.css' %}">
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<div class="dashboard-container">
-  <h1 class="dashboard-title">🎓 On-Campus Supervisor Dashboard</h1>
-  <hr>
+<style>
+  /* ==== Dashboard Custom Styles === */
 
-  <!-- Overview Cards -->
-  <div class="overview-cards">
-    <div class="card blue"><h3>Total Department Students</h3><p>{{ department_students_count }}</p></div>
-    <div class="card green"><h3>Total On-Station Supervisors</h3><p>{{ total_supervisors }}</p></div>
-    <div class="card orange"><h3>Submitted Logs</h3><p>{{ submitted_logs }}</p></div>
-    <div class="card red"><h3>Pending Approvals</h3><p>{{ pending_logs }}</p></div>
-  </div>
+  .dashboard-container {
+    background-color: #00000ad3; /* Dark solid background */
+    color: #e0e0f0;
+    padding: 2rem;
+    border-radius: 12px;
+  }
 
-  <!-- Student Filter/Search -->
-  <section class="info-box">
-    <h3><i class="fas fa-users"></i> Students in {{ request.user.department.name }}</h3>
-    <form method="get" class="filter-form">
-      <input type="text" name="q" id="studentSearch" placeholder="🔍 Search by name, reg no, email or phone"
-             value="{{ request.GET.q|default:'' }}" onkeyup="filterStudents()">
-      <select name="progress_filter" onchange="this.form.submit()">
-        <option value="">Filter by Progress</option>
-        <option value="0-25" {% if request.GET.progress_filter == '0-25' %}selected{% endif %}>0-25%</option>
-        <option value="26-50" {% if request.GET.progress_filter == '26-50' %}selected{% endif %}>26-50%</option>
-        <option value="51-75" {% if request.GET.progress_filter == '51-75' %}selected{% endif %}>51-75%</option>
-        <option value="76-100" {% if request.GET.progress_filter == '76-100' %}selected{% endif %}>76-100%</option>
-      </select>
-      <button type="submit" class="btn-small">Apply</button>
-    </form>
+  h2, h3 {
+    color: #a8b0ff;
+    font-weight: 600;
+  }
 
-    <table id="studentTable" class="full-width-table">
-      <thead>
-        <tr>
-          <th>Student Name</th><th>Reg Number</th><th>Email</th><th>Phone</th>
-          <th>Progress</th><th>Logs Submitted</th><th>Pending Logs</th><th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for student in department_students %}
-        <tr {% if student.progress < 25 %}class="low-progress"{% endif %}>
-          <td><a href="{% url 'student_profile' student.id %}">{{ student.first_name }} {{ student.last_name }}</a></td>
-          <td>{{ student.registration_number }}</td>
-          <td>{{ student.email }}</td>
-          <td>{{ student.phone }}</td>
-          <td>{{ student.progress }}%</td>
-          <td>{{ student.logs_submitted }}</td>
-          <td>{{ student.pending_logs }}</td>
-          <td>
-            <a href="{% url 'view_logs' student.id %}" class="btn-small">View Logs</a>
-            <a href="{% url 'download_logs_pdf' student.id %}" class="btn-small">Download PDF</a>
-          </td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="8">No students found.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  .card {
+    background-color: #2a5c3eee;
+    border: none;
+    border-radius: 12px;
+    color: #ebebf3ff;
+    font-size: larger;
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+    
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.6);
+  }
+
+  .table {
+    background-color: #2a5c3eee;
+    color: whitesmoke;
+  }
+
+  .table th, .table td {
+    vertical-align: middle !important;
+    text-align: center;
+    border-color: #02030cff;
+    border-style: solid;
+  }
+
+  .table thead th {
+    background-color: #040518ff;
+    color: #c0c8ff;
+    font-size: 0.95rem;
+  }
+
+  .table tbody tr:hover {
+    background-color: #156b36ff;
+    color: white;
+  }
+
+  /* Buttons */
+  .btn-outline-primary {
+    color: #a8b0ff;
+    border-color: #a8b0ff;
+  }
+
+  .btn-outline-primary:hover {
+    background-color: #a8b0ff;
+    color: #2c2a6c;
+  }
+
+  .btn-outline-success {
+    color: #92d36e;
+    border-color: #92d36e;
+  }
+
+  .btn-outline-success:hover {
+    background-color: #92d36e;
+    color: #1f2c16;
+  }
+
+  .btn-outline-danger {
+    color: #f67280;
+    border-color: #f67280;
+  }
+
+  .btn-outline-danger:hover {
+    background-color: #f67280;
+    color: #3a0b0e;
+  }
+
+  .btn:hover {
+    opacity: 0.9;
+  }
+
+  /* Ripple Effect */
+  .btn {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    transform: scale(0);
+    background: rgba(255,255,255,0.4);
+    transition: transform 0.3s ease-out;
+  }
+
+  .btn:active::after {
+    transform: scale(2.5);
+    transition: 0s;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  .me-2 {
+    margin-right: 0.5rem !important;
+  }
+</style>
+
+<div class="container dashboard-container mt-5">
+
+  <header class="mb-4 text-center">
+      <h2>On-Campus Supervisor Dashboard & Field Logbook Report</h2>
+  </header>
+
+  <!-- Cards -->
+  <section class="row text-center mb-5 g-3">
+      <div class="col-md-3">
+          <div class="card p-3">
+              <h6 class="text-uppercase fw-semibold">Total Department Students</h6>
+              <p class="display-5 mb-0">{{ department_students_count }}</p>
+          </div>
+      </div>
+      <div class="col-md-3">
+          <div class="card p-3">
+              <h6 class="text-uppercase fw-semibold">Total On-Station Supervisors</h6>
+              <p class="display-5 mb-0">{{ total_supervisors }}</p>
+          </div>
+      </div>
+      <div class="col-md-3">
+          <div class="card p-3">
+              <h6 class="text-uppercase fw-semibold">Submitted Logs</h6>
+              <p class="display-5 mb-0">{{ submitted_logs }}</p>
+          </div>
+      </div>
+      <div class="col-md-3">
+          <div class="card p-3">
+              <h6 class="text-uppercase fw-semibold">Pending Approvals</h6>
+              <p class="display-5 mb-0">{{ pending_logs }}</p>
+          </div>
+      </div>
   </section>
 
-  <!-- Logbook Progress -->
-  <section class="info-box">
-    <h3><i class="fas fa-file-alt"></i> Logbook Progress Overview</h3>
-    <table class="full-width-table">
-      <thead>
-        <tr>
-          <th>Student</th><th>Total Logs</th><th>Approved</th>
-          <th>Pending</th><th>Overdue</th><th>Last Submission</th><th>Bulk Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for data in progress_data %}
-        <tr>
-          <td>{{ data.user__first_name }} {{ data.user__last_name }}</td>
-          <td>{{ data.total }}</td>
-          <td class="status approved">{{ data.approved }}</td>
-          <td class="status pending">{{ data.pending }}</td>
-          <td>{{ data.overdue|default:"0" }}</td>
-          <td>{{ data.last_submission_date|default:"N/A" }}</td>
-          <td>
-            {% if data.user__id %}
-            <form action="{% url 'bulk_approve_logs' data.user__id %}" method="post" style="display:inline;">
-              {% csrf_token %}
-              <button type="submit" class="btn-small green">Approve All</button>
-            </form>
-            <form action="{% url 'bulk_reject_logs' data.user__id %}" method="post" style="display:inline;">
-              {% csrf_token %}
-              <button type="submit" class="btn-small red">Reject All</button>
-            </form>
-            {% else %}
-              N/A
-            {% endif %}
-          </td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="7">No log data available.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  <!-- Table -->
+  <section class="mb-5">
+      <h3 class="mb-3">Students Supervised by On-Station Supervisors</h3>
+      <div class="table-responsive shadow-sm rounded">
+          <table class="table table-bordered table-hover align-middle">
+              <thead>
+                  <tr>
+                      <th>Name</th>
+                      <th>Reg Number</th>
+                      <th>Email</th>
+                      <th>Phone</th>
+                      <th>Supervisor</th>
+                      <th>Actions</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  {% for student in department_students %}
+                  <tr>
+                      <td>{{ student.user.get_full_name }}</td>
+                      <td>{{ student.registration_number }}</td>
+                      <td>{{ student.user.email }}</td>
+                      <td>{{ student.phone }}</td>
+                      <td>
+                          {% if student.supervisor_onstation %}
+                              {{ student.supervisor_onstation.get_full_name }}
+                          {% else %}
+                              <span class="text-muted">Unassigned</span>
+                          {% endif %}
+                      </td>
+                      <td>
+                          <a href="{% url 'logbook:view_logs' student.id %}" class="btn btn-sm btn-outline-primary">View Logs</a>
+                          <a href="{% url 'users:download_logs_pdf' student.id %}" class="btn btn-sm btn-outline-danger">Download PDF</a>
+                      </td>
+                  </tr>
+                  {% empty %}
+                  <tr><td colspan="6" class="text-center">No students found.</td></tr>
+                  {% endfor %}
+              </tbody>
+          </table>
+      </div>
   </section>
 
-  <!-- Supervisors -->
-  <section class="info-box">
-    <h3><i class="fas fa-user-tie"></i> On-Station Supervisors (Your Department)</h3>
-    <table class="full-width-table">
-      <thead>
-        <tr>
-          <th>Name</th><th>Email</th><th>Phone</th><th>Assigned Students</th><th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for sup in onstation_supervisors %}
-        <tr>
-          <td>{{ sup.first_name }} {{ sup.last_name }}</td>
-          <td>{{ sup.email }}</td>
-          <td>{{ sup.phone }}</td>
-          <td>{{ sup.assigned_students_count }}</td>
-          <td>
-            <a href="{% url 'supervisor_students' sup.id %}" class="btn-small">View Students</a>
-            <a href="{% url 'message_supervisor' sup.id %}" class="btn-small">Message</a>
-          </td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="5">No on-station supervisors assigned.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-
-  </section>
-
-  <!-- Task & Resource Section -->
-  <section class="info-box">
-    <h3><i class="fas fa-tasks"></i> Department Task & Resources</h3>
-    <div class="resource-links">
-      <a href="{% url 'users:upload_department_resource' %}" class="btn">Upload Resources</a>
-      <a href="{% url 'users:assign_task_to_students' %}" class="btn">Assign Tasks</a>
-      <a href="{% url 'users:track_progress' %}" class="btn">Track Progress</a>
-    </div>
-
-    <table class="full-width-table">
-      <thead>
-        <tr>
-          <th>Title</th><th>Type</th><th>Status</th><th>Deadline</th>
-          <th>Priority</th><th>Assigned To</th><th>Access Count</th><th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for task in tasks_and_resources %}
-        <tr>
-          <td>{{ task.title }}</td>
-          <td>{{ task.type }}</td>
-          <td>{{ task.status }}</td>
-          <td>{{ task.deadline|default:"N/A" }}</td>
-          <td>{{ task.priority|default:"-" }}</td>
-          <td>{{ task.assigned_to_names|default:"All" }}</td>
-          <td>{{ task.access_count }}</td>
-          <td>
-            <a href="{% url 'edit_task' task.id %}" class="btn-small">Edit</a>
-            <a href="{% url 'delete_task' task.id %}" class="btn-small red">Delete</a>
-          </td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="8">No tasks or resources found.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  <!-- Department Tasks -->
+  <section class="mb-5">
+      <h3>Department Tasks & Resources</h3>
+      <div class="mb-3">
+          <a href="{% url 'users:upload_department_resource' %}" class="btn btn-outline-primary me-2">Upload Resources</a>
+          <a href="{% url 'users:assign_task_to_students' %}" class="btn btn-outline-success me-2">Assign Tasks</a>
+          <a href="{% url 'users:track_progress' %}" class="btn btn-outline-info">Track Progress</a>
+      </div>
   </section>
 </div>
 
-<!-- External JS -->
-<script src="{% static 'js/oncampus.js' %}"></script>
 {% endblock %}

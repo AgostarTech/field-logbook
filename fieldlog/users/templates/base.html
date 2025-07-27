@@ -4,7 +4,8 @@
 <head>
   <meta charset="UTF-8" />
   <title>{% block title %}Field Logbook System{% endblock %}</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
 
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
@@ -12,7 +13,7 @@
   <!-- Font Awesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
 
-  <!-- Custom Style -->
+  <!-- Custom Global Styles -->
   <link rel="stylesheet" href="{% static 'css/base_style.css' %}" />
   {% block extra_css %}{% endblock %}
 </head>
@@ -24,45 +25,56 @@
       <a href="{% url 'users:home' %}" class="nav-logo">Field Logbook</a>
       <button id="nav-toggle"><i class="fas fa-bars"></i></button>
     </div>
+
     <div class="nav-right" id="nav-menu">
       {% if user.is_authenticated %}
-        <span class="nav-welcome">Hello, {{ user.username }}</span>
+        <span class="nav-welcome">Hi, {{ user.username }}</span>
+
         {% if user.is_superuser %}
-          <a href="/admin/" class="nav-link"><i class="fas fa-cogs"></i> Admin</a>
+          <a href="/admin/" class="nav-link"><i class="fas fa-tools"></i> Admin</a>
         {% else %}
-          <a href="{% url 'users:dashboard' %}" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+          <a href="{% url 'users:dashboard' %}" class="nav-link"><i class="fas fa-chart-line"></i> Dashboard</a>
         {% endif %}
-        <form method="post" action="{% url 'users:logout' %}" class="logout-form">{% csrf_token %}
-          <button type="submit" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+
+        <form method="post" action="{% url 'users:logout' %}" class="logout-form">
+          {% csrf_token %}
+          <button type="submit" class="logout-btn">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </button>
         </form>
+
       {% else %}
         <a href="{% url 'users:login' %}" class="nav-link"><i class="fas fa-sign-in-alt"></i> Login</a>
         <a href="{% url 'users:signup_select' %}" class="nav-link"><i class="fas fa-user-plus"></i> Sign Up</a>
-        <a href="{% url 'about' %}" class="nav-link">About Us</a>
-        <a href="{% url 'contact' %}" class="nav-link">Contact Us</a>
+        <a href="{% url 'about' %}" class="nav-link">About</a>
+        <a href="{% url 'contact' %}" class="nav-link">Contact</a>
         <a href="{% url 'learn_more' %}" class="nav-link">Learn More</a>
       {% endif %}
     </div>
   </nav>
 
-  <!-- Messages -->
+  <!-- Flash Messages -->
   {% if messages %}
     <div class="messages">
       {% for message in messages %}
-        <div class="message {{ message.tags }}">{{ message }}</div>
+        <div class="message {{ message.tags }}">
+          {{ message }}
+        </div>
       {% endfor %}
     </div>
   {% endif %}
 
-  <!-- Main -->
-  <main>
-    {% block content %}{% endblock %}
+  <!-- Page Content -->
+  <main class="main-content">
+    {% block content %}
+    {% endblock %}
   </main>
 
-  <!-- JS -->
-  <script src="{% static 'js/base_script.js' %}"></script>
-  {% block extra_js %}{% endblock %}
+  <!-- Footer -->
   {% include 'includes/footer.html' %}
 
+  <!-- Base Scripts -->
+  <script src="{% static 'js/base_script.js' %}"></script>
+  {% block extra_js %}{% endblock %}
 </body>
 </html>

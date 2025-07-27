@@ -3,9 +3,89 @@
 {% block title %}Track Progress{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="progress-container">
   <h2>Track Student Progress</h2>
-  <!-- Add your progress tracking table or content here -->
-  <p>Progress tracking content coming soon...</p>
+  
+  {% if progress_data %}
+  <table class="progress-table">
+    <thead>
+      <tr>
+        <th>Student Name</th>
+        <th>Total Logs</th>
+        <th>Approved Logs</th>
+        <th>Progress (%)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for entry in progress_data %}
+      <tr>
+        <td>{{ entry.student.user.get_full_name|default:entry.student.user.username }}</td>
+        <td>{{ entry.total_logs }}</td>
+        <td>{{ entry.approved_logs }}</td>
+        <td>{{ entry.progress_percent }}%</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p>No student progress data available.</p>
+  {% endif %}
 </div>
+
+<style>
+.progress-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 25px;
+  background-color: #121212; /* dark solid background */
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0, 128, 128, 0.5); /* subtle teal glow */
+  color: #eeeeee; /* light text */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.progress-container h2 {
+  margin-bottom: 24px;
+  color: #00bfa5; /* accent teal color */
+  font-weight: 700;
+  font-size: 2rem;
+  text-align: center;
+}
+
+.progress-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.progress-table th,
+.progress-table td {
+  padding: 12px 18px;
+  text-align: center;
+}
+
+.progress-table thead {
+  background-color: #004d40; /* darker teal header */
+}
+
+.progress-table thead th {
+  color: #ffffff;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.progress-table tbody tr {
+  border-bottom: 1px solid #333333;
+  transition: background-color 0.3s ease;
+}
+
+.progress-table tbody tr:nth-child(even) {
+  background-color: #1e1e1e;
+}
+
+.progress-table tbody tr:hover {
+  background-color: #00796b;
+  color: #ffffff;
+  cursor: default;
+}
+</style>
 {% endblock %}

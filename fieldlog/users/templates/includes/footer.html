@@ -1,204 +1,247 @@
-{% load static %}
-<link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-  integrity="sha512-pVPR0eXlJhsqfBdZT7SnTlkUhuqvl06Q7VjLDXyOaU87Lx0o+Urb1x0PzB0z2EUs28yj+UOSsvCsOW1cNkU8mw=="
-  crossorigin="anonymous"
-  referrerpolicy="no-referrer"
-/>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Field Logbook</title>
+<style>
+  /* Reset */
+  * {
+    box-sizing: border-box;
+  }
 
-<footer class="mega-footer">
+  html, body {
+    margin: 0; padding: 0;
+    height: 100%;
+  }
 
-  <div class="footer-header">
-    <p><i class="fas fa-laptop-code"></i> &copy; 2025 Field Logbook System — Mwenge Catholic University</p>
-  </div>
+  body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
 
-  <div class="footer-container">
+  main {
+    flex: 1 0 auto; /* content area grows */
+  }
 
-    <!-- Section 1 -->
-    <section class="footer-section">
-      <h3><i class="fas fa-book-reader"></i> Field Logbook Resources</h3>
-      <p>Learn the essentials on how to maintain your daily logbook with clarity and precision.</p>
-      <div class="content-snippet">
-        <ul>
-          <li>How to fill daily entries step-by-step</li>
-          <li>Guidelines for attaching multimedia files (photos, videos)</li>
-          <li>Deadlines and submission schedule overview</li>
-          <li>Common mistakes to avoid in report writing</li>
-          <li>Sample report templates downloadable</li>
-          <li>Field logbook mobile app support & usage</li>
-        </ul>
+  footer.mega-footer {
+    flex-shrink: 0;
+    width: 100%;           /* Make footer full width */
+    background-color: #121212;
+    color: #a0d6cf;
+    padding: 40px 20px;
+    box-shadow: inset 0 1px 0 #00bfa5;
+    user-select: none;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  /* max width container inside footer */
+  .mega-footer > .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* Your footer styles */
+  .footer-header {
+    text-align: center;
+    margin-bottom: 25px;
+    font-weight: 600;
+    font-size: 1.25rem;
+    color: #00bfa5;
+  }
+  .footer-header i {
+    margin-right: 8px;
+  }
+  .footer-container {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    scroll-padding: 1rem;
+    -webkit-overflow-scrolling: touch;
+    justify-content: space-between;
+    scrollbar-width: thin;
+    scrollbar-color: #00bfa5 #263238;
+  }
+  .footer-container::-webkit-scrollbar {
+    height: 6px;
+  }
+  .footer-container::-webkit-scrollbar-track {
+    background: #263238;
+    border-radius: 10px;
+  }
+  .footer-container::-webkit-scrollbar-thumb {
+    background: #00bfa5;
+    border-radius: 15px;
+  }
+  .footer-section {
+    background-color: #1e272c;
+    border-radius: 10px;
+    padding: 18px 15px;
+    box-shadow: 0 0 12px rgba(0, 191, 165, 0.25);
+    color: #a0d6cf;
+    flex-grow: 1;
+    flex-basis: 0;
+    min-width: 240px;
+    display: flex;
+    flex-direction: column;
+    transition:
+      box-shadow 0.3s ease,
+      transform 0.25s ease;
+  }
+  .footer-section:hover,
+  .footer-section:focus-within {
+    box-shadow: 0 0 25px rgba(0, 191, 165, 0.6);
+    transform: translateY(-5px);
+    outline: none;
+  }
+  .footer-section h3 {
+    font-size: 1.15rem;
+    margin-bottom: 0.9rem;
+    color: #00bfa5;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    user-select: text;
+  }
+  .footer-section p,
+  .footer-section ul li {
+    color: #b2dfdb;
+    line-height: 1.4;
+    user-select: text;
+    font-size: 0.9rem;
+  }
+  .footer-section ul {
+    padding-left: 18px;
+    margin: 0;
+    list-style-type: disc;
+  }
+  .contact-list a {
+    color: #1de9b6;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+  }
+  .contact-list a:hover,
+  .contact-list a:focus {
+    color: #00bfa5;
+    text-decoration: underline;
+    outline: none;
+  }
+  .scroll-hint {
+    margin-top: 28px;
+    text-align: center;
+    font-style: italic;
+    color: #00bfa5;
+    user-select: none;
+    font-size: 0.9rem;
+  }
+  .scroll-hint i {
+    margin: 0 5px;
+  }
+  /* Responsive */
+  @media (max-width: 720px) {
+    .footer-container {
+      flex-direction: column;
+      gap: 18px;
+    }
+    .footer-section {
+      min-width: auto;
+      width: 100%;
+      flex-basis: auto;
+      flex-grow: 0;
+    }
+  }
+</style>
+</head>
+<body>
+  <main>
+    {% block content %}
+    <!-- Your page content here -->
+    {% endblock %}
+  </main>
+
+  <footer class="mega-footer" role="contentinfo" aria-label="Site footer">
+    <div class="container">
+      <div class="footer-header">
+        <p><i class="fas fa-laptop-code" aria-hidden="true"></i> &copy; 2025 Field Logbook System — Mwenge Catholic University</p>
       </div>
-      <button class="read-more-btn">Read More <i class="fas fa-chevron-down"></i></button>
-      <div class="extra-content">
-        <p>
-          Our system provides students with rich support to ensure all field data is captured accurately.  
-          It encourages daily reflections, task tracking, and supervisor comments directly in the platform.
-        </p>
-        <p>
-          You can easily upload attachments including photos and videos as proof of work done during field training.  
-          The interface is mobile-friendly and designed for offline input with later synchronization.
-        </p>
-        <p>
-          Reports submitted are timestamped and automatically backed up, minimizing risk of data loss or manipulation.  
-          There are also tips on effective field note-taking and how to organize your daily logs efficiently.
-        </p>
-      </div>
-    </section>
 
-    <!-- Section 2 -->
-    <section class="footer-section">
-      <h3><i class="fas fa-user-tie"></i> Supervisor & Institution Tools</h3>
-      <p>Empowering supervisors with smart tools to review, correct, and provide meaningful feedback.</p>
-      <div class="content-snippet">
-        <ul>
-          <li>Stepwise logbook verification process</li>
-          <li>Templates for supervisor comments & marks</li>
-          <li>Automated notifications for incomplete submissions</li>
-          <li>Performance dashboards for student progress monitoring</li>
-          <li>Secure communication channels between supervisors and students</li>
-          <li>Supervisor training videos and policy documentation</li>
-        </ul>
-      </div>
-      <button class="read-more-btn">Read More <i class="fas fa-chevron-down"></i></button>
-      <div class="extra-content">
-        <p>
-          Supervisors can track student activities in real time, highlighting strengths and areas for improvement.  
-          The system also supports multi-level approval workflows and ensures transparency in evaluation.
-        </p>
-        <p>
-          Feedback mechanisms allow for detailed comments, with options for attaching files or video explanations.  
-          Supervisors receive alerts on pending tasks and can access training materials anytime.
-        </p>
-        <p>
-          Institution admins have control over configuring grading rubrics, field schedules, and can export reports for accreditation.
-        </p>
-      </div>
-    </section>
+      <div class="footer-container" tabindex="0">
 
-    <!-- Section 3 -->
-    <section class="footer-section">
-      <h3><i class="fas fa-user-graduate"></i> Student Support & Career Services</h3>
-      <p>Comprehensive support to help students succeed academically and professionally during field training.</p>
-      <div class="content-snippet">
-        <ul>
-          <li>FAQs covering common field challenges</li>
-          <li>Direct contact info for Field Coordinators</li>
-          <li>Step-by-step tutorials on uploads and submissions</li>
-          <li>Workshops on CV writing and interview skills</li>
-          <li>Links to internship portals like BrighterMonday & LinkedIn</li>
-          <li>Guidance on professional ethics and workplace behavior</li>
-        </ul>
-      </div>
-      <button class="read-more-btn">Read More <i class="fas fa-chevron-down"></i></button>
-      <div class="extra-content">
-        <p>
-          Our career services team partners with local companies to offer internship placements tailored to students’ fields of study.  
-          We also conduct mock interviews and review CVs to prepare you for the competitive job market.
-        </p>
-        <p>
-          Technical support is available to help troubleshoot any system issues, ensuring smooth access to learning resources and report submissions.
-        </p>
-        <p>
-          Networking events and webinars are regularly organized to connect students with industry professionals.
-        </p>
-      </div>
-    </section>
+        <section class="footer-section" aria-labelledby="resources-title">
+          <h3 id="resources-title"><i class="fas fa-book-reader" aria-hidden="true"></i> Resources</h3>
+          <p>Essential guides and tips for accurate daily logbook entries.</p>
+          <ul>
+            <li>Step-by-step entry instructions</li>
+            <li>Multimedia attachment guidelines</li>
+            <li>Submission deadlines overview</li>
+          </ul>
+        </section>
 
-    <!-- Section 4 -->
-    <section class="footer-section">
-      <h3><i class="fas fa-network-wired"></i> Academic Linkages & E-Learning</h3>
-      <p>Connecting students with digital platforms and institutional partners for enhanced learning.</p>
-      <div class="content-snippet">
-        <ul>
-          <li>Access to Moodle, Google Classroom, and MS Teams</li>
-          <li>Integration with AI and cybersecurity course modules</li>
-          <li>Collaborations with partner universities for resource sharing</li>
-          <li>Digital libraries and research databases access</li>
-          <li>Online seminar and workshop schedules</li>
-          <li>Virtual labs and simulations</li>
-        </ul>
-      </div>
-      <button class="read-more-btn">Read More <i class="fas fa-chevron-down"></i></button>
-      <div class="extra-content">
-        <p>
-          Students and faculty benefit from seamless integration with popular e-learning tools to support continuous education.  
-          The system facilitates cross-institution collaborations and access to extensive digital resources.
-        </p>
-        <p>
-          Special emphasis is placed on emerging technologies, including artificial intelligence and network security, through dedicated modules.
-        </p>
-        <p>
-          Virtual labs simulate real-world scenarios enabling practical hands-on experience even off-campus.
-        </p>
-      </div>
-    </section>
+        <section class="footer-section" aria-labelledby="supervisor-tools-title">
+          <h3 id="supervisor-tools-title"><i class="fas fa-user-tie" aria-hidden="true"></i> Supervisor Tools</h3>
+          <p>Tools to help supervisors provide efficient feedback.</p>
+          <ul>
+            <li>Verification workflows</li>
+            <li>Comment & mark templates</li>
+            <li>Progress dashboards</li>
+          </ul>
+        </section>
 
-    <!-- Section 5 -->
-    <section class="footer-section">
-      <h3><i class="fas fa-briefcase"></i> Career & Internship Opportunities</h3>
-      <p>Connecting students with real-world work experiences and career growth pathways.</p>
-      <div class="content-snippet">
-        <ul>
-          <li>List of companies accepting field students for internships</li>
-          <li>Links to internship websites like BrighterMonday, LinkedIn, and Fuzu</li>
-          <li>Guidance on writing effective CVs and cover letters</li>
-          <li>Interview preparation and mock interview sessions</li>
-          <li>Job market trends and career advice seminars</li>
-          <li>Alumni networking for job referrals</li>
-        </ul>
+        <section class="footer-section" aria-labelledby="student-support-title">
+          <h3 id="student-support-title"><i class="fas fa-user-graduate" aria-hidden="true"></i> Student Support</h3>
+          <p>Helping students succeed academically and professionally.</p>
+          <ul>
+            <li>FAQs & submission tutorials</li>
+            <li>Field coordinator contacts</li>
+            <li>CV & interview workshops</li>
+          </ul>
+        </section>
+
+        <section class="footer-section" aria-labelledby="contact-title">
+          <h3 id="contact-title"><i class="fas fa-envelope" aria-hidden="true"></i> Contact & Socials</h3>
+          <p>Get in touch or follow us online:</p>
+          <ul class="contact-list">
+            <li>Email: <a href="mailto:support@fieldlogbook.mwenge.ac.tz">support@fieldlogbook.mwenge.ac.tz</a></li>
+            <li>Phone: <a href="tel:+255694079017">+255 694 079 017</a></li>
+            <li>Follow us:
+              <a href="#" aria-label="Twitter"><i class="fab fa-twitter" aria-hidden="true"></i> Twitter</a>,
+              <a href="#" aria-label="Facebook"><i class="fab fa-facebook" aria-hidden="true"></i> Facebook</a>,
+              <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin" aria-hidden="true"></i> LinkedIn</a>
+            </li>
+          </ul>
+        </section>
+
       </div>
-      <button class="read-more-btn">Read More <i class="fas fa-chevron-down"></i></button>
-      <div class="extra-content">
-        <p>
-          We facilitate student placements in reputable companies to gain hands-on experience during field practical training.  
-          Career development workshops focus on resume building, communication skills, and interview techniques.
-        </p>
-        <p>
-          Alumni networks provide mentorship and job opportunities, fostering lifelong professional relationships.
-        </p>
-        <p>
-          Regular updates on internship openings and job fairs keep students informed and competitive.
-        </p>
+
+      <div class="scroll-hint" aria-hidden="true">
+        
       </div>
-    </section>
+    </div>
 
-    <!-- Section 6 -->
-    <section class="footer-section">
-      <h3><i class="fas fa-headset"></i> Contact & Technical Support</h3>
-      <p>We're here to assist you with system usage, troubleshooting, and academic inquiries.</p>
-      <div class="content-snippet">
-        <ul>
-          <li>Email support: support@mwenge.ac.tz</li>
-          <li>Phone: +255 27 275 0456</li>
-          <li>Field coordinator office hours and location</li>
-          <li>Technical troubleshooting guides</li>
-          <li>Live chat support during business hours</li>
-          <li>Feedback and suggestion submission portal</li>
-        </ul>
-      </div>
-      <button class="read-more-btn">Read More <i class="fas fa-chevron-down"></i></button>
-      <div class="extra-content">
-        <p>
-          Contact the support team anytime for help with the Field Logbook System, including technical issues and academic questions.
-        </p>
-        <p>
-          Our live chat and email services ensure prompt assistance to keep your workflow smooth.
-        </p>
-        <p>
-          We welcome feedback to continuously improve the system and your user experience.
-        </p>
-      </div>
-    </section>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const footer = document.querySelector('.mega-footer');
+        if (footer) {
+          setTimeout(() => {
+            footer.style.opacity = '1';
+            footer.style.transform = 'translateY(0)';
+          }, 200);
+        }
+      });
 
-  </div>
-
-  <!-- Navigation hint for horizontal scroll -->
-  <div class="scroll-hint">
-    <i class="fas fa-arrow-left"></i> Swipe or scroll horizontally to explore more sections <i class="fas fa-arrow-right"></i>
-  </div>
-
-</footer>
-
-<link rel="stylesheet" href="{% static 'css/footer.css' %}">
-<script src="{% static 'js/footer.js' %}"></script>
+      function handleFirstTab(e) {
+        if (e.key === 'Tab') {
+          document.body.classList.add('user-is-tabbing');
+          window.removeEventListener('keydown', handleFirstTab);
+        }
+      }
+      window.addEventListener('keydown', handleFirstTab);
+    </script>
+  </footer>
+</body>
+</html>

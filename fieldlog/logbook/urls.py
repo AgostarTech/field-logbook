@@ -1,51 +1,53 @@
 from django.urls import path
-from django.contrib.auth import views as auth_views
 from . import views
 
-
-app_name = "logbook"
+app_name = 'logbook'
 
 urlpatterns = [
-    # Dashboard
-    path('student/', views.student_dashboard, name='student_dashboard'),
-    
-
-    # Profile Management
+    # Profile
     path('profile/', views.profile_view, name='profile'),
-    path('profile/edit/', views.profile_update, name='edit_profile'),
+    path('profile/update/', views.profile_update, name='profile_update'),
+    path('logs/<int:student_id>/', views.view_logs, name='view_logs'),
 
-    # Logbook Activities
+    # Log Entries
+    path('log/new/', views.new_logentry, name='new_logentry'),
+    path('log/last/', views.view_last_entry, name='view_last_entry'),
+    path('log/update/', views.update_entry, name='update_entry'),
+    path('log/create/', views.create_entry, name='create_entry'),
+    path('log/edit/<int:pk>/', views.edit_entry, name='edit_entry'),
+    path('log/detail/<int:pk>/', views.log_detail, name='log_detail'),
+
+    # View logs (various roles)
     path('logs/', views.view_logs, name='view_logs'),
-    path('logs/new/', views.new_logentry, name='new_logentry'),
-    path('logs/create/', views.new_logentry, name='create_log_entry'),  # Could be merged logically
-    path('logs/last/', views.view_last_entry, name='view_last_entry'),
-    path('logs/update/', views.update_entry, name='update_entry'),
-    path('add/', views.add_entry, name='add_entry'),
-    path('edit/<int:pk>/', views.edit_entry, name='edit_entry'),
-    path('detail/<int:pk>/', views.log_detail, name='log_detail'),
+    path('logs/<int:student_id>/', views.view_logs, name='view_logs'),
+    path('all-logs/', views.all_students_logs, name='all_students_logs'),
+    path('student-logs/<int:student_id>/', views.student_logs, name='student_logs'),
 
-    # Progress Reporting
+    # Institutions AJAX
+    path('ajax/get-institutions/', views.get_institutions, name='get_institutions'),
+
+    # Progress Reports
     path('progress-report/', views.progress_report_view, name='progress_report'),
 
-    # Evaluation Forms
-    path('evaluation-forms/', views.evaluation_forms_view, name='evaluation_forms'),
-
-    # File Operations
-    path('files/view/', views.view_files, name='view_files'),
+    # Files
+    path('files/', views.view_files, name='view_files'),
     path('files/upload/', views.upload_file, name='upload_file'),
     path('files/download/', views.download_files, name='download_files'),
     path('files/delete/<int:file_id>/', views.delete_file, name='delete_file'),
 
-    # Task Management
+    # Signup
+    path('signup/student/', views.student_signup, name='student_signup'),
+
+    # Tasks
     path('tasks/assign/', views.assign_task, name='assign_task'),
-    path('complete-task/<int:pk>/', views.mark_task_complete, name='mark_task_complete'),
+    path('tasks/mark-complete/<int:pk>/', views.mark_task_complete, name='mark_task_complete'),
 
-    # Additional Functionalities
-    path('ajax/get_institutions/', views.get_institutions, name='get_institutions'),
-    path('add-entry/', views.add_entry_view, name='add_entry_view'),
-    path('detail/<int:pk>/', views.log_detail, name='log_detail'),
+    # Dashboards
+    path('dashboard/', views.dashboard, name='dashboard'),
+    path('dashboard/student/', views.student_dashboard, name='student_dashboard'),
 
-
-    # Authentication
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    # Placeholder & Add Entry Views
+    path('evaluation-forms/', views.evaluation_forms_view, name='evaluation_forms'),
+    path('add-entry/', views.add_entry, name='add_entry'),
+    path('add-entry-view/', views.add_entry_view, name='add_entry_view'),
 ]

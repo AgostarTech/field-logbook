@@ -3,14 +3,125 @@
 {% block title %}Upload Department Resource{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-  <h2>Upload Department Resource</h2>
+<div
+  style="
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 35px 30px;
+    background: linear-gradient(145deg, #101010, #1a1a1a);
+    border-radius: 15px;
+    box-shadow:
+      0 4px 15px rgba(0, 191, 165, 0.3),
+      inset 0 0 10px #00796b;
+    color: #cce7e2;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  "
+>
+  <h2
+    style="
+      text-align: center;
+      color: #00bfa5;
+      margin-bottom: 30px;
+      font-weight: 800;
+      font-size: 2.2rem;
+      letter-spacing: 1.2px;
+      text-shadow: 0 0 6px #00796b;
+    "
+  >
+    Upload Department Resource
+  </h2>
 
-  <form method="post" enctype="multipart/form-data">
+  {% if messages %}
+  <div
+    style="
+      margin-bottom: 25px;
+      padding: 14px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      text-align: center;
+      box-shadow: 0 0 15px rgba(0, 191, 165, 0.4);
+    "
+  >
+    {% for message in messages %}
+      <div
+        style="
+          margin-bottom: 8px;
+          padding: 10px 15px;
+          border-radius: 6px;
+          background-color: {% if message.tags == 'success' %}#004d40{% else %}#b71c1c{% endif %};
+          color: {% if message.tags == 'success' %}#a5d6a7{% else %}#ffcdd2{% endif %};
+          box-shadow: 0 0 12px {% if message.tags == 'success' %}#004d40{% else %}#b71c1c{% endif %};
+        "
+      >
+        {{ message }}
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data" novalidate>
     {% csrf_token %}
-    {{ form.as_p }}
 
-    <button type="submit" class="btn btn-primary">Upload</button>
+    <div style="margin-bottom: 20px;">
+      <label for="{{ form.title.id_for_label }}" style="display:block; font-weight: 700; font-size: 1.1rem; margin-bottom: 6px; color: #00bfa5;">
+        {{ form.title.label }}
+      </label>
+      {{ form.title }}
+      {% if form.title.errors %}
+        <div style="color: #ff6b6b; font-size: 0.9rem; margin-top: 4px;">
+          {{ form.title.errors }}
+        </div>
+      {% endif %}
+    </div>
+
+    <div style="margin-bottom: 20px;">
+      <label for="{{ form.description.id_for_label }}" style="display:block; font-weight: 700; font-size: 1.1rem; margin-bottom: 6px; color: #00bfa5;">
+        {{ form.description.label }}
+      </label>
+      {{ form.description }}
+      {% if form.description.errors %}
+        <div style="color: #ff6b6b; font-size: 0.9rem; margin-top: 4px;">
+          {{ form.description.errors }}
+        </div>
+      {% endif %}
+    </div>
+
+    <div style="margin-bottom: 28px;">
+      <label for="{{ form.file.id_for_label }}" style="display:block; font-weight: 700; font-size: 1.1rem; margin-bottom: 6px; color: #00bfa5;">
+        {{ form.file.label }}
+      </label>
+      {{ form.file }}
+      {% if form.file.errors %}
+        <div style="color: #ff6b6b; font-size: 0.9rem; margin-top: 4px;">
+          {{ form.file.errors }}
+        </div>
+      {% endif %}
+    </div>
+
+    <button
+      type="submit"
+      style="
+        background-color: #00bfa5;
+        color: #121212;
+        padding: 14px 30px;
+        font-size: 1.25rem;
+        font-weight: 700;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        box-shadow:
+          0 0 20px rgba(0, 191, 165, 0.8),
+          inset 0 2px 6px rgba(255, 255, 255, 0.2);
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        display: block;
+        margin: 0 auto;
+        letter-spacing: 0.05em;
+      "
+      onmouseenter="this.style.backgroundColor='#00796b'; this.style.boxShadow='0 0 30px #00796b inset';"
+      onmouseleave="this.style.backgroundColor='#00bfa5'; this.style.boxShadow='0 0 20px rgba(0, 191, 165, 0.8), inset 0 2px 6px rgba(255,255,255,0.2)';"
+    >
+      Upload
+    </button>
   </form>
 </div>
 {% endblock %}

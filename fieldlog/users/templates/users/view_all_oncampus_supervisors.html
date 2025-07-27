@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<h2>All On-Campus Supervisors</h2>
+<table class="full-width-table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Phone</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for sup in supervisors %}
+      <tr>
+        <td>{{ sup.user.get_full_name }}</td>
+        <td>{{ sup.user.email }}</td>
+        <td>{{ sup.user.phone }}</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="3">No on-campus supervisors found.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

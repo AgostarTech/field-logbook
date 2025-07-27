@@ -121,8 +121,25 @@ def update_entry(request):
     return render(request, 'logbook/update_entry.html', {'form': form})
 
 @login_required
-def view_logs(request):
-    logs = LogEntry.objects.filter(user=request.user).order_by('-created_at')
+def view_logs(request, student_id):
+    user = request.user
+
+    if user.role == 'student':
+        # Students see only their own logs
+        logs = LogEntry.objects.filter(user=user).order_by('-created_at')
+
+    elif user.role in ['station_supervisor', 'university_supervisor']:
+        # Supervisors see logs of all students they supervise
+        logs = LogEntry.objects.filter(user__role='student').order_by('-created_at')
+
+    elif user.role == 'admin':
+        # Admins can view everything
+        logs = LogEntry.objects.all().order_by('-created_at')
+
+    else:
+        # Default fallback (optional)
+        logs = LogEntry.objects.none()
+
     return render(request, 'logbook/view_logs.html', {'logs': logs})
 
 @login_required
@@ -420,3 +437,27 @@ def add_entry(request):
 @login_required
 def add_entry_view(request):
     return render(request, 'logbook/add_entry.html')
+
+@login_required
+def all_students_logs(request):
+    if not request.user.is_staff and getattr(request.user, 'role', None) not in ['onstation', 'oncampus']:
+        messages.error(request, "You do not have permission to view all students' logs.")
+        return redirect('logbook:dashboard')
+
+    logs = LogEntry.objects.select_related('user').order_by('-date', '-created_at')
+    return render(request, 'logbook/all_students_logs.html', {'logs': logs})
+
+from users.models import CustomUser  # Assuming your custom user model
+
+def student_logs(request, student_id):
+    student = get_object_or_404(CustomUser, id=student_id, role='student')
+    logs = student.logentry_set.all()  # or however you get their logs
+    return render(request, 'logbook/student_logs.html', {'student': student, 'logs': logs})
+
+
+from users.models import CustomUser  # Your custom user model
+@login_required
+def student_logs(request, student_id):
+    student = get_object_or_404(CustomUser, id=student_id, role='student')
+    logs = LogEntry.objects.filter(user=student).order_by('-created_at')
+    return render(request, 'logbook/student_logs.html', {'student': student, 'logs': logs})
