@@ -82,7 +82,6 @@ class UserUpdateForm(forms.ModelForm):
 # Log Entry Form
 # =========================
 
-
 from django import forms
 from .models import LogEntry
 from django.utils.timezone import now
@@ -91,30 +90,24 @@ class LogEntryForm(forms.ModelForm):
     class Meta:
         model = LogEntry
         fields = [
-            # Note: Keep company_place_institution here so it renders,
-            # but it's readonly in the widget and initial value is set automatically
-            'company_place_institution', 
             'date',
-            'start_time', 'departure_time',
-            'description'
+            'start_time',
+            'departure_time',
+            'description',
         ]
         widgets = {
-            'company_place_institution': forms.TextInput(attrs={
-                'class': 'form-control mb-3',
-                'readonly': 'readonly',  # user can't edit this
-            }),
             'date': forms.DateInput(attrs={
                 'type': 'date',
                 'class': 'form-control mb-3',
-                'value': now().date()
+                'value': now().date(),
             }),
             'start_time': forms.TimeInput(attrs={
                 'type': 'time',
-                'class': 'form-control mb-3'
+                'class': 'form-control mb-3',
             }),
             'departure_time': forms.TimeInput(attrs={
                 'type': 'time',
-                'class': 'form-control mb-3'
+                'class': 'form-control mb-3',
             }),
             'description': forms.Textarea(attrs={
                 'class': 'form-control notebook-style mb-3',
@@ -122,14 +115,6 @@ class LogEntryForm(forms.ModelForm):
                 'placeholder': 'Describe your daily tasks/assignments',
             }),
         }
-
-    def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)  # Expect user when initializing form
-        super().__init__(*args, **kwargs)
-
-        # Automatically set company/place/institution from user's student_profile
-        if user and hasattr(user, 'student_profile'):
-            self.fields['company_place_institution'].initial = user.student_profile.institution_name
 
 
 

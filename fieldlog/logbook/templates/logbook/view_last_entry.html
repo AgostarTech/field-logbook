@@ -1,48 +1,48 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}All Log Entries{% endblock %}
+{% block title %}Recent Log Entries{% endblock %}
 
 {% block extra_css %}
 <style>
   .container-logentry {
-    max-width: 1100px;
-    margin: 30px auto;
-    background-color: #074d63ff;
-    padding: 25px;
+    max-width: 1000px;
+    margin: 40px auto;
+    background-color: #072e33;
+    padding: 30px;
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    font-family: Arial, sans-serif;
+    color: #f0f9ff;
   }
 
   h1 {
-    font-size: 28px;
+    font-size: 26px;
     margin-bottom: 20px;
-    color: #ffffff;
-    border-bottom: 2px solid #ffffff44;
-    padding-bottom: 10px;
-  }
-
-  .summary {
-    font-size: 16px;
-    margin-bottom: 20px;
-    color: #e5e7eb;
+    border-bottom: 2px solid #0ea5e9;
+    padding-bottom: 8px;
+    color: #e0f2fe;
   }
 
   table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 25px;
+    margin-top: 20px;
+    background-color: #ffffff;
+    color: #1e293b;
+    border-radius: 6px;
+    overflow: hidden;
   }
 
   th, td {
-    border: 1px solid #cbd5e1;
-    padding: 12px 14px;
+    padding: 12px 15px;
+    border: 1px solid #e2e8f0;
     text-align: left;
   }
 
   th {
     background-color: #f1f5f9;
-    color: #1e293b;
+    color: #0f172a;
   }
 
   tr:nth-child(even) {
@@ -54,78 +54,51 @@
     font-weight: bold;
   }
 
+  .status-rejected {
+    color: red;
+    font-weight: bold;
+  }
+
   .status-pending {
     color: orange;
     font-weight: bold;
   }
 
-  .btn {
-    background-color: #e7e9e8ff;
-    color: green;
-    padding: 10px 18px;
-    border-radius: 6px;
-    text-decoration: none;
-    transition: background-color 0.3s ease;
-  }
-
-  .btn:hover {
-    background-color: #1e40af;
-    color: white;
+  .no-entries {
+    font-size: 16px;
+    margin-top: 20px;
+    color: #fcd34d;
   }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container-logentry">
-  <h1>All Log Entries</h1>
+  <h1>Recent Log Entries</h1>
 
-  <p class="summary">Displaying all log entries.</p>
-
-  {% if logs %}
+  {% if entries %}
     <table>
       <thead>
         <tr>
           <th>ID</th>
-          <th>Student</th>
           <th>Date</th>
-          <th>Institution</th>
-          <th>Place</th>
           <th>Description</th>
-          <th>Day</th>
           <th>Status</th>
-          <th>Approved By</th>
-          <th>Approved Date</th>
         </tr>
       </thead>
       <tbody>
-        {% for log in logs %}
+        {% for log in entries %}
         <tr>
           <td>{{ log.id }}</td>
-          <td>{{ log.user.get_full_name|default:log.user.username }}</td>
           <td>{{ log.date }}</td>
-          <td>{{ log.institution.name }}</td>
-          <td>{{ log.place.name }}</td>
-          <td>{{ log.description|truncatewords:10 }}</td>
-          <td>{{ log.day_number }}</td>
+          <td>{{ log.description|truncatewords:12 }}</td>
           <td>
             {% if log.approved %}
               <span class="status-approved">Approved</span>
+            {% elif log.rejected %}
+              <span class="status-rejected">Rejected</span>
             {% else %}
               <span class="status-pending">Pending</span>
-            {% endif %}
-          </td>
-          <td>
-            {% if log.approved and log.user.student_profile.supervisor %}
-              {{ log.user.student_profile.supervisor.get_full_name|default:log.user.student_profile.supervisor.username }}
-            {% else %}
-              &mdash;
-            {% endif %}
-          </td>
-          <td>
-            {% if log.approved %}
-              {{ log.created_at|date:"Y-m-d" }}
-            {% else %}
-              &mdash;
             {% endif %}
           </td>
         </tr>
@@ -133,9 +106,7 @@
       </tbody>
     </table>
   {% else %}
-    <p class="summary">No logs available at the moment.</p>
+    <p class="no-entries">No recent entries found.</p>
   {% endif %}
-
-  <a href="{% url 'logbook:dashboard' %}" class="btn">Back to Dashboard</a>
 </div>
 {% endblock %}

@@ -57,4 +57,15 @@ urlpatterns = [
     path('evaluation-forms/', views.evaluation_forms_view, name='evaluation_forms'),
     path('add-entry/', views.add_entry, name='add_entry'),
     path('add-entry-view/', views.add_entry_view, name='add_entry_view'),
+
+
+    path('log-profile/', views.get_log_profile_data, name='log_profile'),
+    path('log-profile/<int:user_id>/', views.get_log_profile_data, name='log_profile_for_user'),
+
+
+    
+
+
+
+
 ]

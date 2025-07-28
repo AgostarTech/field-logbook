@@ -28,6 +28,63 @@ from .forms import (
 
 User = get_user_model()
 
+#===========================================
+
+
+
+
+# logbook/views.py
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.contrib.auth import get_user_model
+from logbook.models import (
+    LogEntry,
+    ProgressReport,
+    EvaluationForm,
+    UploadedFile,
+    Task,
+    AssignedTask,
+    StudentProfile
+)
+
+User = get_user_model()
+
+@login_required
+def get_log_profile_data(request, user_id=None):
+    # Use the provided user_id or fallback to the logged-in user
+    target_user = User.objects.get(pk=user_id) if user_id else request.user
+
+    student_profile = getattr(target_user, 'logbook_student_profile', None)
+
+    log_entries = LogEntry.objects.filter(user=target_user).values()
+    progress_reports = ProgressReport.objects.filter(student=target_user).values()
+    evaluations = EvaluationForm.objects.filter(student=target_user).values()
+    uploads = UploadedFile.objects.filter(user=target_user).values()
+    assigned_tasks = AssignedTask.objects.filter(student=target_user).values()
+
+    # Get tasks only if the user has a student profile
+    tasks = []
+    if student_profile:
+        tasks = Task.objects.filter(assigned_to=student_profile).values()
+
+    # Combine everything into one dict
+    log_data = {
+        "user_id": target_user.id,
+        "username": target_user.username,
+        "log_entries": list(log_entries),
+        "progress_reports": list(progress_reports),
+        "evaluations": list(evaluations),
+        "uploaded_files": list(uploads),
+        "tasks": list(tasks),
+        "assigned_tasks": list(assigned_tasks),
+    }
+
+    return JsonResponse(log_data, safe=False)
+
+
+
+#==============================================
+
 # ---------- Profile Views ----------
 
 @login_required
@@ -69,46 +126,72 @@ def working_days_since(start_date, current_date):
 
 #+++++++++++++++++++++++++++++++++++++++++++
 
+
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from django.utils.timezone import now
+from .forms import LogEntryForm
+from .models import LogEntry
+from .utils import working_days_since  # Adjust if you use this from another module
+
 @login_required
 def new_logentry(request):
-    profile = getattr(request.user, 'student_profile', None)
+    profile = getattr(request.user, 'studentprofile', None)
+    
     if not profile or not profile.field_start_date:
         messages.error(request, "Please update your profile with field start date before adding log entries.")
         return redirect('logbook:profile_update')
 
     if request.method == 'POST':
-        form = LogEntryForm(request.POST, user=request.user)
+        form = LogEntryForm(request.POST)
         if form.is_valid():
             logentry = form.save(commit=False)
             logentry.user = request.user
             logentry.day_number = working_days_since(profile.field_start_date, logentry.date)
-            # Override company_place_institution to prevent spoofing
-            logentry.company_place_institution = profile.institution_name
+
+            # Set company/place/institution from student profile (load automatically)
+            logentry.company_place_institution = profile.company_place_institution
             logentry.save()
+
             messages.success(request, "New log entry created.")
             return redirect('logbook:view_last_entry')
     else:
-        form = LogEntryForm(
-            initial={
-                'date': now().date(),
-                'start_time': now().time().replace(microsecond=0),
-            },
-            user=request.user
-        )
+        form = LogEntryForm(initial={
+            'date': now().date(),
+            'start_time': now().time().replace(microsecond=0),
+        })
 
     return render(request, 'logbook/new.html', {
         'form': form,
         'entry_count': LogEntry.objects.filter(user=request.user).count(),
         'field_start_date': profile.field_start_date.strftime('%Y-%m-%d'),
+        'company_place': profile.company_place_institution,  # Pass to template for display only
         'max_days': 25,
     })
 
 
+
 ###++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+
+
+
+# logbook/views.py
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from logbook.models import LogEntry
+
 @login_required
 def view_last_entry(request):
-    entry = LogEntry.objects.filter(user=request.user).order_by('-date').first()
-    return render(request, 'logbook/view_last_entry.html', {'entry': entry})
+    entries = LogEntry.objects.filter(user=request.user).order_by('-created_at')[:2]  # assumes 'created_at' exists
+    return render(request, 'logbook/view_last_entry.html', {'entries': entries})
+
+
+
+
+#####################################
 
 @login_required
 def update_entry(request):
@@ -678,3 +761,7 @@ def all_students_logs(request):
         logs = LogEntry.objects.filter(user__in=student_users).select_related('user', 'institution', 'place').order_by('-date', '-created_at')
 
     return render(request, 'logbook/all_students_logs.html', {'logs': logs})
+
+
+
+
