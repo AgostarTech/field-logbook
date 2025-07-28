@@ -38,6 +38,7 @@
     padding: 12px 15px;
     border: 1px solid #e2e8f0;
     text-align: left;
+    vertical-align: middle;
   }
 
   th {
@@ -69,6 +70,56 @@
     margin-top: 20px;
     color: #fcd34d;
   }
+
+  /* Initially hide the full log entries */
+  #all-logs-container {
+    display: none;
+    margin-top: 30px;
+  }
+
+  .btn-toggle {
+    background-color: #0ea5e9;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 6px;
+    margin-top: 20px;
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 6px 12px;
+    font-size: 14px;
+    border-radius: 4px;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid transparent;
+    margin-right: 4px;
+  }
+
+  .btn-download {
+    background-color: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+  }
+  .btn-update {
+    background-color: #fbbf24;
+    color: black;
+    border-color: #fbbf24;
+  }
+  .btn-delete {
+    background-color: #ef4444;
+    color: white;
+    border-color: #ef4444;
+  }
+
+  form.inline-form {
+    display: inline;
+    margin: 0;
+    padding: 0;
+  }
 </style>
 {% endblock %}
 
@@ -81,16 +132,23 @@
       <thead>
         <tr>
           <th>ID</th>
-          <th>Date</th>
+          <th>Name</th>
+          <th>Date Created</th>
           <th>Description</th>
           <th>Status</th>
+          <th>Approved By</th>
+          <th>Messages Commented</th>
+          <th>Download</th>
+          <th>Update</th>
+          <th>Delete</th>
         </tr>
       </thead>
       <tbody>
         {% for log in entries %}
         <tr>
           <td>{{ log.id }}</td>
-          <td>{{ log.date }}</td>
+          <td>{{ log.user.get_full_name }}</td>
+          <td>{{ log.created_at|date:"Y-m-d H:i" }}</td>
           <td>{{ log.description|truncatewords:12 }}</td>
           <td>
             {% if log.approved %}
@@ -101,6 +159,28 @@
               <span class="status-pending">Pending</span>
             {% endif %}
           </td>
+          <td>
+            {% if log.approved_by %}
+              {{ log.approved_by.get_full_name }}
+            {% else %}
+              &mdash;
+            {% endif %}
+          </td>
+          <td>
+            {{ log.comments.count }}
+          </td>
+          <td>
+            <a href="{% url 'logbook:download_log' log.id %}" class="btn btn-download">Download</a>
+          </td>
+          <td>
+            <a href="{% url 'logbook:update_log' log.id %}" class="btn btn-update">Update</a>
+          </td>
+          <td>
+            <form action="{% url 'logbook:delete_log' log.id %}" method="post" class="inline-form" onsubmit="return confirm('Delete this log?');">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-delete">Delete</button>
+            </form>
+          </td>
         </tr>
         {% endfor %}
       </tbody>
@@ -108,5 +188,89 @@
   {% else %}
     <p class="no-entries">No recent entries found.</p>
   {% endif %}
+
+  <!-- Button to toggle all logs -->
+  <button id="toggleAllLogsBtn" class="btn-toggle">Show All Logs</button>
+
+  <!-- All logs section, initially hidden -->
+  <div id="all-logs-container" class="container-logentry">
+    <h2>All Log Entries</h2>
+    {% if all_entries %}
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Date Created</th>
+            <th>Description</th>
+            <th>Status</th>
+            <th>Approved By</th>
+            <th>Messages Commented</th>
+            <th>Download</th>
+            <th>Update</th>
+            <th>Delete</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in all_entries %}
+          <tr>
+            <td>{{ log.id }}</td>
+            <td>{{ log.user.get_full_name }}</td>
+            <td>{{ log.created_at|date:"Y-m-d H:i" }}</td>
+            <td>{{ log.description|truncatewords:12 }}</td>
+            <td>
+              {% if log.approved %}
+                <span class="status-approved">Approved</span>
+              {% elif log.rejected %}
+                <span class="status-rejected">Rejected</span>
+              {% else %}
+                <span class="status-pending">Pending</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if log.approved_by %}
+                {{ log.approved_by.get_full_name }}
+              {% else %}
+                &mdash;
+              {% endif %}
+            </td>
+            <td>
+              {{ log.comments.count }}
+            </td>
+            <td>
+              <a href="{% url 'logbook:download_log' log.id %}" class="btn btn-download">Download</a>
+            </td>
+            <td>
+              <a href="{% url 'logbook:update_log' log.id %}" class="btn btn-update">Update</a>
+            </td>
+            <td>
+              <form action="{% url 'logbook:delete_log' log.id %}" method="post" class="inline-form" onsubmit="return confirm('Delete this log?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-delete">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="no-entries">No log entries found.</p>
+    {% endif %}
+  </div>
 </div>
+
+<script>
+  const toggleBtn = document.getElementById('toggleAllLogsBtn');
+  const allLogsContainer = document.getElementById('all-logs-container');
+
+  toggleBtn.addEventListener('click', () => {
+    if (allLogsContainer.style.display === 'none' || allLogsContainer.style.display === '') {
+      allLogsContainer.style.display = 'block';
+      toggleBtn.textContent = 'Hide All Logs';
+    } else {
+      allLogsContainer.style.display = 'none';
+      toggleBtn.textContent = 'Show All Logs';
+    }
+  });
+</script>
 {% endblock %}

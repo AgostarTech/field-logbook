@@ -117,17 +117,35 @@ class LogEntryForm(forms.ModelForm):
         }
 
 
+#==============================
 
-# File Upload Form
-# =========================
+
+#==========================
+
+
+
+
+from django import forms
+from logbook.models import UploadedFile
 
 class FileUploadForm(forms.ModelForm):
+    description = forms.CharField(
+        max_length=255,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter a brief description',
+        })
+    )
+
     class Meta:
         model = UploadedFile
-        fields = ['file']
+        fields = ['file', 'description']
         widgets = {
             'file': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
+
+
 
 
 # =========================

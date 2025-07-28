@@ -87,10 +87,32 @@ def get_log_profile_data(request, user_id=None):
 
 # ---------- Profile Views ----------
 
+############################################
+
+
+
+
+
 @login_required
 def profile_view(request):
     profile = getattr(request.user, 'student_profile', None)
     return render(request, 'logbook/profile.html', {'user': request.user, 'profile': profile})
+
+
+
+#####################################################
+
+
+
+
+
+
+
+
+
+
+
+
 
 @login_required
 def profile_update(request):
@@ -177,18 +199,22 @@ def new_logentry(request):
 
 
 
-
-# logbook/views.py
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from logbook.models import LogEntry
 
 @login_required
 def view_last_entry(request):
-    entries = LogEntry.objects.filter(user=request.user).order_by('-created_at')[:2]  # assumes 'created_at' exists
-    return render(request, 'logbook/view_last_entry.html', {'entries': entries})
+    # Last 2 entries (or recent few)
+    entries = LogEntry.objects.filter(user=request.user).order_by('-created_at')[:2]
 
+    # All entries
+    all_entries = LogEntry.objects.filter(user=request.user).order_by('-created_at')
 
+    return render(request, 'logbook/view_last_entry.html', {
+        'entries': entries,
+        'all_entries': all_entries,
+    })
 
 
 #####################################
@@ -353,12 +379,49 @@ def progress_report_view(request):
 
 # ---------- File Views ----------
 
+
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from logbook.models import UploadedFile
+from users.models import StudentProfile, SupervisorProfile
+
 @login_required
 def view_files(request):
-    files = UploadedFile.objects.filter(user=request.user).order_by('-uploaded_at')
+    files = UploadedFile.objects.all().order_by('-uploaded_at')
+
     for f in files:
         f.is_image = f.file.url.lower().endswith(('.jpg', '.jpeg', '.png', '.gif'))
+        user = f.user
+        f.uploader_name = f"{user.first_name} {user.last_name}"
+        f.phone_number = getattr(user, 'phone_number', 'N/A')
+
+        if user.role == 'student':
+            if hasattr(user, 'studentprofile'):
+                f.registration_number = user.studentprofile.registration_number
+            else:
+                f.registration_number = 'N/A'
+            f.role_position = ''
+        else:
+            f.registration_number = ''
+            if hasattr(user, 'supervisorprofile'):
+                sp = user.supervisorprofile
+                f.role_position = f"{user.role.replace('_', ' ').title()} - {sp.position}"
+            else:
+                f.role_position = user.role.title()
+
     return render(request, 'logbook/view_files.html', {'files': files})
+
+
+
+
+# logbook/views.py
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from logbook.forms import FileUploadForm  # Ensure your form includes 'description'
+from logbook.models import UploadedFile
 
 @login_required
 def upload_file(request):
@@ -370,16 +433,57 @@ def upload_file(request):
             upload.save()
             messages.success(request, "File uploaded successfully.")
             return redirect('logbook:view_files')
-        messages.error(request, "Please fix the errors.")
+        else:
+            messages.error(request, "Please fix the errors.")
     else:
         form = FileUploadForm()
+    
     return render(request, 'logbook/upload_file.html', {'form': form})
+
+
+
+#=======================================================
+
+
+
+#======================================
+
+
+
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from logbook.models import UploadedFile
+from users.models import StudentProfile, SupervisorProfile
 
 @login_required
 def download_files(request):
     files = UploadedFile.objects.filter(user=request.user).order_by('-uploaded_at')
+
     for f in files:
         f.is_image = f.file.url.lower().endswith(('.jpg', '.jpeg', '.png', '.gif'))
+        user = f.user
+        f.uploader_name = f"{user.first_name} {user.last_name}"
+        f.upload_time = f.uploaded_at
+        f.file_id = f.id
+        f.file_type = 'Image' if f.is_image else 'Document'
+        f.description = getattr(f, 'description', '') or '-'
+
+        if user.role == 'student':
+            if hasattr(user, 'studentprofile'):
+                f.registration_number = user.studentprofile.registration_number
+            else:
+                f.registration_number = 'N/A'
+            f.role_position = ''
+        else:
+            f.registration_number = ''
+            if hasattr(user, 'supervisorprofile'):
+                sp = user.supervisorprofile
+                f.role_position = f"{user.role.replace('_', ' ').title()} - {sp.position}"
+            else:
+                f.role_position = user.role.title()
+
     return render(request, 'logbook/download_files.html', {'files': files})
 
 @login_required
@@ -389,6 +493,12 @@ def delete_file(request, file_id):
         file.delete()
         messages.success(request, "File deleted successfully.")
     return redirect('logbook:download_files')
+
+
+
+
+
+#==============================
 
 # ---------- Signup View ----------
 
@@ -634,20 +744,36 @@ def all_students_logs(request):
         'is_supervisor': is_supervisor
     })
 
-from users.models import CustomUser  # Assuming your custom user model
 
-def student_logs(request, student_id):
-    student = get_object_or_404(CustomUser, id=student_id, role='student')
-    logs = student.logentry_set.all()  # or however you get their logs
-    return render(request, 'logbook/student_logs.html', {'student': student, 'logs': logs})
+#================================================
 
 
-from users.models import CustomUser  # Your custom user model
+
+
+
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from users.models import CustomUser
+from logbook.models import LogEntry
+
 @login_required
 def student_logs(request, student_id):
     student = get_object_or_404(CustomUser, id=student_id, role='student')
-    logs = LogEntry.objects.filter(user=student).order_by('-created_at')
-    return render(request, 'logbook/student_logs.html', {'student': student, 'logs': logs})
+    logs = LogEntry.objects.filter(user=student).select_related('approved_by').order_by('-created_at')
+    return render(request, 'logbook/student_logs.html', {
+        'student': student,
+        'logs': logs,
+    })
+
+
+
+
+
+
+
+
+
+#=========================================
 
 import io
 from django.http import FileResponse
@@ -763,5 +889,19 @@ def all_students_logs(request):
     return render(request, 'logbook/all_students_logs.html', {'logs': logs})
 
 
+
+from django.http import HttpResponse
+
+def download_log(request, pk):
+    return HttpResponse("Download log not implemented yet.")
+
+def update_log(request, pk):
+    return HttpResponse("Update log not implemented yet.")
+
+def log_comments(request, pk):
+    return HttpResponse("Log comments not implemented yet.")
+
+def delete_log(request, pk):
+    return HttpResponse("Delete log not implemented yet.")
 
 

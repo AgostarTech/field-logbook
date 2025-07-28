@@ -1,10 +1,81 @@
 {% extends 'base.html' %}
 
+{% block extra_css %}
+<style>
+  .upload-container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #072e33;
+    color: #e0f2fe;
+    font-family: Arial, sans-serif;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  .upload-container h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #0ea5e9;
+    padding-bottom: 10px;
+  }
+
+  .upload-container form {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .upload-container form p {
+    margin-bottom: 16px;
+  }
+
+  .upload-container input[type="file"],
+  .upload-container textarea {
+    padding: 8px;
+    background-color: #ffffff;
+    color: #1e293b;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+  }
+
+  .upload-container textarea {
+    resize: vertical;
+    height: 100px;
+  }
+
+  .upload-container button[type="submit"] {
+    margin-top: 10px;
+    padding: 10px 16px;
+    font-size: 16px;
+    background-color: #0ea5e9;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .upload-container button:hover {
+    background-color: #0284c7;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
+<div class="upload-container">
   <h2>Upload a File</h2>
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    {{ form.as_p }}
+    <p>
+      <label for="id_file">File:</label><br>
+      {{ form.file }}
+    </p>
+    <p>
+      <label for="id_description">Description (optional):</label><br>
+      {{ form.description }}
+    </p>
     <button type="submit">Upload</button>
   </form>
+</div>
 {% endblock %}

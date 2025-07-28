@@ -1,55 +1,222 @@
 {% extends 'base.html' %}
-{% load static %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'logbook/css/file_gallery.css' %}">
-<link rel="stylesheet" href="{% static 'logbook/css/buttons.css' %}">
+<style>
+  h2 {
+    text-align: center;
+    margin-top: 30px;
+    color: #085a2a41;
+    font-size: 28px;
+  }
+
+  .files-table-container {
+    max-width: 1000px;
+    margin: 30px auto;
+    padding: 0 15px 30px 15px;
+    background-color: #f8fafc;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);
+    font-family: Arial, sans-serif;
+  }
+
+  table.files-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #1e293b;
+  }
+
+  table.files-table th,
+  table.files-table td {
+    padding: 12px 15px;
+    border: 1px solid #e2e8f0;
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  table.files-table th {
+    background-color: #055238ff;
+    color: white;
+    font-weight: 600;
+  }
+
+  table.files-table tr:nth-child(even) {
+    background-color: #e0f2fe;
+  }
+
+  table.files-table tr:hover {
+    background-color: #bae6fd;
+  }
+
+  .file-thumb {
+    max-width: 70px;
+    max-height: 50px;
+    border-radius: 6px;
+    object-fit: cover;
+  }
+
+  .btn {
+    padding: 6px 12px;
+    font-size: 13px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .btn-primary {
+    background-color: #053816ff;
+    color: white;
+  }
+
+  .btn-secondary {
+    background-color: #64748b;
+    color: white;
+  }
+
+  .btn:hover {
+    opacity: 0.9;
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    padding-top: 100px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.6);
+  }
+
+  .modal-content {
+    background-color: #fff;
+    margin: auto;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 80%;
+    max-height: 80%;
+    overflow: auto;
+    position: relative;
+  }
+
+  .modal-close {
+    color: #333;
+    position: absolute;
+    top: 12px;
+    right: 20px;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .modal-body img,
+  .modal-body iframe {
+    width: 100%;
+    max-height: 500px;
+    border-radius: 6px;
+  }
+
+  .empty-msg {
+    text-align: center;
+    color: #64748b;
+    padding: 20px 0;
+  }
+</style>
 {% endblock %}
 
 {% block content %}
-  <h2>Uploaded Files</h2>
+<h2>Uploaded Files</h2>
 
-  <div class="file-gallery">
-    {% for file in files %}
-      <div class="file-item">
-        <div class="file-preview">
-          {% if file.is_image %}
-            <img src="{{ file.file.url }}" alt="Uploaded image" class="file-image" />
-          {% else %}
-            <!-- Document icon SVG -->
-            <svg xmlns="http://www.w3.org/2000/svg" height="60" width="60" viewBox="0 0 384 512" fill="#555">
-              <path d="M224 136v-136H24C10.7 0 0 10.7 0 24v464c0 13.3 10.7 24 24 24h336c13.3 0 24-10.7 24-24V160H248c-13.3 0-24-10.7-24-24zM384 121.9V128h-82.1c-7.5 0-14.6-3.7-18.8-9.7L256 91.6 309.4 38.2c6-6 14.1-9.7 22.6-9.7H384v93.4z"/>
-            </svg>
-          {% endif %}
-        </div>
+<div class="files-table-container">
+  {% if files %}
+    <table class="files-table" aria-label="Uploaded files table">
+      <thead>
+        <tr>
+          <th>Preview</th>
+          <th>ID</th>
+          <th>File Name</th>
+          <th>Upload Date</th>
+          <th>Description</th>
+          <th>Uploader Name</th>
+          <th>Registration No.</th>
+          <th>Role / Position</th>
+          <th>Phone Number</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for file in files %}
+          <tr>
+            <td>
+              {% if file.is_image %}
+                <img src="{{ file.file.url }}" alt="Preview" class="file-thumb" />
+              {% else %}
+                <svg xmlns="http://www.w3.org/2000/svg" height="30" width="30" viewBox="0 0 384 512" fill="#555">
+                  <path d="M224 136v-136H24C10.7 0 0 10.7 0 24v464c0 13.3 10.7 24 24 24h336c13.3 0 24-10.7 24-24V160H248c-13.3 0-24-10.7-24-24zM384 121.9V128h-82.1c-7.5 0-14.6-3.7-18.8-9.7L256 91.6 309.4 38.2c6-6 14.1-9.7 22.6-9.7H384v93.4z"/>
+                </svg>
+              {% endif %}
+            </td>
+            <td>{{ file.id }}</td>
+            <td>{{ file.file.name|slice:"8:" }}</td>
+            <td>{{ file.uploaded_at|date:"Y-m-d H:i" }}</td>
+            <td>{{ file.description|default:"-" }}</td>
+            <td>{{ file.uploader_name }}</td>
+            <td>{{ file.registration_number|default:"-" }}</td>
+            <td>{{ file.role_position|default:"-" }}</td>
+            <td>{{ file.phone_number|default:"-" }}</td>
+            <td>
+              {% if file.is_image %}
+                <button class="btn btn-primary" onclick="openModal('{{ file.file.url }}', 'image')">View</button>
+              {% else %}
+                <button class="btn btn-secondary" onclick="openModal('{{ file.file.url }}', 'doc')">Read</button>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="empty-msg">No uploaded files found.</p>
+  {% endif %}
+</div>
 
-        <div class="file-info">
-          <div class="file-name">{{ file.file.name|slice:"8:" }}</div>
-
-          <div class="file-action-button">
-            {% if file.is_image %}
-              <button onclick="openModal('{{ file.file.url }}', 'image')" class="btn btn-primary btn-sm">View</button>
-            {% else %}
-              <button onclick="openModal('{{ file.file.url }}', 'doc')" class="btn btn-secondary btn-sm">Read</button>
-            {% endif %}
-          </div>
-        </div>
-      </div>
-    {% empty %}
-      <p>No files uploaded yet.</p>
-    {% endfor %}
+<!-- Modal -->
+<div id="fileModal" class="modal">
+  <div class="modal-content">
+    <span class="modal-close" onclick="closeModal()">&times;</span>
+    <div id="modalContent" class="modal-body"></div>
   </div>
-
-  <!-- Modal Container -->
-  <div id="fileModal" class="modal">
-    <div class="modal-content">
-      <span class="modal-close" onclick="closeModal()">&times;</span>
-      <div id="modalContent" class="modal-body"></div>
-    </div>
-  </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'logbook/js/file_modal.js' %}"></script>
-{% endblock %}
+<script>
+  function openModal(fileUrl, type) {
+    const modal = document.getElementById('fileModal');
+    const modalContent = document.getElementById('modalContent');
 
+    if (type === 'image') {
+      modalContent.innerHTML = `<img src="${fileUrl}" alt="Preview Image">`;
+    } else {
+      modalContent.innerHTML = `<iframe src="${fileUrl}" frameborder="0" height="500"></iframe>`;
+    }
+
+    modal.style.display = 'block';
+  }
+
+  function closeModal() {
+    document.getElementById('fileModal').style.display = 'none';
+    document.getElementById('modalContent').innerHTML = '';
+  }
+
+  window.onclick = function(event) {
+    const modal = document.getElementById('fileModal');
+    if (event.target === modal) {
+      closeModal();
+    }
+  };
+</script>
+{% endblock %}

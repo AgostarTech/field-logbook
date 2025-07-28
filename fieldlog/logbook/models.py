@@ -148,6 +148,14 @@ class LogEntry(models.Model):
 # Uploaded Files
 # ========================
 
+
+
+
+# logbook/models.py
+
+from django.conf import settings
+from django.db import models
+
 class UploadedFile(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -155,10 +163,14 @@ class UploadedFile(models.Model):
         related_name='uploaded_files'
     )
     file = models.FileField(upload_to='uploads/')
+    description = models.TextField(blank=True, null=True)  # ✅ Add description field
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.user.username} - {self.file.name.split('/')[-1]}"
+
+
+
 
 
 # ========================

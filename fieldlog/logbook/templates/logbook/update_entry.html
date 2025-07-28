@@ -1,34 +1,83 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Update Log Entry{% endblock %}
+{% block title %}My Profile{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'logbook/css/logentry.css' %}">
+<link rel="stylesheet" href="{% static 'logbook/css/profile.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="container-logentry">
-  <h1>Update Log Entry</h1>
+<div class="profile-page-container">
+  <div class="profile-wrapper">
+    <h2><i class="fas fa-user-circle"></i> My Profile</h2>
 
-  <form method="post" novalidate>
-    {% csrf_token %}
+    <div class="profile-picture-wrapper">
+      {% if user.profile_picture %}
+        <img src="{{ user.profile_picture.url }}" alt="Profile Picture" class="profile-picture">
+      {% else %}
+        <img src="{% static 'logbook/images/default-avatar.png' %}" alt="Default Avatar" class="profile-picture">
+      {% endif %}
+      <div class="rainbow-ring"></div>
+    </div>
 
-    {% for field in form %}
-      <div class="mb-3">
-        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-        {{ field }}
-        {% if field.errors %}
-          <div class="text-danger small">{{ field.errors }}</div>
+    <div class="profile-details">
+      <p><strong>Username:</strong> {{ user.username }}</p>
+      <p><strong>Full Name:</strong> {{ user.get_full_name }}</p>
+      <p><strong>Email:</strong> {{ user.email }}</p>
+      <p><strong>Phone:</strong>
+        {% if user.phone_number %}
+          {{ user.phone_number }}
+        {% elif student_profile and student_profile.phone_number %}
+          {{ student_profile.phone_number }}
+        {% elif supervisor_profile and supervisor_profile.phone_number %}
+          {{ supervisor_profile.phone_number }}
+        {% else %}
+          Not Provided
         {% endif %}
-      </div>
-    {% endfor %}
+      </p>
+      <p><strong>Role:</strong> {{ user.role|capfirst }}</p>
+      <p><strong>Date Joined:</strong> {{ user.date_joined|date:"F j, Y" }}</p>
+      <p><strong>Last Login:</strong> {{ user.last_login|date:"F j, Y, g:i a" }}</p>
 
-    <button type="submit" class="btn btn-primary w-100">Update Entry</button>
-  </form>
+      {% if student_profile %}
+        <hr>
+        <h3>Student Details</h3>
+        <p><strong>Registration No:</strong> {{ student_profile.registration_number }}</p>
+        <p><strong>Gender:</strong> {{ student_profile.gender|default:"Not Specified" }}</p>
+        <p><strong>Department:</strong> {{ student_profile.department.name|default:"N/A" }}</p>
+        <p><strong>Level of Study:</strong> {{ student_profile.level|default:"N/A" }}</p>
+        <p><strong>Institution/Place:</strong> {{ student_profile.place.name|default:"N/A" }}</p>
+        <p><strong>Supervisor:</strong> {{ student_profile.supervisor.get_full_name|default:"N/A" }}</p>
+        <p><strong>Log Entries:</strong> {{ student_profile.logentry_set.count }}</p>
+        <p><strong>Reports:</strong> {{ student_profile.progressreport_set.count }}</p>
+        <p><strong>Uploaded Files:</strong> {{ student_profile.user.uploadedfile_set.count }}</p>
+
+      {% elif supervisor_profile %}
+        <hr>
+        <h3>Supervisor Details</h3>
+        <p><strong>Position:</strong> {{ supervisor_profile.position|default:"N/A" }}</p>
+        <p><strong>Department:</strong> {{ supervisor_profile.department.name|default:"N/A" }}</p>
+        <p><strong>Office Location:</strong> {{ supervisor_profile.office_location|default:"N/A" }}</p>
+        <p><strong>Supervised Students:</strong> {{ supervisor_profile.studentprofile_set.count }}</p>
+        <p><strong>Evaluations:</strong> {{ supervisor_profile.evaluationform_set.count }}</p>
+      {% else %}
+        <p><em>No detailed profile information found.</em></p>
+      {% endif %}
+    </div>
+
+    <div class="profile-actions">
+      {% if student_profile %}
+        <a href="{% url 'users:edit_student_profile' %}" class="btn">Edit Profile</a>
+      {% elif supervisor_profile %}
+        <a href="{% url 'users:edit_supervisor_profile' %}" class="btn">Edit Profile</a>
+      {% endif %}
+      <a href="{% url 'users:change_password' %}" class="btn btn-secondary">Change Password</a>
+    </div>
+  </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'logbook/js/logentry.js' %}"></script>
+<script src="{% static 'logbook/js/profile.js' %}"></script>
 {% endblock %}

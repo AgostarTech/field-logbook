@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ student.get_full_name }}'s Logs{% endblock %}
+
+{% block content %}
+<div class="container-logentry">
+  <h2>Logbook for {{ student.get_full_name }}</h2>
+  <p>Total Logs Submitted: {{ logs.count }} / 25</p>
+
+  {% if logs %}
+    <table class="log-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Created</th>
+          <th>Description</th>
+          <th>Status</th>
+          <th>Approved By</th>
+          <th>Commented By</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+        <tr>
+          <td>{{ log.id }}</td>
+          <td>{{ log.created_at|date:"M d, Y H:i" }}</td>
+          <td>{{ log.description|truncatewords:10 }}</td>
+          <td>
+            {% if log.approved %}
+              <span class="status-approved">Approved</span>
+            {% elif log.rejected %}
+              <span class="text-danger">Rejected</span>
+            {% else %}
+              <span class="status-pending">Pending</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if log.approved_by %}
+              {{ log.approved_by.get_full_name }}
+            {% else %}
+              <em>—</em>
+            {% endif %}
+          </td>
+          <td>
+            {% if log.comments.exists %}
+              {% for comment in log.comments.all %}
+                <div><small>{{ comment.user.get_full_name }}</small></div>
+              {% endfor %}
+            {% else %}
+              <em>—</em>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'logbook:download_log' log.id %}" class="btn btn-sm btn-outline-primary">Download</a>
+            <a href="{% url 'logbook:update_log' log.id %}" class="btn btn-sm btn-outline-warning">Update</a>
+            <a href="{% url 'logbook:log_comments' log.id %}" class="btn btn-sm btn-outline-info">Comments</a>
+            <form action="{% url 'logbook:delete_log' log.id %}" method="post" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this log?')">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No logs submitted yet.</p>
+  {% endif %}
+</div>
+{% endblock %}
