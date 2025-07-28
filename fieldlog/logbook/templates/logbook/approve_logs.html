@@ -52,38 +52,38 @@
 </style>
 
 <div class="container">
-    <h2>Approved Logs</h2>
-    <p>These logs have been reviewed and approved.</p>
+  <h2>Approved Logs</h2>
+  <p>These logs have been reviewed and approved.</p>
 
-    <table>
-        <thead>
-            <tr>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>Registration Number</th>
-                <th>Course</th>
-                <th>Log Content</th>
-                <th>Log Time</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for log in approve_log %}
-            <tr>
-                <td>{{ log.student.user.first_name }}</td>
-                <td>{{ log.student.user.last_name }}</td>
-                <td>{{ log.student.registration_number }}</td>
-                <td>{{ log.student.course }}</td>
-                <td>{{ log.content|truncatechars:50 }}</td>
-                <td>{{ log.date|date:"Y-m-d H:i" }}</td>
-                <td>Approved</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="7" style="text-align:center; padding: 20px; color: #ccc;">No approved logs found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+  <table>
+    <thead>
+      <tr>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Registration Number</th>
+        <th>Course</th>
+        <th>Log Content</th>
+        <th>Log Date</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for log in approved_logs %}
+      <tr>
+        <td>{{ log.student.user.first_name }}</td>
+        <td>{{ log.student.user.last_name }}</td>
+        <td>{{ log.student.registration_number }}</td>
+        <td>{{ log.student.course }}</td>
+        <td>{{ log.content|truncatechars:50 }}</td>
+        <td>{{ log.date|date:"Y-m-d" }}</td>
+        <td><span style="color: #28a745; font-weight: bold;">Approved</span></td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="7" style="text-align:center; padding: 20px; color: #ccc;">No approved logs found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 {% endblock %}

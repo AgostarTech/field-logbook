@@ -66,6 +66,9 @@ def working_days_since(start_date, current_date):
 
 # ---------- Log Entry Views ----------
 
+
+#+++++++++++++++++++++++++++++++++++++++++++
+
 @login_required
 def new_logentry(request):
     profile = getattr(request.user, 'student_profile', None)
@@ -74,29 +77,34 @@ def new_logentry(request):
         return redirect('logbook:profile_update')
 
     if request.method == 'POST':
-        form = LogEntryForm(request.POST)
+        form = LogEntryForm(request.POST, user=request.user)
         if form.is_valid():
             logentry = form.save(commit=False)
             logentry.user = request.user
             logentry.day_number = working_days_since(profile.field_start_date, logentry.date)
+            # Override company_place_institution to prevent spoofing
+            logentry.company_place_institution = profile.institution_name
             logentry.save()
             messages.success(request, "New log entry created.")
             return redirect('logbook:view_last_entry')
     else:
-        form = LogEntryForm(initial={
-            'date': now().date(),
-            'start_time': now().time().replace(microsecond=0),
-        })
+        form = LogEntryForm(
+            initial={
+                'date': now().date(),
+                'start_time': now().time().replace(microsecond=0),
+            },
+            user=request.user
+        )
 
     return render(request, 'logbook/new.html', {
         'form': form,
-        'places': Place.objects.all(),
-        'institutions': Institution.objects.none(),
         'entry_count': LogEntry.objects.filter(user=request.user).count(),
         'field_start_date': profile.field_start_date.strftime('%Y-%m-%d'),
         'max_days': 25,
     })
 
+
+###++++++++++++++++++++++++++++++++++++++++++++++++++
 @login_required
 def view_last_entry(request):
     entry = LogEntry.objects.filter(user=request.user).order_by('-date').first()

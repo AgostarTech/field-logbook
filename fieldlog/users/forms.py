@@ -16,9 +16,17 @@ from .models import (
 # STUDENT SIGN UP FORM
 # ==========================
 
+
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import CustomUser, StudentProfile, Department, Course, OnCampusSupervisor, OnStationSupervisor
+from .models import (
+    CustomUser,
+    StudentProfile,
+    Department,
+    Course,
+    OnCampusSupervisor,
+    OnStationSupervisor
+)
 
 GENDER_CHOICES = (
     ('male', 'Male'),
@@ -38,31 +46,32 @@ class StudentSignUpForm(UserCreationForm):
     first_name = forms.CharField(max_length=30, required=True, label="First Name")
     middle_name = forms.CharField(max_length=30, required=False, label="Second Name")
     last_name = forms.CharField(max_length=30, required=True, label="Surname")
-    
+
     registration_number = forms.CharField(max_length=30, required=True, label="Registration Number")
-    
     gender = forms.ChoiceField(choices=GENDER_CHOICES, required=False, label="Gender")
-    
-    course = forms.ModelChoiceField(queryset=Course.objects.all(), required=False, empty_label="Select Course")
-    department = forms.ModelChoiceField(queryset=Department.objects.all(), required=False, empty_label="Select Department")
-    
+
+    course = forms.ModelChoiceField(queryset=Course.objects.all(), required=False, empty_label="Select Course", label="Course")
+    department = forms.ModelChoiceField(queryset=Department.objects.all(), required=False, empty_label="Select Department", label="Department Name")
+
     phone = forms.CharField(max_length=15, required=False, label="Phone Number")
     email = forms.EmailField(required=False, label="Email Address")
-    
+
+    company_name = forms.CharField(max_length=100, required=False, label="Place/Company / Institution Name")
+
     year_of_study = forms.ChoiceField(choices=YEAR_CHOICES, required=False, label="Year of Study")
-    
+
     onstation_supervisor = forms.ModelChoiceField(
         queryset=OnStationSupervisor.objects.all(),
         required=False,
         empty_label="Select On-Station Supervisor",
-        label="On-Station Supervisor"
+        label="Onstation Supervisor"
     )
-    
+
     oncampus_supervisor = forms.ModelChoiceField(
         queryset=OnCampusSupervisor.objects.all(),
         required=False,
         empty_label="Select On-Campus Supervisor",
-        label="On-Campus Supervisor"
+        label="Oncampus Supervisor"
     )
 
     class Meta:
@@ -70,13 +79,12 @@ class StudentSignUpForm(UserCreationForm):
         fields = [
             'username', 'first_name', 'middle_name', 'last_name',
             'registration_number', 'gender', 'course', 'department',
-            'phone', 'email', 'year_of_study', 'onstation_supervisor',
-            'oncampus_supervisor', 'password1', 'password2',
+            'phone', 'company_name', 'onstation_supervisor', 'oncampus_supervisor',
+            'year_of_study', 'email', 'password1', 'password2',
         ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Remove help texts for better UI
         for field in ['username', 'password1', 'password2']:
             self.fields[field].help_text = ''
 
@@ -121,6 +129,7 @@ class StudentSignUpForm(UserCreationForm):
                 department=self.cleaned_data.get('department'),
                 phone_number=self.cleaned_data.get('phone', ''),
                 year_of_study=self.cleaned_data.get('year_of_study'),
+                company_name=self.cleaned_data.get('company_name'),
                 supervisor_onstation=self.cleaned_data.get('onstation_supervisor'),
                 supervisor_oncampus=self.cleaned_data.get('oncampus_supervisor'),
             )
@@ -157,21 +166,38 @@ GENDER_CHOICES = (
     ('female', 'Female'),
     ('other', 'Other'),
 )
+########################################
+
+
+
+from django import forms
+from django.contrib.auth.forms import UserCreationForm
+from users.models import CustomUser, OnStationSupervisor
+
+GENDER_CHOICES = (
+    ('M', 'Male'),
+    ('F', 'Female'),
+    ('O', 'Other'),
+)
 
 class OnStationSupervisorSignUpForm(UserCreationForm):
-    first_name = forms.CharField(max_length=30, required=True, label="First Name")
-    last_name = forms.CharField(max_length=30, required=True, label="Second Name")
-    email = forms.EmailField(required=True)
-    phone = forms.CharField(max_length=15, required=True)
-    gender = forms.ChoiceField(choices=GENDER_CHOICES, required=True)
-    company_name = forms.CharField(max_length=100, required=True, label="Company / Institution Name")
-    position = forms.CharField(max_length=100, required=True, label="Your Position")
-    password1 = forms.CharField(widget=forms.PasswordInput, label="Enter New Password")
-    password2 = forms.CharField(widget=forms.PasswordInput, label="Confirm Password")
+    username = forms.CharField(label="Username", required=False)
+    first_name = forms.CharField(label="First Name", required=False)
+    last_name = forms.CharField(label="Second Name", required=False)
+    email = forms.EmailField(required=False)
+    phone = forms.CharField(required=False)
+    gender = forms.ChoiceField(choices=GENDER_CHOICES, required=False)
+    company_name = forms.CharField(label="Company / Institution Name", required=False)
+    position = forms.CharField(label="Your Position", required=False)
+    password1 = forms.CharField(widget=forms.PasswordInput, label="Enter New Password", required=False)
+    password2 = forms.CharField(widget=forms.PasswordInput, label="Confirm Password", required=False)
 
     class Meta:
         model = CustomUser
-        fields = ('username', 'first_name', 'last_name', 'email', 'phone', 'gender', 'password1', 'password2')
+        fields = (
+            'username', 'first_name', 'last_name', 'email',
+            'phone', 'gender', 'password1', 'password2'
+        )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -182,49 +208,64 @@ class OnStationSupervisorSignUpForm(UserCreationForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.first_name = self.cleaned_data['first_name']
-        user.last_name = self.cleaned_data['last_name']
-        user.email = self.cleaned_data['email']
-        user.phone = self.cleaned_data['phone']  # Assuming phone is a field on CustomUser
-        user.gender = self.cleaned_data['gender']  # Assuming gender is a field on CustomUser
+
+        # Use get() with default '' to avoid errors in demo
+        user.username = self.cleaned_data.get('username', '')
+        user.first_name = self.cleaned_data.get('first_name', '')
+        user.last_name = self.cleaned_data.get('last_name', '')
+        user.email = self.cleaned_data.get('email', '')
+        user.phone = self.cleaned_data.get('phone', '')
+        user.gender = self.cleaned_data.get('gender', '')
         user.role = 'onstation'
 
         if commit:
             user.save()
             OnStationSupervisor.objects.create(
                 user=user,
-                company_name=self.cleaned_data['company_name'],
-                position=self.cleaned_data['position'],
+                company_name=self.cleaned_data.get('company_name', ''),
+                position=self.cleaned_data.get('position', ''),
             )
         return user
-###############################################
+
+
+
+
+
+
+#########################################
+
+
+
 import uuid
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from users.models import CustomUser, SupervisorProfile
 
 class OnCampusSupervisorSignUpForm(UserCreationForm):
+    user_name = forms.CharField(max_length=30, required=False, label="Username")
     first_name = forms.CharField(max_length=30, required=False, label="First Name")
     middle_name = forms.CharField(max_length=30, required=False, label="Middle Name")
     last_name = forms.CharField(max_length=30, required=False, label="Last Name")
     email = forms.EmailField(required=False)
     phone = forms.CharField(max_length=20, required=False)
     position = forms.CharField(max_length=50, required=False)
-    # department removed
 
     class Meta:
         model = CustomUser
-        fields = ('first_name', 'middle_name', 'last_name', 'email', 'password1', 'password2')
+        fields = ('user_name', 'first_name', 'middle_name', 'last_name', 'email', 'password1', 'password2')
 
     def save(self, commit=True):
         user = super().save(commit=False)
 
-        # Generate username from email or fallback
-        base_username = self.cleaned_data.get('email', 'user').split('@')[0]
-        unique_suffix = uuid.uuid4().hex[:5]
-        user.username = f"{base_username}_{unique_suffix}"
+        # Tumia user input kama username, au tengeneza fallback ya email + uuid
+        input_username = self.cleaned_data.get('user_name', '').strip()
+        if input_username:
+            user.username = input_username
+        else:
+            base_username = self.cleaned_data.get('email', 'user').split('@')[0]
+            unique_suffix = uuid.uuid4().hex[:5]
+            user.username = f"{base_username}_{unique_suffix}"
 
-        # Assign fields, defaulting to empty string
         user.first_name = self.cleaned_data.get('first_name', '')
         user.middle_name = self.cleaned_data.get('middle_name', '')
         user.last_name = self.cleaned_data.get('last_name', '')
@@ -236,13 +277,9 @@ class OnCampusSupervisorSignUpForm(UserCreationForm):
             SupervisorProfile.objects.create(
                 user=user,
                 phone=self.cleaned_data.get('phone', ''),
-                position=self.cleaned_data.get('position', ''),
-                # no department field here
+                position=self.cleaned_data.get('position', '')
             )
         return user
-
-
-
 
 
 
@@ -345,23 +382,24 @@ class TaskAssignForm(forms.Form):
 
 from django import forms
 from .models import OnStationSupervisor
+from django import forms
+from users.models import OnStationSupervisor
 
 class OnStationSupervisorForm(forms.ModelForm):
-    # Extra fields from User model
-    first_name = forms.CharField(max_length=30, widget=forms.TextInput(attrs={'class': 'form-control'}))
-    last_name = forms.CharField(max_length=30, widget=forms.TextInput(attrs={'class': 'form-control'}))
-    username = forms.CharField(max_length=30, widget=forms.TextInput(attrs={'class': 'form-control'}))
-    email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    # Extra user fields, made optional and unrestricted
+    first_name = forms.CharField(required=False)
+    last_name = forms.CharField(required=False)
+    username = forms.CharField(required=False)
+    email = forms.EmailField(required=False)
 
     class Meta:
         model = OnStationSupervisor
-        fields = ['company_name', 'position']  # Only OnStationSupervisor model fields
+        fields = ['company_name', 'position']
         widgets = {
-            'company_name': forms.TextInput(attrs={'class': 'form-control'}),
-            'position': forms.TextInput(attrs={'class': 'form-control'}),
+            'company_name': forms.TextInput(),
+            'position': forms.TextInput(),
         }
 
-from django import forms
 
 class RejectionForm(forms.Form):
     reason = forms.CharField(

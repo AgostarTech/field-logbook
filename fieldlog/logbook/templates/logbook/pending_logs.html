@@ -103,7 +103,7 @@
                 <th>Registration Number</th>
                 <th>Course</th>
                 <th>Log Content</th>
-                <th>Log Time</th>
+                <th>Log Date</th>  {# Changed header label to "Log Date" #}
                 <th>Status</th>
                 <th>Actions</th>
             </tr>
@@ -116,7 +116,7 @@
                 <td>{{ log.student.registration_number }}</td>
                 <td>{{ log.student.course }}</td>
                 <td>{{ log.content|truncatechars:50 }}</td>
-                <td>{{ log.date|date:"Y-m-d H:i" }}</td>
+                <td>{{ log.date|date:"Y-m-d" }}</td>  {# Removed time specifiers #}
                 <td>Pending</td>
                 <td class="actions">
                     <form method="post" action="{% url 'users:approve_log' log.id %}" aria-label="Approve log {{ log.id }}">

@@ -87,6 +87,12 @@ def create_student_profile(sender, instance, created, **kwargs):
 
 #############################
 
+
+
+
+from django.db import models
+from django.conf import settings
+
 class LogEntry(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
@@ -99,30 +105,22 @@ class LogEntry(models.Model):
         on_delete=models.CASCADE,
         related_name='log_entries'
     )
-    place = models.ForeignKey(
-        Place,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='log_entries'
-    )
-    institution = models.ForeignKey(
-        Institution,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='log_entries'
-    )
+
+    # ✅ Merged place + institution into a single field
+    company_place_institution = models.CharField(max_length=255)
+
     date = models.DateField()
     day_number = models.PositiveIntegerField(null=True, blank=True)
     start_time = models.TimeField(null=True, blank=True)
     departure_time = models.TimeField(null=True, blank=True)
     description = models.TextField()
-    trainee_signature = models.CharField(max_length=100)
+
+    # ❌ Removed trainee_signature
+
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
 
-    approved = models.BooleanField(default=False)  # legacy field for compatibility
+    approved = models.BooleanField(default=False)
     status = models.CharField(
         max_length=10,
         choices=STATUS_CHOICES,
@@ -141,6 +139,10 @@ class LogEntry(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.date}"
+
+
+
+
 
 # ========================
 # Uploaded Files

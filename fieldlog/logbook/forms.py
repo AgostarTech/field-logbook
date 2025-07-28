@@ -81,6 +81,8 @@ class UserUpdateForm(forms.ModelForm):
 # =========================
 # Log Entry Form
 # =========================
+
+
 from django import forms
 from .models import LogEntry
 from django.utils.timezone import now
@@ -89,47 +91,48 @@ class LogEntryForm(forms.ModelForm):
     class Meta:
         model = LogEntry
         fields = [
-            'place', 'institution', 'date',
+            # Note: Keep company_place_institution here so it renders,
+            # but it's readonly in the widget and initial value is set automatically
+            'company_place_institution', 
+            'date',
             'start_time', 'departure_time',
-            'description', 'trainee_signature'
+            'description'
         ]
         widgets = {
-            'place': forms.Select(attrs={'class': 'form-select mb-3'}),
-            'institution': forms.Select(attrs={'class': 'form-select mb-3'}),
+            'company_place_institution': forms.TextInput(attrs={
+                'class': 'form-control mb-3',
+                'readonly': 'readonly',  # user can't edit this
+            }),
             'date': forms.DateInput(attrs={
-                'type': 'date', 'class': 'form-control mb-3',
+                'type': 'date',
+                'class': 'form-control mb-3',
                 'value': now().date()
             }),
             'start_time': forms.TimeInput(attrs={
-                'type': 'time', 'class': 'form-control mb-3'
+                'type': 'time',
+                'class': 'form-control mb-3'
             }),
             'departure_time': forms.TimeInput(attrs={
-                'type': 'time', 'class': 'form-control mb-3'
+                'type': 'time',
+                'class': 'form-control mb-3'
             }),
             'description': forms.Textarea(attrs={
-                'class': 'form-control notebook-style mb-3', 'rows': 6,
+                'class': 'form-control notebook-style mb-3',
+                'rows': 6,
                 'placeholder': 'Describe your daily tasks/assignments',
-            }),
-            'trainee_signature': forms.TextInput(attrs={
-                'class': 'form-control mb-3',
-                'placeholder': 'Type your full name as signature',
             }),
         }
 
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)  # Expect user when initializing form
         super().__init__(*args, **kwargs)
-        self.fields['institution'].queryset = self.fields['institution'].queryset.none()
 
-        if 'place' in self.data:
-            try:
-                place_id = int(self.data.get('place'))
-                self.fields['institution'].queryset = self.fields['institution'].queryset.filter(place_id=place_id).order_by('name')
-            except (ValueError, TypeError):
-                pass
-        elif self.instance.pk and self.instance.place:
-            self.fields['institution'].queryset = self.fields['institution'].queryset.filter(place=self.instance.place)
+        # Automatically set company/place/institution from user's student_profile
+        if user and hasattr(user, 'student_profile'):
+            self.fields['company_place_institution'].initial = user.student_profile.institution_name
 
-# =========================
+
+
 # File Upload Form
 # =========================
 

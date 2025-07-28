@@ -216,7 +216,7 @@
                                 <form method="post" action="{% url 'users:comment_log' log.id %}">
                                     {% csrf_token %}
                                     <input type="text" name="comment" value="{{ log.comment }}" placeholder="Write comment..." style="width: 100%;">
-                                    <button type="submit" class="btn btn-primary btn-sm mt-1">💾</button>
+                                    <button type="submit" class="btn btn-primary btn-sm mt-1">comment</button>
                                 </form>
                             </td>
                         </tr>

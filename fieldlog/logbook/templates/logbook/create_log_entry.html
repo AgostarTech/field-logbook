@@ -48,6 +48,18 @@
   .form-label {
     font-weight: 600;
   }
+
+  .signature-placeholder {
+    margin-top: 2rem;
+    font-style: italic;
+    color: #333;
+  }
+
+  .signature-line {
+    margin-top: 1rem;
+    border-top: 1px solid #000;
+    width: 250px;
+  }
 </style>
 {% endblock %}
 
@@ -62,21 +74,41 @@
   <div class="form-wrapper">
     <form method="post" novalidate>
       {% csrf_token %}
+
       {% for field in form %}
-        <div class="mb-3">
-          <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+        {% if field.name == "trainee_signature" %}
+          {# Removed trainee_signature field entirely #}
+        {% else %}
+          <div class="mb-3">
+            <label for="{{ field.id_for_label }}" class="form-label">
+              {% if field.name == "company_place_institution" %}
+                Company / Place / Institution
+              {% else %}
+                {{ field.label }}
+              {% endif %}
+            </label>
 
-          {% if field.name == "description" %}
-            {{ field|add_class:"form-control notebook-style" }}
-          {% else %}
-            {{ field|add_class:"form-control" }}
-          {% endif %}
+            {% if field.name == "company_place_institution" %}
+              {{ field|add_class:"form-control" }} {# This field is readonly in form widget #}
+            {% elif field.name == "description" %}
+              {{ field|add_class:"form-control notebook-style" }}
+            {% else %}
+              {{ field|add_class:"form-control" }}
+            {% endif %}
 
-          {% if field.errors %}
-            <div class="text-danger small">{{ field.errors }}</div>
-          {% endif %}
-        </div>
+            {% if field.errors %}
+              <div class="text-danger small">{{ field.errors }}</div>
+            {% endif %}
+          </div>
+        {% endif %}
       {% endfor %}
+
+      <div class="signature-placeholder">
+        <strong>Trainee Name:</strong> {{ user.get_full_name }} <br>
+        <strong>Signature:</strong>
+        <div class="signature-line"></div>
+        <em>(Sign here manually after downloading PDF)</em>
+      </div>
 
       <div class="btn-group">
         <button type="submit" class="btn btn-success">Submit Entry</button>

@@ -4,23 +4,29 @@ from django.utils import timezone
 from .models import (
     CustomUser,
     Department,
+    Course,
     StudentProfile,
     AssignedTask,
     SupervisorUpload,
     OnStationSupervisor,
     OnCampusSupervisor,
+    LogEntry,
+    SupervisorProfile,
+    Task,
+    TaskResource,
+    UploadedDocument,
+    EvaluationForm,
+    DepartmentResource,
 )
-from logbook.models import LogEntry
 
-
-# =============== Custom Inlines ===============
+# Inline ya StudentProfile ndani ya User
 class StudentProfileInline(admin.StackedInline):
     model = StudentProfile
     can_delete = False
     verbose_name_plural = 'Student Profile'
 
 
-# =============== Custom User Admin ===============
+# Custom User Admin
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
     list_display = ('username', 'email', 'role', 'is_staff', 'is_active')
@@ -35,14 +41,21 @@ class CustomUserAdmin(UserAdmin):
     )
 
 
-# =============== Department Admin ===============
+# Department Admin
 @admin.register(Department)
 class DepartmentAdmin(admin.ModelAdmin):
     list_display = ('name',)
     search_fields = ('name',)
 
 
-# =============== On-Campus Supervisor Admin ===============
+# Course Admin
+@admin.register(Course)
+class CourseAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    search_fields = ('name',)
+
+
+# OnCampusSupervisor Admin
 @admin.register(OnCampusSupervisor)
 class OnCampusSupervisorAdmin(admin.ModelAdmin):
     list_display = ('user', 'department', 'is_approved')
@@ -57,21 +70,28 @@ class OnCampusSupervisorAdmin(admin.ModelAdmin):
         self.message_user(request, f"{updated} supervisor(s) marked as approved.")
 
 
-# =============== On-Station Supervisor Admin ===============
+# OnStationSupervisor Admin
 @admin.register(OnStationSupervisor)
 class OnStationSupervisorAdmin(admin.ModelAdmin):
     list_display = ('user', 'company_name', 'position')
     search_fields = ('user__username', 'company_name')
 
 
-# =============== Student Profile Admin ===============
+# StudentProfile Admin
 @admin.register(StudentProfile)
 class StudentProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'registration_number', 'course', 'year_of_study')
     search_fields = ('user__username', 'registration_number', 'course')
 
 
-# =============== Log Entry Admin ===============
+# SupervisorProfile Admin
+@admin.register(SupervisorProfile)
+class SupervisorProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'department', 'phone', 'position')
+    search_fields = ('user__username', 'department__name', 'position')
+
+
+# LogEntry Admin
 @admin.register(LogEntry)
 class LogEntryAdmin(admin.ModelAdmin):
     list_display = ('student', 'date', 'status', 'approved_by', 'approved_at')
@@ -105,7 +125,7 @@ class LogEntryAdmin(admin.ModelAdmin):
         self.message_user(request, f"{updated_count} log(s) rejected.")
 
 
-# =============== Assigned Task Admin ===============
+# AssignedTask Admin
 @admin.register(AssignedTask)
 class AssignedTaskAdmin(admin.ModelAdmin):
     list_display = ('task_title', 'supervisor', 'student', 'due_date', 'status', 'is_completed')
@@ -113,8 +133,45 @@ class AssignedTaskAdmin(admin.ModelAdmin):
     search_fields = ('task_title', 'supervisor__username', 'student__user__username')
 
 
-# =============== Supervisor Upload Admin ===============
+# SupervisorUpload Admin
 @admin.register(SupervisorUpload)
 class SupervisorUploadAdmin(admin.ModelAdmin):
+    list_display = ('title', 'uploaded_by', 'uploaded_at')
+    search_fields = ('title', 'uploaded_by__username')
+
+
+# Task Admin
+@admin.register(Task)
+class TaskAdmin(admin.ModelAdmin):
+    list_display = ('id', 'assigned_by', 'completed', 'assigned_at', 'due_date')
+    list_filter = ('completed', 'assigned_at')
+    search_fields = ('assigned_by__username',)
+
+
+# TaskResource Admin
+@admin.register(TaskResource)
+class TaskResourceAdmin(admin.ModelAdmin):
+    list_display = ('title', 'type', 'status', 'deadline', 'department')
+    list_filter = ('type', 'status', 'department')
+    search_fields = ('title',)
+
+
+# UploadedDocument Admin
+@admin.register(UploadedDocument)
+class UploadedDocumentAdmin(admin.ModelAdmin):
+    list_display = ('title', 'student', 'uploaded_at')
+    search_fields = ('title', 'student__user__username')
+
+
+# EvaluationForm Admin
+@admin.register(EvaluationForm)
+class EvaluationFormAdmin(admin.ModelAdmin):
+    list_display = ('student', 'submitted_at')
+    search_fields = ('student__user__username',)
+
+
+# DepartmentResource Admin
+@admin.register(DepartmentResource)
+class DepartmentResourceAdmin(admin.ModelAdmin):
     list_display = ('title', 'uploaded_by', 'uploaded_at')
     search_fields = ('title', 'uploaded_by__username')

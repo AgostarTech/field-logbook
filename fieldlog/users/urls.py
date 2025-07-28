@@ -1,6 +1,7 @@
 from django.urls import path, reverse_lazy
 from django.contrib.auth import views as auth_views
 from . import views
+from .views import organization_list
 from .views import (
     export_student_logs_pdf,
     assign_task_to_students,
@@ -37,6 +38,7 @@ urlpatterns = [
 
     # Student Profile View
     path('student/<int:pk>/', views.student_profile, name='student_profile'),
+    path('comment-log/<int:log_id>/', views.comment_log, name='comment_log'),
 
     # Task Assignment
     path('assign-task/', views.assign_task, name='assign_task'),
@@ -108,4 +110,5 @@ urlpatterns = [
 
     # Upload Profile Picture
     path('upload-picture/', views.upload_picture, name='upload_picture'),
+    path('organizations/', organization_list, name='organization_list'),
 ]

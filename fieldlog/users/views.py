@@ -430,10 +430,17 @@ def supervisor_upload_document(request):
 
 
 # ===== View Student Profile & Logs =====
+###############################################
+
+
+
+
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
-from django.db.models import Count, Q, Max
-from .models import StudentProfile, LogEntry, TaskResource, OnStationSupervisor, OnCampusSupervisor
+from django.db.models import Max
+from users.models import CustomUser, StudentProfile, Department, OnStationSupervisor, OnCampusSupervisor
+from logbook.models import LogEntry
+#from tasks.models import TaskResource
 
 @login_required
 def student_profile(request, pk):
@@ -441,10 +448,7 @@ def student_profile(request, pk):
     student_user = get_object_or_404(CustomUser, pk=pk, role='student')
 
     # Get student profile
-    try:
-        profile = student_user.studentprofile
-    except StudentProfile.DoesNotExist:
-        profile = None
+    profile = getattr(student_user, 'studentprofile', None)
 
     # Logs
     logs = LogEntry.objects.filter(user=student_user).order_by('-date')
@@ -457,25 +461,41 @@ def student_profile(request, pk):
     total_required_logs = 60
     progress = round((approved_logs / total_required_logs) * 100, 1) if total_required_logs else 0
 
-    # Course (handle ForeignKey, ManyToMany or plain field)
-    if hasattr(profile, 'course'):
+    # Course
+    course_names = 'N/A'
+    if profile and hasattr(profile, 'course'):
         try:
             course = profile.course.all() if hasattr(profile.course, 'all') else [profile.course]
             course_names = ', '.join([c.name for c in course])
         except Exception:
-            course_names = getattr(profile, 'course', 'N/A')
-    else:
-        course_names = 'N/A'
-
-    # Supervisors
-    onstation_supervisor = getattr(profile, 'supervisor_onstation', None)
-    oncampus_supervisor = getattr(profile, 'supervisor_oncampus', None)
+            course_names = str(getattr(profile, 'course', 'N/A'))
 
     # Department
     department = getattr(student_user, 'department', None)
 
-    # Tasks assigned to this student
+    # Supervisors
+    onstation_supervisor = getattr(profile, 'supervisor_onstation', None) if profile else None
+    oncampus_supervisor = getattr(profile, 'supervisor_oncampus', None) if profile else None
+
+    # Tasks
     assigned_tasks = TaskResource.objects.filter(assigned_to=student_user)
+
+    # Extra details from user or profile
+    details = {
+        'email': student_user.email,
+        'username': student_user.username,
+        'first_name': student_user.first_name,
+        'last_name': student_user.last_name,
+        'gender': getattr(profile, 'gender', 'N/A'),
+        'phone': getattr(profile, 'phone_number', 'N/A'),
+        'institution': getattr(profile, 'institution_name', 'N/A'),
+        'company_name': getattr(profile, 'company_name', 'N/A'),
+        'location': getattr(profile, 'location', 'N/A'),
+        'field_start_date': getattr(profile, 'field_start_date', None),
+        'field_end_date': getattr(profile, 'field_end_date', None),
+        'created_at': getattr(profile, 'created_at', None),
+        'updated_at': getattr(profile, 'updated_at', None),
+    }
 
     context = {
         'student': student_user,
@@ -487,15 +507,20 @@ def student_profile(request, pk):
         'last_log_date': last_log_date,
         'progress': progress,
         'course_names': course_names,
+        'department': department,
         'onstation_supervisor': onstation_supervisor,
         'oncampus_supervisor': oncampus_supervisor,
-        'department': department,
         'assigned_tasks': assigned_tasks,
+        'details': details,
     }
 
     return render(request, 'users/student_profile.html', context)
 
 
+
+
+
+################################################
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from .models import OnStationSupervisor, OnCampusSupervisor, StudentProfile, CustomUser
@@ -787,6 +812,7 @@ def approved_logs(request):
         'approved_logs': approved_logs,
     }
     return render(request, 'logbook/approve_logs.html', context)
+
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
@@ -1170,4 +1196,30 @@ def upload_picture(request):
         form = ProfilePictureForm(instance=profile)
 
     return render(request, 'users/upload_picture.html', {'form': form})
+
+
+
+from django.shortcuts import render
+from .models import Organization
+
+def organization_list(request):
+    organizations = Organization.objects.all()
+    return render(request, 'organization_list.html', {'organizations': organizations})
+
+
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from .models import LogEntry
+
+@login_required
+def comment_log(request, log_id):
+    if request.method == 'POST':
+        log = get_object_or_404(LogEntry, pk=log_id)
+        comment = request.POST.get('comment', '').strip()
+        if comment:
+            log.comment = comment
+            log.save()
+        return redirect('users:logbook_activity')
+    return redirect('users:logbook_activity')
+
 

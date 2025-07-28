@@ -30,6 +30,11 @@
       {% csrf_token %}
 
       <div class="form-group">
+        <label>Username:</label>
+        {{ form.user_name }}
+      </div>
+
+      <div class="form-group">
         <label>First Name:</label>
         {{ form.first_name }}
       </div>

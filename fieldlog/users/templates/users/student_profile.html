@@ -1,9 +1,97 @@
-<!-- templates/users/student_profile.html -->
 {% extends "base.html" %}
 
+{% block title %}Student Profile{% endblock %}
+
 {% block content %}
-<h1>Student Profile</h1>
-<p>Name: {{ student.user.get_full_name }}</p>
-<p>Email: {{ student.user.email }}</p>
-<p>Department: {{ student.department }}</p>
+<div class="container mt-5">
+  <h1 class="mb-4">Student Profile</h1>
+
+  <table class="table table-bordered">
+    <tbody>
+      <tr>
+        <th>Full Name</th>
+        <td>{{ student.get_full_name }}</td>
+      </tr>
+      <tr>
+        <th>Username</th>
+        <td>{{ student.username }}</td>
+      </tr>
+      <tr>
+        <th>Email</th>
+        <td>{{ student.email }}</td>
+      </tr>
+      <tr>
+        <th>Gender</th>
+        <td>{{ details.gender }}</td>
+      </tr>
+      <tr>
+        <th>Phone Number</th>
+        <td>{{ details.phone }}</td>
+      </tr>
+      <tr>
+        <th>Department</th>
+        <td>{{ department.name }}</td>
+      </tr>
+      <tr>
+        <th>Course</th>
+        <td>{{ course_names }}</td>
+      </tr>
+      <tr>
+        <th>Institution Name</th>
+        <td>{{ details.institution }}</td>
+      </tr>
+      <tr>
+        <th>Company / Place / Institution</th>
+        <td>{{ details.company_name }}</td>
+      </tr>
+      <tr>
+        <th>Location</th>
+        <td>{{ details.location }}</td>
+      </tr>
+      <tr>
+        <th>Field Start Date</th>
+        <td>{{ details.field_start_date }}</td>
+      </tr>
+      <tr>
+        <th>Field End Date</th>
+        <td>{{ details.field_end_date }}</td>
+      </tr>
+      <tr>
+        <th>Logbook Progress</th>
+        <td>{{ progress }}% ({{ approved_logs }} approved of {{ total_logs }} entries)</td>
+      </tr>
+      <tr>
+        <th>Last Log Date</th>
+        <td>{{ last_log_date|default:"N/A" }}</td>
+      </tr>
+      <tr>
+        <th>On-Station Supervisor</th>
+        <td>{{ onstation_supervisor.get_full_name|default:"N/A" }}</td>
+      </tr>
+      <tr>
+        <th>On-Campus Supervisor</th>
+        <td>{{ oncampus_supervisor.get_full_name|default:"N/A" }}</td>
+      </tr>
+      <tr>
+        <th>Created At</th>
+        <td>{{ details.created_at }}</td>
+      </tr>
+      <tr>
+        <th>Last Updated</th>
+        <td>{{ details.updated_at }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 class="mt-5">Assigned Tasks</h3>
+  {% if assigned_tasks %}
+    <ul>
+      {% for task in assigned_tasks %}
+        <li>{{ task.title }} (Due: {{ task.due_date }})</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No tasks assigned.</p>
+  {% endif %}
+</div>
 {% endblock %}
