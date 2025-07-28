@@ -147,19 +147,44 @@ def get_institutions(request):
     place_id = request.GET.get('place_id')
     institutions = Institution.objects.filter(place_id=place_id).values('id', 'name')
     return JsonResponse(list(institutions), safe=False)
+###############################
 
-# ---------- Progress Report Views ----------
+
+
+###task progress
+
+
+
+#########################################
+
+from datetime import datetime, timedelta
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from .models import ProgressReport
+from .forms import ProgressReportForm
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from datetime import datetime, timedelta
 
 @login_required
 def progress_report_view(request):
     user = request.user
     profile = getattr(user, 'student_profile', None)
+    is_student = hasattr(user, 'student_profile')
+
     trainee_name = f"{user.first_name} {user.last_name}" if user.first_name and user.last_name else user.username
-    organization_name = profile.organization_name if profile else "N/A"
-    registration_number = profile.registration_number if profile else "N/A"
 
-    start_date = datetime(2025, 6, 1)  # Adjust this as needed
+    if profile:
+        organization_name = profile.organization.name if hasattr(profile, 'organization') and profile.organization else "N/A"
+        registration_number = getattr(profile, 'registration_number', "N/A")
+    else:
+        organization_name = "N/A"
+        registration_number = "N/A"
 
+    start_date = datetime(2025, 6, 1)
     weeks = [
         (1, 'supervisor_comment_week_1', start_date, start_date + timedelta(days=6)),
         (2, 'supervisor_comment_week_2', start_date + timedelta(days=7), start_date + timedelta(days=13)),
@@ -168,7 +193,7 @@ def progress_report_view(request):
         (5, 'supervisor_comment_week_5', start_date + timedelta(days=28), start_date + timedelta(days=34)),
     ]
 
-    if request.method == 'POST':
+    if request.method == 'POST' and not is_student:
         form = ProgressReportForm(request.POST)
         if form.is_valid():
             lat = form.cleaned_data.get('latitude')
@@ -194,7 +219,7 @@ def progress_report_view(request):
                 initial_data['longitude'] = pr.longitude
             except ProgressReport.DoesNotExist:
                 initial_data[field_name] = ''
-        form = ProgressReportForm(initial=initial_data)
+        form = ProgressReportForm(initial=initial_data) if not is_student else None
 
     detailed_weeks = []
     for week_number, comment_field, start, end in weeks:
@@ -208,6 +233,13 @@ def progress_report_view(request):
             latitude = None
             longitude = None
 
+        if form:
+            editable_html = form[comment_field].as_widget()
+            readonly_html = form[comment_field].as_widget(attrs={'readonly': 'readonly', 'disabled': 'disabled'})
+        else:
+            editable_html = None
+            readonly_html = None
+
         detailed_weeks.append({
             'week_number': week_number,
             'start_date': start.strftime('%Y-%m-%d'),
@@ -215,7 +247,8 @@ def progress_report_view(request):
             'supervisor_comment': supervisor_comment,
             'latitude': latitude,
             'longitude': longitude,
-            'form_field': form[comment_field],
+            'form_field_html': editable_html,
+            'form_field_html_readonly': readonly_html,
         })
 
     return render(request, 'logbook/progress_report.html', {
@@ -224,6 +257,7 @@ def progress_report_view(request):
         'trainee_name': trainee_name,
         'organization_name': organization_name,
         'registration_number': registration_number,
+        'is_student': is_student,
     })
 
 # ---------- File Views ----------
@@ -414,9 +448,57 @@ def mark_task_complete(request, pk):
 
 # ---------- Placeholder ----------
 
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from .models import EvaluationForm
+from django.contrib import messages
+
 @login_required
 def evaluation_forms_view(request):
-    return render(request, 'logbook/evaluation_forms.html')
+    user = request.user
+
+    try:
+        form_instance = EvaluationForm.objects.get(student=user)
+    except EvaluationForm.DoesNotExist:
+        form_instance = None
+
+    if request.method == 'POST':
+        if form_instance and form_instance.submitted:
+            messages.warning(request, "You have already submitted your evaluation.")
+            return redirect('evaluation_forms')  # prevent resubmission
+
+        data = {
+            'strengths': request.POST.get('strengths'),
+            'benefits_personal': request.POST.get('benefits_personal'),
+            'org_benefits': request.POST.get('org_benefits'),
+            'community_benefits': request.POST.get('community_benefits'),
+            'relevance': request.POST.get('relevance'),
+            'constraint': request.POST.get('constraint'),
+            'solution': request.POST.get('solution'),
+            'suggestions': request.POST.get('suggestions'),
+            'knowledge': request.POST.get('knowledge'),
+            'skills': request.POST.get('skills'),
+            'supervision': request.POST.get('supervision'),
+            'evaluation_method': request.POST.get('evaluation_method'),
+            'submitted': True,
+        }
+
+        if form_instance:
+            for key, value in data.items():
+                setattr(form_instance, key, value)
+            form_instance.save()
+        else:
+            EvaluationForm.objects.create(student=user, **data)
+
+        messages.success(request, "Evaluation submitted successfully.")
+        return redirect('evaluation_forms')
+
+    context = {
+        'form_data': form_instance,
+        'is_submitted': form_instance.submitted if form_instance else False,
+    }
+
+    return render(request, 'logbook/evaluation_forms.html', context)
 
 # ---------- Student Dashboard ----------
 
@@ -564,3 +646,27 @@ def download_entry_pdf(request):
 
     buffer.seek(0)
     return FileResponse(buffer, as_attachment=True, filename=f"{user.username}_log_entries.pdf")
+
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from .models import LogEntry
+
+@login_required
+def all_students_logs(request):
+    user = request.user
+
+    if user.is_staff or getattr(user, 'role', None) in ['onstation', 'oncampus']:
+        logs = LogEntry.objects.select_related('user', 'institution', 'place').order_by('-date', '-created_at')
+
+    elif hasattr(user, 'student_profile'):
+        # Show only logs for the logged-in student
+        logs = LogEntry.objects.filter(user=user).select_related('user', 'institution', 'place').order_by('-date', '-created_at')
+
+    else:
+        # For supervisors: show logs of students they supervise
+        supervised_students = user.supervised_students.all()  # adjust related_name if needed
+        student_users = [s.user for s in supervised_students]
+        logs = LogEntry.objects.filter(user__in=student_users).select_related('user', 'institution', 'place').order_by('-date', '-created_at')
+
+    return render(request, 'logbook/all_students_logs.html', {'logs': logs})

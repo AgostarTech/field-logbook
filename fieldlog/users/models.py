@@ -57,6 +57,9 @@ class CustomUser(AbstractUser):
 # SupervisorProfile Model
 # Stores extra details for supervisors, linked to user and department
 # -------------------------------
+from django.db import models
+from users.models import CustomUser, Department  # Adjust import paths as needed
+
 class SupervisorProfile(models.Model):
     user = models.OneToOneField(
         CustomUser,
@@ -65,7 +68,7 @@ class SupervisorProfile(models.Model):
     )
     department = models.ForeignKey(
         Department,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,  # Delete supervisor profile if department deleted
         null=True,
         blank=True
     )
@@ -344,21 +347,7 @@ class TaskResource(models.Model):
 # DepartmentResource Model
 # Files/resources uploaded for a department
 # -------------------------------
-class DepartmentResource(models.Model):
-    title = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
-    file = models.FileField(upload_to='department_resources/')
-    uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    uploaded_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return self.title
-
-
-# -------------------------------
-# UploadedDocument Model
-# Documents uploaded by students
-# -------------------------------
 class UploadedDocument(models.Model):
     student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name='uploaded_documents')
     title = models.CharField(max_length=255, blank=True)
@@ -367,3 +356,38 @@ class UploadedDocument(models.Model):
 
     def __str__(self):
         return self.title or f"Document {self.pk}"
+
+class EvaluationForm(models.Model):
+    student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE)
+    strengths = models.TextField()
+    benefits_personal = models.TextField()
+    org_benefits = models.TextField()
+    community_benefits = models.TextField()
+    relevance = models.TextField()
+    constraint = models.TextField()
+    solution = models.TextField()
+    suggestions = models.TextField()
+    knowledge = models.TextField()
+    skills = models.TextField()
+    supervision = models.TextField()
+    evaluation_method = models.TextField()
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Evaluation by {self.student.user.username} on {self.submitted_at.strftime('%Y-%m-%d')}"
+
+
+# users/models.py (or logbook/models.py)
+from django.db import models
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+class DepartmentResource(models.Model):
+    title = models.CharField(max_length=255)
+    file = models.FileField(upload_to='department_resources/')
+    uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title

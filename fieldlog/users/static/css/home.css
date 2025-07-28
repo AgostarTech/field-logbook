@@ -1,234 +1,201 @@
-/* --------------------------------
-   Hero Section
----------------------------------- */
+/* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body, html {
+  width: 100%;
+  font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #09520c;
+  color: #333;
+  overflow-x: hidden;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* HERO SECTION */
 .hero-section {
+  width: 100%;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  padding: 4rem 2rem;
-  background: linear-gradient(135deg, #203a43, #2c5364);
-  color: #cfd8dc;
+  background: linear-gradient(to right, #0a5275, #0984a3);
+  color: white;
+  padding: 60px 40px;
+  border-radius: 0 0 40px 40px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 }
 
 .hero-content {
-  flex: 1 1 55%;
-  max-width: 600px;
-  animation: fadeIn 1s ease forwards;
-  opacity: 0;
+  flex: 1 1 400px;
+  min-width: 280px;
+  padding: 10px;
 }
 
 .hero-content h1 {
-  font-size: 2.8rem;
-  margin-bottom: 1rem;
-  color: #1de9b6;
+  font-size: 2.5em;
+  margin-bottom: 0.4em;
   display: flex;
   align-items: center;
-  gap: 12px;
-}
-
-.hero-content h1 i {
-  font-size: 2.5rem;
-  color: #14a37f;
-  text-shadow: 0 0 10px #1de9b6;
-  animation: pulseGlow 2.5s infinite ease-in-out;
+  gap: 10px;
 }
 
 .tagline {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-  color: #80deea;
+  font-size: 1.3em;
+  color: #ffeaa7;
+  margin-bottom: 10px;
 }
 
 .description {
-  font-size: 1rem;
+  font-size: 1.05em;
   line-height: 1.6;
-  margin-bottom: 2rem;
+  margin-bottom: 25px;
 }
 
 .cta-button {
   display: inline-block;
-  background-color: #1de9b6;
-  color: #0f2027;
-  padding: 0.8rem 1.6rem;
-  border-radius: 10px;
-  text-decoration: none;
-  font-weight: bold;
-  text-transform: uppercase;
-  box-shadow: 0 0 20px #1de9b6;
+  background-color: #ffffff;
+  color: #0a5275;
+  padding: 12px 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
 }
 
 .cta-button:hover {
-  background-color: #14a37f;
-  box-shadow: 0 0 30px #14a37f;
+  background-color: #ffeaa7;
+  color: #000;
   transform: scale(1.05);
 }
 
-/* --------------------------------
-   Hero Logo (Right Side)
----------------------------------- */
 .hero-logo-box {
-  flex: 1 1 35%;
+  flex: 1 1 300px;
   text-align: center;
-  animation: fadeIn 2s ease forwards;
+  padding: 10px;
 }
 
 .mwecau-logo-right {
-  max-width: 180px;
-  width: 100%;
-  border-radius: 50%;
-  margin-bottom: 1rem;
-  box-shadow: 0 0 25px #1de9b6;
-  animation: pulseGlow 3s infinite ease-in-out;
+  width: 180px;
+  margin-bottom: 10px;
+  border-radius: 12px;
+  background: rgb(4, 94, 26);
+  padding: 10px;
 }
 
 .logo-caption {
-  font-size: 1rem;
   font-style: italic;
-  color: #80deea;
-  text-shadow: 0 0 6px #1de9b6;
+  font-size: 1em;
+  color: #f1f1f1;
 }
 
-/* --------------------------------
-   Hero Illustration (optional)
----------------------------------- */
-.hero-illustration {
-  flex: 1 1 40%;
-  text-align: center;
-}
-
-.hero-illustration img {
-  max-width: 100%;
-  animation: fadeIn 2s ease-in;
-}
-
-/* --------------------------------
-   Features Section
----------------------------------- */
+/* FEATURES SECTION */
 .features-section {
-  background: #1c2a35;
-  padding: 4rem 2rem;
-  color: #cfd8dc;
+  width: 100%;
+  padding: 60px 40px;
+  background-color: #ffffff;
   text-align: center;
 }
 
 .features-section h2 {
-  font-size: 2rem;
-  margin-bottom: 2rem;
-  color: #1de9b6;
-  text-shadow: 0 0 5px #14a37f;
+  font-size: 2em;
+  margin-bottom: 40px;
+  color: #0a5275;
 }
 
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
 }
 
 .feature-box {
-  background: rgba(30, 45, 60, 0.95);
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 0 15px #1de9b6;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.feature-box i {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-  color: #14a37f;
-  text-shadow: 0 0 10px #1de9b6;
+  background: #f0f8fa;
+  padding: 30px 20px;
+  border-radius: 20px;
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease;
 }
 
 .feature-box:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 0 25px #1de9b6;
+  transform: translateY(-6px);
+  background-color: #eaf9ff;
 }
 
-/* --------------------------------
-   Motto Section
----------------------------------- */
+.feature-box i {
+  font-size: 2em;
+  color: #0a5275;
+  margin-bottom: 15px;
+}
+
+.feature-box h3 {
+  margin-bottom: 10px;
+  color: #0984a3;
+}
+
+/* MOTTO SECTION */
 .motto-section {
-  background: #0f2027;
-  color: #cfd8dc;
-  padding: 3rem 2rem;
+  width: 100%;
+  background: #0a5275;
+  color: white;
   text-align: center;
+  padding: 50px 30px;
+  margin-top: 40px;
+  border-radius: 40px 40px 0 0;
 }
 
-blockquote {
-  font-style: italic;
-  font-size: 1.2rem;
+.motto-section blockquote {
+  font-size: 1.3em;
   line-height: 1.8;
+  max-width: 700px;
+  margin: 0 auto;
   position: relative;
 }
 
-blockquote i {
-  font-size: 1.5rem;
-  color: #1de9b6;
+.motto-section i {
+  font-size: 1.4em;
+  color: #ffeaa7;
+  margin-bottom: 10px;
 }
 
-blockquote footer {
-  margin-top: 1rem;
-  font-weight: bold;
-  color: #80deea;
+.motto-section footer {
+  margin-top: 20px;
+  font-size: 0.9em;
+  font-style: italic;
+  color: #dfe6e9;
 }
 
-/* --------------------------------
-   Animations
----------------------------------- */
-@keyframes fadeIn {
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes pulseGlow {
-  0%, 100% {
-    text-shadow: 0 0 8px #14a37f, 0 0 20px #1de9b6;
-    color: #14a37f;
-  }
-  50% {
-    text-shadow: 0 0 16px #1de9b6, 0 0 30px #14a37f;
-    color: #62dafb;
-  }
-}
-
-.ripple-container {
-  position: relative;
-  overflow: hidden;
-}
-
-.ripple {
-  position: absolute;
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: 50%;
-  transform: scale(0);
-  animation: ripple 0.6s linear;
-  width: 100px;
-  height: 100px;
-  pointer-events: none;
-}
-
-@keyframes ripple {
-  to {
-    transform: scale(4);
-    opacity: 0;
-  }
-}
-
-/* --------------------------------
-   Responsive Layout
----------------------------------- */
+/* Responsive Fixes */
 @media (max-width: 768px) {
   .hero-section {
     flex-direction: column;
     text-align: center;
+    padding: 40px 20px;
   }
 
-  .hero-logo-box {
-    margin-top: 2rem;
+  .hero-content h1 {
+    font-size: 2em;
+    justify-content: center;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cta-button {
+    width: 100%;
+    max-width: 300px;
   }
 }

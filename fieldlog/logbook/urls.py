@@ -25,6 +25,8 @@ urlpatterns = [
 
     # Institutions AJAX
     path('ajax/get-institutions/', views.get_institutions, name='get_institutions'),
+    path('all-logs/', views.all_students_logs, name='all_students_logs'),
+
 
     # Progress Reports
     path('progress-report/', views.progress_report_view, name='progress_report'),

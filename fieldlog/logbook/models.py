@@ -80,7 +80,7 @@ def create_student_profile(sender, instance, created, **kwargs):
             registration_number=f"TEMP{instance.pk}",
             course="Unknown"
         )
-        
+
 ##############################
 
 ##log entry
@@ -233,3 +233,19 @@ class AssignedTask(models.Model):
 
     def __str__(self):
         return self.title
+
+
+# logbook/models.py
+from django.db import models
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+class EvaluationForm(models.Model):
+    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='evaluations')
+    supervisor_comments = models.TextField(blank=True)
+    student_feedback = models.TextField(blank=True)
+    date_submitted = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Evaluation for {self.student.username} - {self.date_submitted.date()}"

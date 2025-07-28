@@ -23,6 +23,7 @@ from .forms import OnStationSupervisorSignUpForm
 
 
 
+
 from .models import (
     StudentProfile,
     OnStationSupervisor,
@@ -122,15 +123,29 @@ def onstation_signup(request):
     }
     return render(request, 'users/on-stations_signup.html', context)
 
+
+
+
+from django.contrib.auth import login
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .forms import OnCampusSupervisorSignUpForm
+
 def oncampus_signup(request):
-    form = OnCampusSupervisorSignUpForm(request.POST or None)
     if request.method == 'POST':
+        form = OnCampusSupervisorSignUpForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)
-            return redirect('users:dashboard')
-        messages.error(request, "Please fix the errors below.")
+            login(request, user)  # auto-login after signup
+            return redirect('users:dashboard')  # redirect wherever you want
+        else:
+            messages.error(request, "Please fix the errors below.")
+    else:
+        form = OnCampusSupervisorSignUpForm()
     return render(request, 'users/on-campus_signup.html', {'form': form, 'title': 'On-Campus Supervisor Signup'})
+
+
+
 
 
 # ===== Dashboard Dispatcher =====
@@ -155,35 +170,24 @@ def student_dashboard(request):
     # Add any student specific info here if needed
     return render(request, 'users/student_dashboard.html')
 
-
-
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.db.models import Q, Count, Max
-from django.utils import timezone
-
 @login_required
 def oncampus_dashboard(request):
     user = request.user
 
-    # Only allow On-Campus Supervisors
     if user.role != 'oncampus':
         return redirect('login')
 
-    department = user.department
-    total_required_logs = 60
+    # Remove department restriction for demo
+    # department = user.department  
+    total_required_logs = 25
 
-    # Get search and filter query params
     search_query = request.GET.get('q', '')
     progress_filter = request.GET.get('progress_filter', '')
 
-    # Get all students in department or all if no department assigned
-    if department:
-        department_students = StudentProfile.objects.filter(department=department.name).select_related('user')
-    else:
-        department_students = StudentProfile.objects.all().select_related('user')
+    # Remove department filter from students too, for demo purposes
+    department_students = StudentProfile.objects.all().select_related('user')
 
-    # Apply search filters if any
+    # Apply search filters
     if search_query:
         department_students = department_students.filter(
             Q(user__first_name__icontains=search_query) |
@@ -193,10 +197,8 @@ def oncampus_dashboard(request):
             Q(phone_number__icontains=search_query)
         )
 
-    # Enrich each student with log progress info
     enriched_students = []
     for student in department_students:
-        # Use the StudentProfile instance directly
         student_logs = LogEntry.objects.filter(student=student)
 
         approved_count = student_logs.filter(status='approved').count()
@@ -210,7 +212,7 @@ def oncampus_dashboard(request):
         student.phone = getattr(student.user, 'phone_number', '')
         enriched_students.append(student)
 
-    # Filter students by progress range if filter applied
+    # Apply progress filter if any
     if progress_filter in ['0-25', '26-50', '51-75', '76-100']:
         ranges = {
             '0-25': (0, 25),
@@ -221,15 +223,19 @@ def oncampus_dashboard(request):
         min_val, max_val = ranges[progress_filter]
         enriched_students = [s for s in enriched_students if min_val <= s.progress <= max_val]
 
-    # Summary stats
     department_students_count = len(enriched_students)
     submitted_logs = sum(s.logs_submitted for s in enriched_students)
     pending_logs = sum(s.pending_logs for s in enriched_students)
 
-    # On-Station Supervisors assigned to students under this On-Campus supervisor
+    # Remove department filtering on supervisors too, for demo
+    oncampus_supervisors = OnCampusSupervisor.objects.all()
+    onstation_supervisors = OnStationSupervisor.objects.all()
+
+    # Students assigned to current supervisor
     assigned_students = StudentProfile.objects.filter(supervisor_oncampus__user=user)
+
     supervisor_ids = assigned_students.values_list('supervisor_onstation__user_id', flat=True).distinct()
-    onstation_supervisors = OnStationSupervisor.objects.filter(user_id__in=supervisor_ids).select_related('user')
+    onstation_supervisors = onstation_supervisors.filter(user_id__in=supervisor_ids).select_related('user')
 
     for sup in onstation_supervisors:
         sup.assigned_students_count = StudentProfile.objects.filter(supervisor_onstation=sup).count()
@@ -238,7 +244,6 @@ def oncampus_dashboard(request):
 
     total_supervisors = onstation_supervisors.count()
 
-    # Aggregate log data for progress charts or summary
     user_ids = [s.user.id for s in enriched_students]
     progress_data = LogEntry.objects.filter(student__user__id__in=user_ids).values(
         'student__user__id',
@@ -252,12 +257,9 @@ def oncampus_dashboard(request):
         last_submission_date=Max('date'),
     )
 
-    # Tasks and resources assigned for the department
-    tasks_and_resources = TaskResource.objects.filter(
-        department=department
-    ).prefetch_related('assigned_to').order_by('-created_at') if department else TaskResource.objects.all().order_by('-created_at')
+    # Remove department filter on tasks/resources as well for demo
+    tasks_and_resources = TaskResource.objects.all().prefetch_related('assigned_to').order_by('-created_at')
 
-    # Selected student display logic from GET param
     selected_student_id = request.GET.get('student_id')
     selected_profile = None
     student_user = None
@@ -275,7 +277,6 @@ def oncampus_dashboard(request):
         student_user = selected_profile.user
         logs = LogEntry.objects.filter(student=selected_profile).order_by('-date')
 
-    # Handle marks update POST
     if request.method == 'POST' and selected_profile:
         performance_mark = request.POST.get('performance')
         try:
@@ -873,7 +874,8 @@ def view_log_statistics(request):
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from users.models import DepartmentResource  # Only import DepartmentResource
+from .models import DepartmentResource
+  # Only import DepartmentResource
 
 @login_required
 def view_uploaded_resources(request):
@@ -1168,3 +1170,4 @@ def upload_picture(request):
         form = ProfilePictureForm(instance=profile)
 
     return render(request, 'users/upload_picture.html', {'form': form})
+

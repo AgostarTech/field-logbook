@@ -5,44 +5,184 @@
   <meta charset="UTF-8" />
   <title>{% block title %}Field Logbook System{% endblock %}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
-
   <!-- Font Awesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
 
-  <!-- Custom Global Styles -->
-  <link rel="stylesheet" href="{% static 'css/base_style.css' %}" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 100%;
+      font-family: 'Poppins', sans-serif;
+      background-color: #061813ff; /* solid green with teal feel */
+      color: #fff;
+      line-height: 1.6;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 30px;
+      background-color: #025c43;
+      color: white;
+    }
+
+    .nav-left .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: white;
+      text-decoration: none;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .nav-link,
+    .logout-btn {
+      color: white;
+      text-decoration: none;
+      background: none;
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+    }
+
+    .nav-link:hover,
+    .logout-btn:hover {
+      opacity: 0.8;
+    }
+
+    .logout-form {
+      display: inline;
+    }
+
+    .messages {
+      padding: 15px 30px;
+      width: 100%;
+    }
+
+    .message {
+      margin-bottom: 10px;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-weight: 500;
+      color: black;
+    }
+
+    .message.success { background-color: #068524ff; }
+    .message.error { background-color: #078807ff; }
+    .message.warning { background-color: #0a741cff; }
+
+     .main-content {
+  width: 800%;
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 20px;
+  background-image: url("{% static 'images/mwecaulogo.png' %}"); /* replace with your actual path */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  color: #333;
+}
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    select,
+    textarea {
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+      width: 100%;
+    }
+
+    button,
+    input[type="submit"] {
+      background-color: #087a54;
+      color: white;
+      padding: 12px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    button:hover,
+    input[type="submit"]:hover {
+      background-color: #010504ff;
+    }
+
+    footer {
+      background-color: #003b38;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      margin-top: 40px;
+    }
+
+    @media (max-width: 768px) {
+      .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .nav-right {
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .main-content {
+        padding: 15px;
+        margin: 20px;
+      }
+    }
+  </style>
+
   {% block extra_css %}{% endblock %}
 </head>
 <body>
 
-  <!-- Navbar -->
+  <!-- Navigation Bar -->
   <nav class="navbar">
     <div class="nav-left">
       <a href="{% url 'users:home' %}" class="nav-logo">Field Logbook</a>
-      <button id="nav-toggle"><i class="fas fa-bars"></i></button>
     </div>
-
-    <div class="nav-right" id="nav-menu">
+    <div class="nav-right">
       {% if user.is_authenticated %}
         <span class="nav-welcome">Hi, {{ user.username }}</span>
-
         {% if user.is_superuser %}
           <a href="/admin/" class="nav-link"><i class="fas fa-tools"></i> Admin</a>
         {% else %}
           <a href="{% url 'users:dashboard' %}" class="nav-link"><i class="fas fa-chart-line"></i> Dashboard</a>
         {% endif %}
-
         <form method="post" action="{% url 'users:logout' %}" class="logout-form">
           {% csrf_token %}
-          <button type="submit" class="logout-btn">
-            <i class="fas fa-sign-out-alt"></i> Logout
-          </button>
+          <button type="submit" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
         </form>
-
       {% else %}
         <a href="{% url 'users:login' %}" class="nav-link"><i class="fas fa-sign-in-alt"></i> Login</a>
         <a href="{% url 'users:signup_select' %}" class="nav-link"><i class="fas fa-user-plus"></i> Sign Up</a>
@@ -64,13 +204,12 @@
     </div>
   {% endif %}
 
-  <!-- Page Content -->
+  <!-- Main Page Content -->
   <main class="main-content">
-    {% block content %}
-    {% endblock %}
+    {% block content %}{% endblock %}
   </main>
 
-  <!-- Footer -->
+  <!-- Footer Section -->
   {% include 'includes/footer.html' %}
 
   <!-- Base Scripts -->

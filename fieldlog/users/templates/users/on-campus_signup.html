@@ -10,87 +10,73 @@
   <div class="a1">
     <h2>On-Campus Supervisor Signup</h2>
 
-    {% if messages %}
-      <div id="alert-container">
-        {% for message in messages %}
-          <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-        {% endfor %}
+    {% if form.errors %}
+      <div class="alert alert-danger">
+        <strong>Please correct the following errors:</strong>
+        <ul>
+          {% for field in form %}
+            {% for error in field.errors %}
+              <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+            {% endfor %}
+          {% endfor %}
+          {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
       </div>
     {% endif %}
 
-    <form method="post" novalidate>
+    <form method="post">
       {% csrf_token %}
 
       <div class="form-group">
-        <label for="{{ form.username.id_for_label }}">Username:</label>
-        {{ form.username }}
-      </div>
-
-      <div class="form-group">
-        <label for="{{ form.first_name.id_for_label }}">First Name:</label>
+        <label>First Name:</label>
         {{ form.first_name }}
       </div>
 
       <div class="form-group">
-        <label for="{{ form.last_name.id_for_label }}">Second Name:</label>
+        <label>Middle Name:</label>
+        {{ form.middle_name }}
+      </div>
+
+      <div class="form-group">
+        <label>Last Name:</label>
         {{ form.last_name }}
       </div>
 
       <div class="form-group">
-        <label for="{{ form.email.id_for_label }}">Email address:</label>
+        <label>Email:</label>
         {{ form.email }}
       </div>
 
       <div class="form-group">
-        <label for="{{ form.phone.id_for_label }}">Phone Number:</label>
+        <label>Phone:</label>
         {{ form.phone }}
       </div>
 
       <div class="form-group">
-        <label for="{{ form.department.id_for_label }}">Department Name:</label>
-        {{ form.department }}
-      </div>
-
-      <div class="form-group">
-        <label for="{{ form.position.id_for_label }}">Your Position:</label>
+        <label>Position:</label>
         {{ form.position }}
       </div>
 
       <div class="form-group">
-        <label for="{{ form.password1.id_for_label }}">Password:</label>
+        <label>Password:</label>
         {{ form.password1 }}
-        {# Help text intentionally hidden #}
       </div>
 
       <div class="form-group">
-        <label for="{{ form.password2.id_for_label }}">Confirm Password:</label>
+        <label>Confirm Password:</label>
         {{ form.password2 }}
       </div>
 
-      <button type="submit" class="signup-btn">Create Account</button>
+      <button type="submit" class="signup-btn">Sign Up</button>
     </form>
 
     <div class="login-link">
-      Already have an account? <a href="{% url 'login' %}">Login here</a>
+      Already have an account? <a href="{% url 'login' %}">Login</a>
     </div>
 
     <p class="footer-note">© 2025 Field Logbook System</p>
   </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script src="{% static 'js/s_signup.js' %}"></script>
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const form = document.querySelector('form');
-    const alertContainer = document.getElementById('alert-container');
-
-    if (form && alertContainer) {
-      form.addEventListener('input', () => {
-        alertContainer.remove();
-      });
-    }
-  });
-</script>
 {% endblock %}
