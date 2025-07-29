@@ -249,7 +249,7 @@ class AssignedTask(models.Model):
         return self.title
 
 
-# logbook/models.py
+
 from django.db import models
 from django.contrib.auth import get_user_model
 
@@ -257,8 +257,19 @@ User = get_user_model()
 
 class EvaluationForm(models.Model):
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='evaluations')
-    supervisor_comments = models.TextField(blank=True)
-    student_feedback = models.TextField(blank=True)
+    strengths = models.TextField(blank=True)
+    benefits_personal = models.TextField(blank=True)
+    org_benefits = models.TextField(blank=True)
+    community_benefits = models.TextField(blank=True)
+    relevance = models.TextField(blank=True)
+    constraint = models.TextField(blank=True)
+    solution = models.TextField(blank=True)
+    suggestions = models.TextField(blank=True)
+    knowledge = models.TextField(blank=True)
+    skills = models.TextField(blank=True)
+    supervision = models.TextField(blank=True)
+    evaluation_method = models.TextField(blank=True)
+    submitted = models.BooleanField(default=False)
     date_submitted = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

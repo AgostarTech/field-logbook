@@ -8,6 +8,9 @@ urlpatterns = [
     path('profile/', views.profile_view, name='profile'),
     path('profile/update/', views.profile_update, name='profile_update'),
 
+    # Evaluation Forms
+    path('evaluation-forms/', views.evaluation_forms_view, name='evaluation_forms'),
+
     # Log Entries
     path('log/new/', views.new_logentry, name='new_logentry'),
     path('log/last/', views.view_last_entry, name='view_last_entry'),
@@ -52,12 +55,12 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),
     path('dashboard/student/', views.student_dashboard, name='student_dashboard'),
 
-    # Entry Placeholders
-    path('evaluation-forms/', views.evaluation_forms_view, name='evaluation_forms'),
-    path('add-entry/', views.add_entry, name='add_entry'),
-    path('add-entry-view/', views.add_entry_view, name='add_entry_view'),
-
     # Log Profile
     path('log-profile/', views.get_log_profile_data, name='log_profile'),
     path('log-profile/<int:user_id>/', views.get_log_profile_data, name='log_profile_for_user'),
+
+    # Entry Additions
+    path('add-entry/', views.add_entry, name='add_entry'),
+    path('add-entry-view/', views.add_entry_view, name='add_entry_view'),
+    path('evaluation-forms/', views.evaluation_forms_view, name='evaluation_forms'),
 ]

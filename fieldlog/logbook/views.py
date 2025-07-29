@@ -649,11 +649,6 @@ def mark_task_complete(request, pk):
 
 # ---------- Placeholder ----------
 
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
-from .models import EvaluationForm
-from django.contrib import messages
-
 @login_required
 def evaluation_forms_view(request):
     user = request.user
@@ -666,7 +661,7 @@ def evaluation_forms_view(request):
     if request.method == 'POST':
         if form_instance and form_instance.submitted:
             messages.warning(request, "You have already submitted your evaluation.")
-            return redirect('evaluation_forms')  # prevent resubmission
+            return redirect('logbook:evaluation_forms')  # add 'logbook:'
 
         data = {
             'strengths': request.POST.get('strengths'),
@@ -692,7 +687,7 @@ def evaluation_forms_view(request):
             EvaluationForm.objects.create(student=user, **data)
 
         messages.success(request, "Evaluation submitted successfully.")
-        return redirect('evaluation_forms')
+        return redirect('logbook:evaluation_forms')  # add 'logbook:'
 
     context = {
         'form_data': form_instance,
@@ -700,6 +695,8 @@ def evaluation_forms_view(request):
     }
 
     return render(request, 'logbook/evaluation_forms.html', context)
+
+
 
 # ---------- Student Dashboard ----------
 
@@ -905,3 +902,51 @@ def delete_log(request, pk):
     return HttpResponse("Delete log not implemented yet.")
 
 
+
+# logbook/views.py
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.contrib.auth import get_user_model
+from logbook.models import (
+    LogEntry,
+    ProgressReport,
+    EvaluationForm,
+    UploadedFile,
+    Task,
+    AssignedTask,
+    StudentProfile
+)
+
+User = get_user_model()
+
+@login_required
+def get_log_profile_data(request, user_id=None):
+    # Use the provided user_id or fallback to the logged-in user
+    target_user = User.objects.get(pk=user_id) if user_id else request.user
+
+    student_profile = getattr(target_user, 'logbook_student_profile', None)
+
+    log_entries = LogEntry.objects.filter(user=target_user).values()
+    progress_reports = ProgressReport.objects.filter(student=target_user).values()
+    evaluations = EvaluationForm.objects.filter(student=target_user).values()
+    uploads = UploadedFile.objects.filter(user=target_user).values()
+    assigned_tasks = AssignedTask.objects.filter(student=target_user).values()
+
+    # Get tasks only if the user has a student profile
+    tasks = []
+    if student_profile:
+        tasks = Task.objects.filter(assigned_to=student_profile).values()
+
+    # Combine everything into one dict
+    log_data = {
+        "user_id": target_user.id,
+        "username": target_user.username,
+        "log_entries": list(log_entries),
+        "progress_reports": list(progress_reports),
+        "evaluations": list(evaluations),
+        "uploaded_files": list(uploads),
+        "tasks": list(tasks),
+        "assigned_tasks": list(assigned_tasks),
+    }
+
+    return JsonResponse(log_data, safe=False)
